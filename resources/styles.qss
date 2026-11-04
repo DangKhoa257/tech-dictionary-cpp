@@ -1,0 +1,74 @@
+QWidget#root, QWidget#content {
+    background: #f7f9fc;
+    color: #23334a;
+    font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+QFrame#sidebar {
+    background: #172a43;
+}
+
+QLabel#brand {
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+QFrame#sidebar QLabel#eyebrow {
+    color: #91aac7;
+}
+
+QLabel#eyebrow {
+    color: #617d9e;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+QPushButton#navButton {
+    background: #263b56;
+    border: 1px solid #344a65;
+    border-radius: 8px;
+    color: #aebed2;
+    font-size: 14px;
+    padding: 12px 14px;
+    text-align: left;
+}
+
+QLabel#sidebarFooter {
+    color: #91aac7;
+    font-size: 11px;
+}
+
+QLabel#heading {
+    color: #172a43;
+    font-size: 31px;
+    font-weight: 700;
+}
+
+QLabel#description, QLabel#cardText {
+    color: #5b6d83;
+    font-size: 14px;
+}
+
+QLineEdit#searchField {
+    background: #ffffff;
+    border: 1px solid #dce4ef;
+    border-radius: 10px;
+    color: #78899e;
+    font-size: 14px;
+    padding: 14px 16px;
+}
+
+QFrame#welcomeCard {
+    background: #ffffff;
+    border: 1px solid #e2e9f2;
+    border-radius: 14px;
+}
+
+QLabel#cardTitle {
+    color: #203653;
+    font-size: 20px;
+    font-weight: 700;
+}
