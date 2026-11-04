@@ -25,5 +25,27 @@ if(MSVC)
     target_compile_options(TechDictionary PRIVATE /utf-8)
 endif()
 
-# Dictionary operation and component modules join this target when implemented.
-# Keeping unfinished files out avoids unresolved symbols and misleading stubs.
+# Add dictionary_core.cpp with clearDictionary before enabling node-producing
+# operations. Add each remaining dictionary/UI source only after its declared
+# functions are implemented, their dependencies link, and controller wiring is
+# reviewed. Keeping placeholders out avoids unresolved symbols and fake behavior.
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(AppControllerTests
+        tests/app_controller_test.cpp
+        src/app_controller.cpp
+        include/app_controller.h
+        ui/main_window.cpp
+        ui/main_window.h
+        resources/resources.qrc
+    )
+    target_include_directories(AppControllerTests PRIVATE include ui)
+    target_link_libraries(AppControllerTests PRIVATE Qt6::Widgets)
+    if(MSVC)
+        target_compile_options(AppControllerTests PRIVATE /utf-8)
+    endif()
+    add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
+    set_tests_properties(AppControllerBoundary PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()
