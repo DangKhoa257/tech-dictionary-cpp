@@ -14,8 +14,12 @@ add_executable(TechDictionary WIN32
     src/main.cpp
     src/app_controller.cpp
     include/app_controller.h
+    src/dictionary_core.cpp
+    src/dictionary_search.cpp
     ui/main_window.cpp
     ui/main_window.h
+    ui/search_widget.cpp
+    ui/search_widget.h
     resources/resources.qrc
 )
 
@@ -48,4 +52,13 @@ if(BUILD_TESTING)
     add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
     set_tests_properties(AppControllerBoundary PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+    add_executable(DictionarySearchTests
+        tests/test_search.cpp
+        src/dictionary_core.cpp
+        src/dictionary_search.cpp
+    )
+    target_include_directories(DictionarySearchTests PRIVATE include)
+    add_test(NAME DictionarySearch COMMAND DictionarySearchTests)
 endif()
+
