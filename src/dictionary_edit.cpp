@@ -169,3 +169,4 @@ std::vector<const WordNode*> listAllWords(const Dictionary& dictionary) {
     return result;
 }
 
+
