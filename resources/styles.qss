@@ -36,6 +36,11 @@ QPushButton#navButton {
     text-align: left;
 }
 
+QPushButton#navButton:hover {
+    background: #324c6e;
+    color: #ffffff;
+}
+
 QLabel#sidebarFooter {
     color: #91aac7;
     font-size: 11px;
@@ -59,6 +64,10 @@ QLineEdit#searchField {
     color: #78899e;
     font-size: 14px;
     padding: 14px 16px;
+}
+
+QLineEdit#searchField:focus {
+    border-color: #0097e6;
 }
 
 QFrame#welcomeCard {
