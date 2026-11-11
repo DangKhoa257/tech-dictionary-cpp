@@ -1,11 +1,11 @@
 #include "dictionary.h"
 
 #include <cctype>
-#include <stdexcept>
+#include <cstddef>
 #include <string>
-#include <vector>
 
 namespace {
+
 bool isValidEnglishKey(const std::string& english) {
     if (english.empty()) {
         return false;
@@ -14,114 +14,87 @@ bool isValidEnglishKey(const std::string& english) {
     const unsigned char first = static_cast<unsigned char>(english.front());
     return (first >= 'A' && first <= 'Z') || (first >= 'a' && first <= 'z');
 }
-}
 
-std::size_t hashWord(const std::string& english) {
-    if (!isValidEnglishKey(english)) {
-        throw std::invalid_argument("English word must start with an ASCII letter.");
-    }
-
-    const unsigned char first = static_cast<unsigned char>(english.front());
-    if (first >= 'a' && first <= 'z') {
-        return static_cast<std::size_t>(first - 'a');
-    }
-
-    return static_cast<std::size_t>(first - 'A');
-}
-
-void clearDictionary(Dictionary& dictionary) {
-    for (std::size_t i = 0; i < 26; ++i) {
-        WordNode* current = dictionary.buckets[i];
-        dictionary.buckets[i] = nullptr;
-
-        while (current != nullptr) {
-            WordNode* next = current->next;
-            delete current;
-            current = next;
+bool isBlank(const std::string& value) {
+    for (unsigned char character : value) {
+        if (!std::isspace(character)) {
+            return false;
         }
     }
+    return true;
 }
 
-bool addWord(Dictionary& dictionary, const std::string& english, const std::string& vietnamese) {
-    if (!isValidEnglishKey(english) || vietnamese.empty()) {
+bool equalsAsciiCaseInsensitive(const std::string& left, const std::string& right) {
+    if (left.size() != right.size()) {
         return false;
     }
 
-    const std::size_t bucketIndex = hashWord(english);
-    WordNode* current = dictionary.buckets[bucketIndex];
+    for (std::size_t i = 0; i < left.size(); ++i) {
+        unsigned char leftCharacter = static_cast<unsigned char>(left[i]);
+        unsigned char rightCharacter = static_cast<unsigned char>(right[i]);
 
-    while (current != nullptr) {
-        if (current->english == english) {
+        if (leftCharacter >= 'A' && leftCharacter <= 'Z') {
+            leftCharacter = static_cast<unsigned char>(leftCharacter - 'A' + 'a');
+        }
+        if (rightCharacter >= 'A' && rightCharacter <= 'Z') {
+            rightCharacter = static_cast<unsigned char>(rightCharacter - 'A' + 'a');
+        }
+
+        if (leftCharacter != rightCharacter) {
             return false;
         }
-        current = current->next;
     }
-
-    WordNode* newNode = new WordNode{english, vietnamese, nullptr};
-
-    if (dictionary.buckets[bucketIndex] == nullptr) {
-        dictionary.buckets[bucketIndex] = newNode;
-        return true;
-    }
-
-    current = dictionary.buckets[bucketIndex];
-    while (current->next != nullptr) {
-        current = current->next;
-    }
-    current->next = newNode;
 
     return true;
 }
 
-const WordNode* findWord(const Dictionary& dictionary, const std::string& english) {
+bool getValidBucketIndex(const std::string& english, std::size_t& bucketIndex) {
     if (!isValidEnglishKey(english)) {
-        return nullptr;
-    }
-
-    const std::size_t bucketIndex = hashWord(english);
-    const WordNode* current = dictionary.buckets[bucketIndex];
-
-    while (current != nullptr) {
-        if (current->english == english) {
-            return current;
-        }
-        current = current->next;
-    }
-
-    return nullptr;
-}
-
-bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
-                       const std::string& vietnamese) {
-    if (!isValidEnglishKey(english) || vietnamese.empty()) {
         return false;
     }
 
-    const std::size_t bucketIndex = hashWord(english);
-    WordNode* current = dictionary.buckets[bucketIndex];
+    // TV2 owns hashWord(). Its documented invalid-input sentinel is 26.
+    bucketIndex = hashWord(english);
+    return bucketIndex < 26;
+}
 
-    while (current != nullptr) {
-        if (current->english == english) {
+}  // namespace
+
+bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
+                       const std::string& vietnamese) {
+    if (isBlank(vietnamese)) {
+        return false;
+    }
+
+    std::size_t bucketIndex = 0;
+    if (!getValidBucketIndex(english, bucketIndex)) {
+        return false;
+    }
+
+    for (WordNode* current = dictionary.buckets[bucketIndex];
+         current != nullptr;
+         current = current->next) {
+        if (equalsAsciiCaseInsensitive(current->english, english)) {
+            // Assign the original UTF-8 byte sequence without modifying it.
             current->vietnamese = vietnamese;
             return true;
         }
-        current = current->next;
     }
 
     return false;
 }
 
 bool deleteWord(Dictionary& dictionary, const std::string& english) {
-    if (!isValidEnglishKey(english)) {
+    std::size_t bucketIndex = 0;
+    if (!getValidBucketIndex(english, bucketIndex)) {
         return false;
     }
 
-    const std::size_t bucketIndex = hashWord(english);
-    WordNode* current = dictionary.buckets[bucketIndex];
     WordNode* previous = nullptr;
+    WordNode* current = dictionary.buckets[bucketIndex];
 
     while (current != nullptr) {
-        if (current->english == english) {
+        if (equalsAsciiCaseInsensitive(current->english, english)) {
             if (previous == nullptr) {
                 dictionary.buckets[bucketIndex] = current->next;
             } else {
@@ -139,33 +112,4 @@ bool deleteWord(Dictionary& dictionary, const std::string& english) {
     return false;
 }
 
-std::vector<const WordNode*> listBucket(const Dictionary& dictionary, std::size_t bucketIndex) {
-    std::vector<const WordNode*> result;
-
-    if (bucketIndex >= 26) {
-        return result;
-    }
-
-    const WordNode* current = dictionary.buckets[bucketIndex];
-    while (current != nullptr) {
-        result.push_back(current);
-        current = current->next;
-    }
-
-    return result;
-}
-
-std::vector<const WordNode*> listAllWords(const Dictionary& dictionary) {
-    std::vector<const WordNode*> result;
-
-    for (std::size_t i = 0; i < 26; ++i) {
-        const WordNode* current = dictionary.buckets[i];
-        while (current != nullptr) {
-            result.push_back(current);
-            current = current->next;
-        }
-    }
-
-    return result;
-}
 
