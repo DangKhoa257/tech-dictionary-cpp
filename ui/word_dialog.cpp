@@ -111,5 +111,5 @@ void WordDialog::handleSave() {
     }
 
     emit saveRequested(english, vietnamese);
-    accept();
+    
 }
