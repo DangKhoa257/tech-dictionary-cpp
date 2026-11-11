@@ -111,5 +111,3 @@ bool deleteWord(Dictionary& dictionary, const std::string& english) {
 
     return false;
 }
-
-
