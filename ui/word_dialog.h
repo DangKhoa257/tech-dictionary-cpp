@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QDialog>
 #include <QString>
 
@@ -38,3 +39,4 @@ private:
     QLabel* validationLabel_;
     QPushButton* saveButton_;
 };
+
