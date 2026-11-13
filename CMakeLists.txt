@@ -17,10 +17,16 @@ if(Qt6_FOUND)
         include/app_controller.h
         src/dictionary_core.cpp
         src/dictionary_search.cpp
+        src/dictionary_edit.cpp
+        src/dictionary_history.cpp
         ui/main_window.cpp
         ui/main_window.h
         ui/search_widget.cpp
         ui/search_widget.h
+        ui/word_dialog.cpp
+        ui/word_dialog.h
+        ui/delete_confirm.cpp
+        ui/delete_confirm.h
         resources/resources.qrc
     )
 
@@ -50,6 +56,20 @@ if(BUILD_TESTING)
         add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
         set_tests_properties(AppControllerBoundary PROPERTIES
             ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+        add_executable(WordDialogTests
+            tests/word_dialog_test.cpp
+            ui/word_dialog.cpp
+            ui/word_dialog.h
+        )
+        target_include_directories(WordDialogTests PRIVATE ui)
+        target_link_libraries(WordDialogTests PRIVATE Qt6::Widgets)
+        if(MSVC)
+            target_compile_options(WordDialogTests PRIVATE /utf-8)
+        endif()
+        add_test(NAME WordDialogBoundary COMMAND WordDialogTests)
+        set_tests_properties(WordDialogBoundary PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
     endif()
 
     add_executable(DictionarySearchTests
@@ -72,6 +92,21 @@ if(BUILD_TESTING)
         target_compile_options(DictionaryTV6Tests PRIVATE /utf-8)
     endif()
     add_test(NAME DictionaryTV6 COMMAND DictionaryTV6Tests)
+
+    add_executable(DictionaryEditTests
+        tests/dictionary_edit_test.cpp
+        src/dictionary_core.cpp
+        src/dictionary_search.cpp
+        src/dictionary_edit.cpp
+        src/dictionary_history.cpp
+        src/dictionary_display.cpp
+        src/dictionary_storage.cpp
+    )
+    target_include_directories(DictionaryEditTests PRIVATE include)
+    if(MSVC)
+        target_compile_options(DictionaryEditTests PRIVATE /utf-8)
+    endif()
+    add_test(NAME DictionaryEdit COMMAND DictionaryEditTests)
 endif()
 
 if(NOT Qt6_FOUND)

@@ -1,5 +1,6 @@
 #include "dictionary_history.h"
 
+#include <type_traits>
 #include <utility>
 
 namespace {
@@ -80,11 +81,18 @@ bool DictionaryHistory::restore(Dictionary& dictionary, const Snapshot& snapshot
 }
 
 bool DictionaryHistory::undo(Dictionary& dictionary) {
+    static_assert(std::is_nothrow_move_constructible<Change>::value,
+                  "History moves must not fail after restoration");
     if (undoStack_.empty()) {
         return false;
     }
 
     Change& change = undoStack_.back();
+    try {
+        redoStack_.reserve(redoStack_.size() + 1);
+    } catch (...) {
+        return false;
+    }
     if (!restore(dictionary, change.before)) {
         return false;
     }
@@ -100,6 +108,11 @@ bool DictionaryHistory::redo(Dictionary& dictionary) {
     }
 
     Change& change = redoStack_.back();
+    try {
+        undoStack_.reserve(undoStack_.size() + 1);
+    } catch (...) {
+        return false;
+    }
     if (!restore(dictionary, change.after)) {
         return false;
     }
