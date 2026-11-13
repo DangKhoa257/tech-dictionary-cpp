@@ -221,12 +221,45 @@ void testEmptyAndInvalidEnglishInput() {
            "update rejects key beginning with a digit");
     expect(!deleteWord(dictionary, "_Apple"),
            "delete rejects key beginning with punctuation");
-    expect(!updateWordMeaning(dictionary, " Apple", "nghia"),
-           "update rejects key beginning with whitespace");
+    expect(updateWordMeaning(dictionary, "  Apple  ", "nghia"),
+           "update accepts padded English lookup key");
+    expect(findExact(dictionary, 0, "Apple")->vietnamese == "nghia",
+           "padded lookup preserves stored English spelling");
+    expect(!updateWordMeaning(dictionary, "\tApple", "nghia"),
+           "update rejects control characters before trimming");
+    expect(!deleteWord(dictionary, "Apple\n"),
+           "delete rejects control characters before trimming");
+    expect(!deleteWord(dictionary, std::string("A\xFF", 2)),
+           "delete rejects invalid UTF-8 key");
     expect(countBucket(dictionary, 0) == 1,
            "invalid English input does not alter dictionary");
 
     clearDictionary(dictionary);
+}
+
+void testPaddedDeleteAndCompleteFlow() {
+    Dictionary dictionary{};
+    expect(addWord(dictionary, "  Machine Learning  ", "Học máy"),
+           "TV3 add accepts padded multiword term");
+    expect(findWord(dictionary, " machine learning ") != nullptr,
+           "TV3 find accepts padded multiword term");
+    expect(updateWordMeaning(dictionary, "  MACHINE LEARNING  ", "  Học máy nâng cao  "),
+           "TV4 update accepts padded key and meaning");
+    const std::string path = "tv4_complete_flow.txt";
+    expect(saveDictionary(dictionary, path), "TV6 saves updated term");
+    Dictionary loaded{};
+    expect(loadDictionary(loaded, path), "TV6 loads updated term");
+    const WordNode* found = findWord(loaded, "Machine Learning");
+    expect(found != nullptr && found->vietnamese == "Học máy nâng cao",
+           "TV3 finds reloaded UTF-8 meaning");
+    expect(deleteWord(loaded, "  mAcHiNe LeArNiNg  "),
+           "TV4 deletes padded case-insensitive key");
+    expect(findWord(loaded, "Machine Learning") == nullptr,
+           "TV3 no longer finds deleted term");
+    expect(saveDictionary(loaded, path), "TV6 saves deletion");
+    clearDictionary(loaded);
+    clearDictionary(dictionary);
+    std::remove(path.c_str());
 }
 
 void testDictionaryIntegrityAfterOperations() {
@@ -418,6 +451,7 @@ int main() {
     testDeleteMissingAndRepeatedDelete();
     testCaseInsensitiveOperations();
     testEmptyAndInvalidEnglishInput();
+    testPaddedDeleteAndCompleteFlow();
     testDictionaryIntegrityAfterOperations();
 
     testUndoRedoAddWord();

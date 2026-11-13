@@ -7,6 +7,25 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+namespace {
+
+bool hasInvalidText(const QString& text) {
+    for (qsizetype i = 0; i < text.size(); ++i) {
+        const ushort value = text.at(i).unicode();
+        if (value < 0x20 || value == 0x7F) return true;
+        if (QChar::isHighSurrogate(value)) {
+            if (i + 1 >= text.size() ||
+                !QChar::isLowSurrogate(text.at(i + 1).unicode())) return true;
+            ++i;
+        } else if (QChar::isLowSurrogate(value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace
+
 WordDialog::WordDialog(Mode mode, QWidget* parent)
     : QDialog(parent),
       mode_(mode),
@@ -90,6 +109,10 @@ void WordDialog::showSaveError(const QString& message) {
 }
 
 void WordDialog::handleSave() {
+    if (hasInvalidText(englishEdit_->text()) || hasInvalidText(vietnameseEdit_->text())) {
+        setValidationMessage(QStringLiteral("Không dùng ký tự điều khiển hoặc văn bản không hợp lệ."));
+        return;
+    }
     const QString english = englishWord();
     const QString vietnamese = vietnameseMeaning();
 

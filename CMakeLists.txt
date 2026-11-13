@@ -56,6 +56,20 @@ if(BUILD_TESTING)
         add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
         set_tests_properties(AppControllerBoundary PROPERTIES
             ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+        add_executable(WordDialogTests
+            tests/word_dialog_test.cpp
+            ui/word_dialog.cpp
+            ui/word_dialog.h
+        )
+        target_include_directories(WordDialogTests PRIVATE ui)
+        target_link_libraries(WordDialogTests PRIVATE Qt6::Widgets)
+        if(MSVC)
+            target_compile_options(WordDialogTests PRIVATE /utf-8)
+        endif()
+        add_test(NAME WordDialogBoundary COMMAND WordDialogTests)
+        set_tests_properties(WordDialogBoundary PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
     endif()
 
     add_executable(DictionarySearchTests

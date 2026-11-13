@@ -1,6 +1,5 @@
 #include "dictionary.h"
 
-#include <cctype>
 #include <cstddef>
 #include <string>
 
@@ -93,6 +92,8 @@ bool getValidBucketIndex(const std::string& english, std::size_t& bucketIndex) {
 
 bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
                        const std::string& vietnamese) {
+    if (!isValidUtf8TsvField(english)) return false;
+    const std::string normalizedEnglish = trimSpaces(english);
     if (!isValidUtf8TsvField(vietnamese)) {
         return false;
     }
@@ -100,14 +101,14 @@ bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
     if (normalizedMeaning.empty()) return false;
 
     std::size_t bucketIndex = 0;
-    if (!getValidBucketIndex(english, bucketIndex)) {
+    if (!getValidBucketIndex(normalizedEnglish, bucketIndex)) {
         return false;
     }
 
     for (WordNode* current = dictionary.buckets[bucketIndex];
          current != nullptr;
          current = current->next) {
-        if (equalsAsciiCaseInsensitive(current->english, english)) {
+        if (equalsAsciiCaseInsensitive(current->english, normalizedEnglish)) {
             // Assign the original UTF-8 byte sequence without modifying it.
             current->vietnamese = normalizedMeaning;
             return true;
@@ -118,8 +119,10 @@ bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
 }
 
 bool deleteWord(Dictionary& dictionary, const std::string& english) {
+    if (!isValidUtf8TsvField(english)) return false;
+    const std::string normalizedEnglish = trimSpaces(english);
     std::size_t bucketIndex = 0;
-    if (!getValidBucketIndex(english, bucketIndex)) {
+    if (!getValidBucketIndex(normalizedEnglish, bucketIndex)) {
         return false;
     }
 
@@ -127,7 +130,7 @@ bool deleteWord(Dictionary& dictionary, const std::string& english) {
     WordNode* current = dictionary.buckets[bucketIndex];
 
     while (current != nullptr) {
-        if (equalsAsciiCaseInsensitive(current->english, english)) {
+        if (equalsAsciiCaseInsensitive(current->english, normalizedEnglish)) {
             if (previous == nullptr) {
                 dictionary.buckets[bucketIndex] = current->next;
             } else {
