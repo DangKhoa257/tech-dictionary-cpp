@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Qt6 QUIET COMPONENTS Widgets)
-
+if(NOT Qt6_FOUND)
+    message(FATAL_ERROR "Qt 6 Widgets is required for the TechDictionary desktop application.")
+endif()
 if(Qt6_FOUND)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
@@ -19,6 +21,8 @@ if(Qt6_FOUND)
         src/dictionary_search.cpp
         src/dictionary_edit.cpp
         src/dictionary_history.cpp
+        src/dictionary_display.cpp
+        src/dictionary_storage.cpp
         ui/main_window.cpp
         ui/main_window.h
         ui/search_widget.cpp
@@ -32,6 +36,11 @@ if(Qt6_FOUND)
 
     target_include_directories(TechDictionary PRIVATE include ui)
     target_link_libraries(TechDictionary PRIVATE Qt6::Widgets)
+    add_custom_command(TARGET TechDictionary POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:TechDictionary>/data"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary.txt"
+            "$<TARGET_FILE_DIR:TechDictionary>/data/dictionary.txt")
     if(MSVC)
         target_compile_options(TechDictionary PRIVATE /utf-8)
     endif()
@@ -46,16 +55,34 @@ if(BUILD_TESTING)
             include/app_controller.h
             ui/main_window.cpp
             ui/main_window.h
+            src/dictionary_core.cpp
+            src/dictionary_search.cpp
+            src/dictionary_edit.cpp
+            src/dictionary_history.cpp
+            src/dictionary_display.cpp
+            src/dictionary_storage.cpp
+            ui/search_widget.cpp
+            ui/search_widget.h
+            ui/word_dialog.cpp
+            ui/word_dialog.h
+            ui/delete_confirm.cpp
+            ui/delete_confirm.h
             resources/resources.qrc
         )
         target_include_directories(AppControllerTests PRIVATE include ui)
         target_link_libraries(AppControllerTests PRIVATE Qt6::Widgets)
+        add_custom_command(TARGET AppControllerTests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:AppControllerTests>/data"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary.txt"
+                "$<TARGET_FILE_DIR:AppControllerTests>/data/dictionary.txt")
         if(MSVC)
             target_compile_options(AppControllerTests PRIVATE /utf-8)
         endif()
         add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
         set_tests_properties(AppControllerBoundary PROPERTIES
-            ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+            TIMEOUT 30)
 
         add_executable(WordDialogTests
             tests/word_dialog_test.cpp
@@ -124,8 +151,4 @@ if(BUILD_TESTING)
         target_compile_options(DictionaryEditTests PRIVATE /utf-8)
     endif()
     add_test(NAME DictionaryEdit COMMAND DictionaryEditTests)
-endif()
-
-if(NOT Qt6_FOUND)
-    message(STATUS "Qt 6 Widgets not found: GUI targets are disabled; core tests remain available.")
 endif()
