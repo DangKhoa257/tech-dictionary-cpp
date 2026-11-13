@@ -25,50 +25,7 @@ void check(bool condition, const char* expression, int line) {
 
 #define CHECK(expression) check((expression), #expression, __LINE__)
 
-std::string normalizeEnglish(const std::string& word) {
-    std::string result = word;
-    for (char& character : result) {
-        const unsigned char value = static_cast<unsigned char>(character);
-        if (value >= 'A' && value <= 'Z') {
-            character = static_cast<char>(value - 'A' + 'a');
-        }
-    }
-    return result;
-}
-
-// Test-only TV3 doubles. These definitions are linked only into the isolated
-// DictionaryTV6Tests executable, never into the application target.
-}
-
-bool addWord(Dictionary& dictionary, const std::string& english,
-             const std::string& vietnamese) {
-    if (english.empty() || vietnamese.empty() || hashWord(english) >= 26) return false;
-    if (findWord(dictionary, english) != nullptr) return false;
-
-    const std::size_t bucket = hashWord(english);
-    WordNode* node = new WordNode{english, vietnamese, nullptr};
-    if (dictionary.buckets[bucket] == nullptr) {
-        dictionary.buckets[bucket] = node;
-    } else {
-        WordNode* tail = dictionary.buckets[bucket];
-        while (tail->next != nullptr) tail = tail->next;
-        tail->next = node;
-    }
-    return true;
-}
-
-const WordNode* findWord(const Dictionary& dictionary, const std::string& english) {
-    const std::size_t bucket = hashWord(english);
-    if (bucket >= 26) return nullptr;
-    const std::string key = normalizeEnglish(english);
-    for (const WordNode* node = dictionary.buckets[bucket];
-         node != nullptr; node = node->next) {
-        if (normalizeEnglish(node->english) == key) return node;
-    }
-    return nullptr;
-}
-
-namespace {
+// These tests link TV3's production addWord and findWord.
 
 bool writeFile(const std::string& path, const std::string& data) {
     std::ofstream output(path, std::ios::binary | std::ios::trunc);
@@ -146,6 +103,14 @@ int main() {
     CHECK(loadDictionary(roundTrip, path));
     CHECK(listAllWords(roundTrip).size() == 4);
     CHECK(findWord(roundTrip, "DATABASE")->vietnamese == "Cơ sở dữ liệu");
+    CHECK(addWord(roundTrip, " Router ", " Bộ định tuyến "));
+    CHECK(!addWord(roundTrip, "router", "duplicate"));
+    CHECK(saveDictionary(roundTrip, path));
+    Dictionary integrated{};
+    CHECK(loadDictionary(integrated, path));
+    CHECK(findWord(integrated, "ROUTER") != nullptr);
+    CHECK(findWord(integrated, "ROUTER")->vietnamese == "Bộ định tuyến");
+    clearDictionary(integrated);
     clearDictionary(roundTrip);
 
     // Exact duplicate and ASCII case-insensitive duplicate must fail transactionally.
@@ -155,6 +120,8 @@ int main() {
         "Algorithm\tA\nalgorithm\tB\n");
     checkLoadFailurePreservesDictionary(dictionary, path,
         "DATABASE\tA\ndatabase\tB\n");
+    checkLoadFailurePreservesDictionary(dictionary, path,
+        "Algorithm \tA\nalgorithm\tB\n");
 
     // Malformed rows and invalid fields.
     checkLoadFailurePreservesDictionary(dictionary, path, "Broken row without tab\n");
@@ -205,6 +172,20 @@ int main() {
     CHECK(readFile(path) == oldFile);
     dictionary.buckets[25] = nullptr;
     delete invalidMeaning;
+
+    WordNode* padded = new WordNode{"Algorithm ", "meaning", nullptr};
+    aTail->next = padded;
+    CHECK(!saveDictionary(dictionary, path));
+    CHECK(readFile(path) == oldFile);
+    aTail->next = nullptr;
+    delete padded;
+
+    WordNode* wrongBucket = new WordNode{"Zebra", "meaning", nullptr};
+    dictionary.buckets[1] = wrongBucket;
+    CHECK(!saveDictionary(dictionary, path));
+    CHECK(readFile(path) == oldFile);
+    dictionary.buckets[1] = nullptr;
+    delete wrongBucket;
 
     // Empty file is a valid dictionary and replaces the old contents only on success.
     CHECK(writeFile(path, ""));

@@ -59,6 +59,19 @@ if(BUILD_TESTING)
     )
     target_include_directories(DictionarySearchTests PRIVATE include)
     add_test(NAME DictionarySearch COMMAND DictionarySearchTests)
+
+    add_executable(DictionaryTV6Tests
+        tests/dictionary_tv6_test.cpp
+        src/dictionary_core.cpp
+        src/dictionary_search.cpp
+        src/dictionary_display.cpp
+        src/dictionary_storage.cpp
+    )
+    target_include_directories(DictionaryTV6Tests PRIVATE include)
+    if(MSVC)
+        target_compile_options(DictionaryTV6Tests PRIVATE /utf-8)
+    endif()
+    add_test(NAME DictionaryTV6 COMMAND DictionaryTV6Tests)
 endif()
 
 if(NOT Qt6_FOUND)

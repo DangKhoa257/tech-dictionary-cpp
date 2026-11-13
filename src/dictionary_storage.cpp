@@ -90,6 +90,10 @@ bool validField(const std::string& field) {
     return true;
 }
 
+bool hasOuterSpaces(const std::string& field) {
+    return !field.empty() && (field.front() == ' ' || field.back() == ' ');
+}
+
 std::string makeTemporaryPath(const std::filesystem::path& destination) {
     static std::atomic<std::uint64_t> sequence{0};
     const auto ticks = std::chrono::steady_clock::now().time_since_epoch().count();
@@ -250,21 +254,24 @@ bool loadDictionary(Dictionary& dictionary, const std::string& path) {
 
 bool saveDictionary(const Dictionary& dictionary, const std::string& path) {
     if (path.empty()) return false;
-    const std::vector<const WordNode*> words = listAllWords(dictionary);
     std::unordered_set<std::string> seenEnglish;
     std::string contents;
 
     // Validate and serialize in memory before creating any temporary file.
-    for (const WordNode* node : words) {
-        if (node == nullptr || !validField(node->english) ||
-            !validField(node->vietnamese) || hashWord(node->english) >= 26) {
-            return false;
+    for (std::size_t bucket = 0; bucket < 26; ++bucket) {
+        for (const WordNode* node = dictionary.buckets[bucket];
+             node != nullptr; node = node->next) {
+            if (!validField(node->english) || !validField(node->vietnamese) ||
+                hasOuterSpaces(node->english) || hasOuterSpaces(node->vietnamese) ||
+                hashWord(node->english) != bucket) {
+                return false;
+            }
+            if (!seenEnglish.insert(normalizeEnglishKey(node->english)).second) return false;
+            contents += node->english;
+            contents.push_back('\t');
+            contents += node->vietnamese;
+            contents.push_back('\n');
         }
-        if (!seenEnglish.insert(normalizeEnglishKey(node->english)).second) return false;
-        contents += node->english;
-        contents.push_back('\t');
-        contents += node->vietnamese;
-        contents.push_back('\n');
     }
 
     const std::filesystem::path destination = std::filesystem::u8path(path);
