@@ -1,82 +1,40 @@
 # Architecture
 
-Version 0.1.0 builds only the entry point, controller, and main window. The
-dictionary modules below are planned integration points, not functioning features.
+## Ownership and flow
 
-## Layers and ownership
+`src/main.cpp` creates `QApplication` and TV1's noncopyable `AppController`. The controller owns `Dictionary`, `DictionaryHistory`, and TV5's `MainWindow`; the window owns TV3's embedded `SearchWidget` and temporary TV4 `WordDialog` instances. The controller destructor calls TV2's `clearDictionary`. `Dictionary::buckets[26]` own singly linked `WordNode` chains. TV3/TV6 return non-owning pointers, which the controller converts to `QString` immediately. UI objects never retain node pointers.
 
-1. **Qt UI:** `MainWindow` displays the shell. TV5 owns its layout and QSS. TV3
-   will add `SearchWidget`; TV4 will add `WordDialog`. UI components should present
-   results and collect input without owning linked-list nodes.
-2. **Application controller:** `AppController` owns the main window and an initially
-   empty `Dictionary`. TV1 owns integration. It currently launches the window,
-   validates empty input, and returns explicit unavailable results for operations
-   whose implementations are not linked.
-3. **Dictionary operations:** `include/dictionary.h` declares the shared API. TV2
-   owns hashing and memory cleanup; TV3 owns add/search; TV4 owns update/delete;
-   TV6 owns listing and storage. Operation `.cpp` files are excluded from CMake
-   until implemented.
-4. **Hash table and linked lists:** `Dictionary::buckets[26]` holds heads of 26
-   singly linked lists. A node stores English and Vietnamese UTF-8 strings plus a
-   `next` pointer. The dictionary owns the nodes. Returned node pointers are
-   non-owning and become invalid after deletion or clearing.
-5. **File storage:** TV6 will read and write `data/dictionary.txt` or a path chosen
-   by the user. The file is empty until the storage format is agreed upon.
+| UI event | Controller action | Module |
+| --- | --- | --- |
+| SearchWidget `searchRequested` | `searchWord` | TV3 `findWord` |
+| MainWindow `wordSelected` | Show copied meaning | TV3 `findWord` |
+| MainWindow `filterRequested` | Refresh list for A–Z range | TV6 `listBucket` / `listAllWords` |
+| MainWindow add/edit/delete requests | Dialog/confirmation, mutate and refresh | TV3 `addWord`; TV4 `updateWordMeaning` / `deleteWord` |
+| Edit menu Undo/Redo | Restore history and refresh | TV4 `DictionaryHistory` |
+| File menu Open/Save/Save As | Replace or persist dictionary | TV6 `loadDictionary` / `saveDictionary` |
 
-## Communication
+TV1's `AppController` maps module results to `ControllerResult`, manages the active path and dirty state, and shows status/error messages. Qt strings and filenames cross the module boundary as UTF-8. The main window retains TV5's QSS and layout. The controller uses the exact six filter labels emitted by TV5.
 
-The UI communicates through the controller. The controller calls the dictionary
-API and translates results into values or messages the UI can display. Dictionary
-operations should not depend on Qt, allowing them to be tested separately.
-Storage uses the same dictionary model; it should report errors to the controller,
-which decides what to show in the UI.
+## Data lifecycle
 
-For example, after search is implemented, entering **Algorithm** in `SearchWidget`
-will send the term to `AppController`. The controller will call `findWord`. The
-search implementation will derive the A bucket and traverse its linked list. It
-will return a non-owning pointer or `nullptr`; the controller will display the
-Vietnamese meaning or a not-found message. None of this flow is active in v0.1.0.
+CMake copies the repository's UTF-8 TSV seed to `data/dictionary.txt` beside the build executable. At launch the controller first looks for a user-editable file at `QStandardPaths::AppDataLocation/dictionary.txt`; otherwise it loads the adjacent seed. Loading the seed sets the active save path to the user file, so ordinary Save does not overwrite the seed. Save As also rejects the seed path. A package must include the same adjacent `data/` directory. If neither file exists, the app starts empty and reports that state.
 
-## Contracts to finalize during integration
+TV6 loads a complete TSV into a temporary dictionary before replacing current nodes. Invalid rows or I/O errors leave existing data untouched. TV6 saves via a sibling temporary file and replacement. The controller prompts Save/Discard/Cancel before Open or window close. A cancelled or failed save leaves the window open. Successful load clears Undo/Redo history and marks the dictionary clean.
 
-The team needs one shared rule for invalid hash input, case sensitivity, duplicate
-English entries, and the storage file format. `hashWord` returns an index, so its
-invalid-input behavior needs special care before any caller relies on it. Keep
-all files UTF-8. Add real tests with each implementation and add its source to
-CMake only when it is ready to link.
+Each successful add/update/delete captures before and after value snapshots and records a change in TV4 history. Undo/Redo reconstructs nodes, then the controller refreshes the list from scratch. Dirty state compares the live snapshot with the most recently loaded/saved snapshot, so undoing to the saved state removes the modified marker. History is not persisted across launches. If history recording fails after a dictionary mutation, the controller clears history and still refreshes the UI and marks data dirty; the operation remains successful with a warning message.
 
-## TV1 integration contract
+## Build and tests
 
-`AppController` is the application boundary. UI components will send `QString`
-values to its public methods. Each method returns a `ControllerResult` with a
-`ControllerStatus` and a user-facing message. Search will also set `vietnamese`
-on success. `InvalidInput` means required input is empty or whitespace;
-`Unavailable` means the implementation is not linked; `NotFound`, `Failed`, and
-`Success` are reserved for completed modules. A valid request currently returns
-`Unavailable`, never a fabricated success. The controller must convert `QString`
-to/from UTF-8 `std::string` when calling the dictionary API.
+Qt 6 Widgets is mandatory. The application target links TV2–TV6 source modules and all UI components. From a Qt/MinGW-enabled Windows shell:
 
-| Connection | Initiator and input | Expected output | Error reporting | Owner |
-| --- | --- | --- | --- | --- |
-| UI → controller | TV3 search widget sends English text; TV4 word dialog sends English and Vietnamese text; TV5 main window presents navigation | A `ControllerResult` for each request | Controller returns `InvalidInput` or `Unavailable` now; later `NotFound`/`Failed` as appropriate | TV3, TV4, TV5 for UI; TV1 for wiring |
-| Controller → TV2 core | TV1 passes the owned `Dictionary` to hashing and cleanup as needed | Valid bucket behavior and released nodes | Core reports or documents invalid hash input; controller maps failures to a result | TV2 core; TV1 integration |
-| Controller → TV3 add/search | English text and, for add, Vietnamese meaning in UTF-8 | `addWord` boolean or non-owning `findWord` pointer; prefix search needs a separately agreed API | `false`/`nullptr` is mapped to a result after invalid, duplicate, and not-found rules are agreed | TV3 implementation; TV1 integration |
-| Controller → TV4 edit | English text and optional new Vietnamese meaning in UTF-8 | `updateWordMeaning`/`deleteWord` boolean | `false` is mapped to `NotFound` or `Failed` under the agreed contract | TV4 implementation; TV1 integration |
-| Controller → TV6 display/storage | Owned dictionary and a file path for load/save; list requests use bucket index or all entries | Non-owning word pointers from listing; load/save boolean | Invalid path is rejected by controller; file errors become `Failed` once storage can distinguish them | TV6 implementation; TV1 integration |
-| Controller → UI refresh | Successful mutation or load | TV5/TV3 display receives updated values, never ownership of nodes | Controller presents operation errors without refreshing stale data | TV1 wiring; TV5/TV3 presentation |
+```powershell
+cmake -S . -B build-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="C:/Qt/6.12.0/mingw_64"
+cmake --build build-debug -j 4
+ctest --test-dir build-debug --output-on-failure
+```
 
-The controller is non-copyable because `Dictionary` contains owning raw pointers.
-No current operation creates nodes, so the initial zeroed dictionary is safe at
-shutdown. **Before any node-producing module is connected**, TV2 must implement
-`clearDictionary`, TV1 must link that module and call cleanup when the controller
-is destroyed, and integration tests must cover shutdown after insertion/loading.
-Do not let the UI keep `WordNode*` after a mutation or cleanup.
+Repeat with `build-release` and `-DCMAKE_BUILD_TYPE=Release`. `AppControllerBoundary` uses a temporary directory inside the test build, exercises real operations and UI filter signals, and destroys controllers with populated dictionaries. Other CTest targets cover the original module boundaries.
 
-Add `dictionary_core.cpp` only when hashing and cleanup are implemented. Add
-`dictionary_search.cpp` with TV3's completed functions, `dictionary_edit.cpp`
-with TV4's completed functions, and `dictionary_display.cpp` and
-`dictionary_storage.cpp` with TV6's completed functions. Add `search_widget.cpp`
-and `word_dialog.cpp` after their classes and request/response signals are ready.
-Review unresolved symbols and ownership before each CMake change. The current
-`MainWindow` has no request signals or methods for displaying results, so no UI
-connection can be made without TV5's interface changes.
+## Limits
+
+Search is exact and ASCII case insensitive for English keys. A term must start with A–Z; punctuation can follow. Invalid UTF-8 TSV is rejected. History is per session. The application has no in-app prefix/fuzzy search or import merge. TV2–TV6 retain ownership of their original implementations; TV1 owns this integration layer.
