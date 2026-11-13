@@ -14,11 +14,14 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QStandardPaths>
 #include <QStatusBar>
 #include <QVBoxLayout>
 
 #include <exception>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -69,9 +72,21 @@ bool samePath(const QString& a, const QString& b) {
                QDir::cleanPath(QFileInfo(b).absoluteFilePath()), sensitivity) == 0;
 }
 
+struct DictionaryGuard {
+    DictionaryGuard() = default;
+    Dictionary value{};
+    ~DictionaryGuard() { clearDictionary(value); }
+    DictionaryGuard(const DictionaryGuard&) = delete;
+    DictionaryGuard& operator=(const DictionaryGuard&) = delete;
+};
+
 }  // namespace
 
-AppController::AppController(QApplication& application) : application_(application) {
+AppController::AppController(QApplication& application, QString userDictionaryPath,
+                             QString bundledDictionaryPath)
+    : application_(application),
+      userDictionaryPathOverride_(std::move(userDictionaryPath)),
+      bundledDictionaryPathOverride_(std::move(bundledDictionaryPath)) {
     mainWindow_.setWindowTitle(QStringLiteral("Tech Dictionary[*]"));
     mainWindow_.installEventFilter(this);
     connectUi();
@@ -81,6 +96,8 @@ AppController::AppController(QApplication& application) : application_(applicati
 }
 
 AppController::~AppController() {
+    mainWindow_.removeEventFilter(this);
+    disconnect(&mainWindow_, nullptr, this, nullptr);
     clearDictionary(dictionary_);
 }
 
@@ -172,10 +189,26 @@ ControllerResult AppController::deleteWord(const QString& english) {
 
 ControllerResult AppController::loadFromFile(const QString& path) {
     if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Choose a dictionary file to open."));
-    if (!::loadDictionary(dictionary_, utf8(path))) return failed(QStringLiteral("Could not open dictionary. Check the path and UTF-8 TSV format."));
+    DictionaryGuard incoming;
+    DictionaryHistory::Snapshot incomingSnapshot;
+    QString nextPath;
+    bool restoresProtected = false;
+    try {
+        if (!::loadDictionary(incoming.value, utf8(path)))
+            return failed(QStringLiteral("Could not open dictionary. Check the path and UTF-8 TSV format."));
+        incomingSnapshot = DictionaryHistory::capture(incoming.value);
+        nextPath = samePath(path, seedPath())
+            ? (protectedStartupPath_.isEmpty() ? editableDefaultPath() : QString{})
+            : QFileInfo(path).absoluteFilePath();
+        restoresProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
+    } catch (const std::exception&) {
+        return failed(QStringLiteral("Could not open dictionary. Existing data was kept."));
+    }
+    for (std::size_t i = 0; i < 26; ++i) std::swap(dictionary_.buckets[i], incoming.value.buckets[i]);
     history_.clear();
-    currentPath_ = samePath(path, seedPath()) ? editableDefaultPath() : QFileInfo(path).absoluteFilePath();
-    savedSnapshot_ = DictionaryHistory::capture(dictionary_);
+    currentPath_.swap(nextPath);
+    savedSnapshot_.swap(incomingSnapshot);
+    if (restoresProtected) protectedStartupPath_.clear();
     dirty_ = false;
     refreshList();
     refreshActions();
@@ -183,33 +216,58 @@ ControllerResult AppController::loadFromFile(const QString& path) {
 }
 
 ControllerResult AppController::saveToFile(const QString& path) {
+    return saveToFileImpl(path, false);
+}
+
+ControllerResult AppController::saveToFileImpl(const QString& path, bool allowProtectedOverwrite) {
     if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Choose a dictionary file to save."));
     if (samePath(path, seedPath())) return invalid(QStringLiteral("The shipped dictionary is a read-only seed. Choose another file."));
-    if (!::saveDictionary(dictionary_, utf8(path))) return failed(QStringLiteral("Could not save dictionary. Check the destination permissions."));
-    currentPath_ = QFileInfo(path).absoluteFilePath();
+    const bool replacesProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
+    if (replacesProtected && !allowProtectedOverwrite)
+        return invalid(QStringLiteral("This unreadable startup file is protected. Use Save As and explicitly confirm replacement."));
+    DictionaryHistory::Snapshot prepared;
+    QString nextPath;
     try {
-        savedSnapshot_ = DictionaryHistory::capture(dictionary_);
+        prepared = snapshotForSave();
+        nextPath = QFileInfo(path).absoluteFilePath();
     } catch (const std::exception&) {
-        history_.clear();
+        return failed(QStringLiteral("Could not prepare the save. No file was written."));
     }
+    try {
+        if (!::saveDictionary(dictionary_, utf8(path)))
+            return failed(QStringLiteral("Could not save dictionary. Check the destination permissions."));
+    } catch (const std::exception&) {
+        return failed(QStringLiteral("Could not save dictionary. Check the destination permissions."));
+    }
+    static_assert(std::is_nothrow_swappable<DictionaryHistory::Snapshot>::value,
+                  "Committing a saved snapshot must not throw after disk write");
+    savedSnapshot_.swap(prepared);
+    currentPath_.swap(nextPath);
+    if (replacesProtected) protectedStartupPath_.clear();
     dirty_ = false;
     refreshActions();
     return success(QStringLiteral("Dictionary saved."));
 }
 
+DictionaryHistory::Snapshot AppController::snapshotForSave() const {
+    return DictionaryHistory::capture(dictionary_);
+}
+
 ControllerResult AppController::undo() {
-    if (!history_.canUndo()) return {ControllerStatus::Unavailable, QStringLiteral("Nothing to undo."), {}};
+    if (!history_.canUndo()) return {ControllerStatus::NotFound, QStringLiteral("Nothing to undo."), {}};
     if (!history_.undo(dictionary_)) return failed(QStringLiteral("Could not undo change."));
-    dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_;
+    try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
+    catch (const std::exception&) { dirty_ = true; }
     refreshList();
     refreshActions();
     return success(QStringLiteral("Change undone."));
 }
 
 ControllerResult AppController::redo() {
-    if (!history_.canRedo()) return {ControllerStatus::Unavailable, QStringLiteral("Nothing to redo."), {}};
+    if (!history_.canRedo()) return {ControllerStatus::NotFound, QStringLiteral("Nothing to redo."), {}};
     if (!history_.redo(dictionary_)) return failed(QStringLiteral("Could not redo change."));
-    dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_;
+    try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
+    catch (const std::exception&) { dirty_ = true; }
     refreshList();
     refreshActions();
     return success(QStringLiteral("Change redone."));
@@ -261,6 +319,7 @@ void AppController::connectUi() {
 
 void AppController::refreshList(const QString& select) {
     if (searchWidget_) searchWidget_->clearResult();
+    const QString selected = select.isEmpty() ? mainWindow_.selectedWord() : select;
     QStringList words;
     std::vector<const WordNode*> nodes;
     if (currentFilter_ == QLatin1String("All Words")) {
@@ -279,10 +338,10 @@ void AppController::refreshList(const QString& select) {
     }
     for (const auto* node : nodes) words.push_back(QString::fromUtf8(node->english.c_str()));
     mainWindow_.setWordList(words);
-    if (!select.isEmpty()) {
+    if (!selected.isEmpty()) {
         auto* list = mainWindow_.findChild<QListWidget*>(QStringLiteral("wordList"));
         if (list) {
-            const auto matches = list->findItems(select, Qt::MatchExactly);
+            const auto matches = list->findItems(selected, Qt::MatchExactly);
             if (!matches.isEmpty()) list->setCurrentItem(matches.front());
         }
     }
@@ -303,23 +362,50 @@ void AppController::showResult(const ControllerResult& result) {
 }
 
 QString AppController::editableDefaultPath() const {
+    if (!userDictionaryPathOverride_.isEmpty()) return userDictionaryPathOverride_;
     return QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).filePath(QStringLiteral("dictionary.txt"));
 }
 
 QString AppController::seedPath() const {
+    if (!bundledDictionaryPathOverride_.isEmpty()) return bundledDictionaryPathOverride_;
     return QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("data/dictionary.txt"));
 }
 
 void AppController::loadStartupDictionary() {
     const QString editable = editableDefaultPath();
-    const bool hasEditable = QFileInfo::exists(editable);
-    const QString path = hasEditable ? editable : seedPath();
-    if (QFileInfo::exists(path)) {
-        showResult(loadFromFile(path));
-    } else {
-        mainWindow_.statusBar()->showMessage(QStringLiteral("No dictionary seed found. You can add terms or open a file."));
-        currentPath_ = editable;
+    if (QFileInfo::exists(editable)) {
+        const auto result = loadFromFile(editable);
+        if (result.status == ControllerStatus::Success) { showResult(result); return; }
+        protectedStartupPath_ = editable;
+        currentPath_.clear();
+        QMessageBox recovery(&mainWindow_);
+        recovery.setIcon(QMessageBox::Warning);
+        recovery.setWindowTitle(QStringLiteral("Dictionary recovery"));
+        recovery.setText(QStringLiteral("Your dictionary file could not be loaded. It has been left unchanged."));
+        const bool hasSeed = QFileInfo::exists(seedPath());
+        recovery.setInformativeText(hasSeed
+            ? QStringLiteral("Open another file, load the bundled dictionary, or start empty. Saving will not overwrite the unreadable file without your confirmation.")
+            : QStringLiteral("Open another file or start empty. Saving will not overwrite the unreadable file without your confirmation."));
+        auto* openButton = recovery.addButton(QStringLiteral("Open another file…"), QMessageBox::ActionRole);
+        auto* seedButton = hasSeed
+            ? recovery.addButton(QStringLiteral("Load bundled dictionary"), QMessageBox::ActionRole) : nullptr;
+        auto* emptyButton = recovery.addButton(QStringLiteral("Start empty"), QMessageBox::AcceptRole);
+        recovery.setDefaultButton(qobject_cast<QPushButton*>(emptyButton));
+        recovery.exec();
+        if (recovery.clickedButton() == openButton) {
+            const QString other = QFileDialog::getOpenFileName(&mainWindow_, QStringLiteral("Open dictionary"),
+                QFileInfo(editable).absolutePath(), QStringLiteral("Dictionary TSV (*.txt *.tsv);;All files (*)"));
+            if (!other.isEmpty()) showResult(loadFromFile(other));
+        } else if (seedButton && recovery.clickedButton() == seedButton) {
+            const auto seedResult = loadFromFile(seedPath());
+            if (seedResult.status == ControllerStatus::Success) showResult(seedResult);
+            else mainWindow_.statusBar()->showMessage(QStringLiteral("Bundled dictionary could not be loaded. Started empty."));
+        }
+        return;
     }
+    if (QFileInfo::exists(seedPath())) showResult(loadFromFile(seedPath()));
+    else mainWindow_.statusBar()->showMessage(QStringLiteral("No dictionary seed found. You can add terms or open a file."));
+    if (currentPath_.isEmpty()) currentPath_ = editable;
 }
 
 bool AppController::confirmDiscardChanges() {
@@ -352,8 +438,15 @@ bool AppController::saveFile(bool saveAs) {
     if (saveAs || path.isEmpty()) path = QFileDialog::getSaveFileName(&mainWindow_,
         QStringLiteral("Save dictionary"), path, QStringLiteral("Dictionary TSV (*.txt *.tsv);;All files (*)"));
     if (path.isEmpty()) return false;
+    const bool replacingProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
+    if (replacingProtected) {
+        const auto answer = QMessageBox::warning(&mainWindow_, QStringLiteral("Replace unreadable dictionary?"),
+            QStringLiteral("This will replace the unreadable original file. Continue?"),
+            QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
+        if (answer != QMessageBox::Yes) return false;
+    }
     if (samePath(path, editableDefaultPath())) QDir().mkpath(QFileInfo(path).absolutePath());
-    const auto result = saveToFile(path);
+    const auto result = saveToFileImpl(path, replacingProtected);
     showResult(result);
     return result.status == ControllerStatus::Success;
 }

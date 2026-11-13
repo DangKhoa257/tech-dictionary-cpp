@@ -22,7 +22,8 @@ struct ControllerResult {
 
 class AppController : public QObject {
 public:
-    explicit AppController(QApplication& application);
+    explicit AppController(QApplication& application, QString userDictionaryPath = {},
+                           QString bundledDictionaryPath = {});
     ~AppController() override;
     AppController(const AppController&) = delete;
     AppController& operator=(const AppController&) = delete;
@@ -42,6 +43,8 @@ public:
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
+    // Kept overridable so integration tests can inject a snapshot failure before a save.
+    virtual DictionaryHistory::Snapshot snapshotForSave() const;
 
 private:
     void connectUi();
@@ -54,6 +57,7 @@ private:
     QString seedPath() const;
     void openFile();
     bool saveFile(bool saveAs);
+    ControllerResult saveToFileImpl(const QString& path, bool allowProtectedOverwrite);
     void openWordDialog(bool edit);
     void deleteSelectedWord();
 
@@ -67,5 +71,8 @@ private:
     QString currentPath_;
     QString currentFilter_ = QStringLiteral("All Words");
     DictionaryHistory::Snapshot savedSnapshot_{};
+    QString userDictionaryPathOverride_;
+    QString bundledDictionaryPathOverride_;
+    QString protectedStartupPath_;
     bool dirty_ = false;
 };

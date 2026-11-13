@@ -81,7 +81,8 @@ if(BUILD_TESTING)
         endif()
         add_test(NAME AppControllerBoundary COMMAND AppControllerTests)
         set_tests_properties(AppControllerBoundary PROPERTIES
-            ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+            TIMEOUT 30)
 
         add_executable(WordDialogTests
             tests/word_dialog_test.cpp

@@ -19,6 +19,8 @@ For Release, use `build-release` and `-DCMAKE_BUILD_TYPE=Release`. Adjust the Qt
 
 The bundled `data/dictionary.txt` is loaded when no editable dictionary exists. The app keeps this seed read-only and saves changes to `QStandardPaths::AppDataLocation/dictionary.txt` for the current user. **File → Open** loads another UTF-8 TSV; **Save** writes the active editable file; **Save As** chooses a new path. Each line is `English<TAB>Vietnamese`. The app confirms unsaved changes before Open or Exit. A corrupt load leaves the current dictionary intact.
 
+If the user dictionary cannot be read at startup, a one-time recovery dialog offers another file, the bundled seed, or an empty dictionary. The unreadable file is preserved. After seed or empty recovery, Save asks for a path; choosing to replace the unreadable original requires an additional explicit confirmation. If both files are missing, the app starts empty and remains usable.
+
 Search by English term, select a list item to see its meaning, or choose an A–Z range in the sidebar. Add, edit, and delete use the buttons in the main window. Edit → Undo/Redo use Ctrl+Z and Ctrl+Y. Changes made since the last save are marked in the window state.
 
 ## Project ownership
