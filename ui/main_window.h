@@ -1,5 +1,4 @@
-#ifndef MAIN_WINDOW_H
-#define MAIN_WINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -21,12 +20,15 @@ public:
     // Các hàm cho TV1 kết nối danh sách từ và hiển thị chi tiết
     void setWordList(const QStringList &words);
     void setWordDetail(const QString &title, const QString &definition);
+    // Empty when no word is selected. Controller enables requests after wiring.
+    QString selectedWord() const;
+    void setInteractionEnabled(bool enabled);
 
     // Hàm lấy layout để TV1 nhúng SearchWidget của TV3
     QVBoxLayout* getSearchContainerLayout() const;
 
 signals:
-    // Tín hiệu lọc A-Z cho TV1
+    // Values: "All Words", "A - E", "F - J", "K - O", "P - T", "U - Z".
     void filterRequested(const QString &range);
 
     // Tín hiệu Thêm / Sửa / Xóa cho TV1 nối với TV4
@@ -63,6 +65,6 @@ private:
     QPushButton *btnAdd;
     QPushButton *btnEdit;
     QPushButton *btnDelete;
+    QList<QPushButton*> filterButtons_;
+    bool interactionEnabled_ = false;
 };
-
-#endif // MAIN_WINDOW_H

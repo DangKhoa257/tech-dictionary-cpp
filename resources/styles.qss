@@ -52,12 +52,12 @@ QLabel#heading {
     font-weight: 700;
 }
 
-QLabel#description, QLabel#cardText {
+QLabel#description {
     color: #5b6d83;
     font-size: 14px;
 }
 
-QLineEdit#searchField {
+QLineEdit#searchInput {
     background: #ffffff;
     border: 1px solid #dce4ef;
     border-radius: 10px;
@@ -66,18 +66,32 @@ QLineEdit#searchField {
     padding: 14px 16px;
 }
 
-QLineEdit#searchField:focus {
+QLineEdit#searchInput:focus {
     border-color: #0097e6;
 }
 
-QFrame#welcomeCard {
+QListWidget#wordList, QTextEdit#wordDetail {
     background: #ffffff;
     border: 1px solid #e2e9f2;
-    border-radius: 14px;
+    border-radius: 8px;
+    padding: 8px;
 }
 
-QLabel#cardTitle {
-    color: #203653;
-    font-size: 20px;
-    font-weight: 700;
+QPushButton#addButton, QPushButton#editButton, QPushButton#deleteButton {
+    background: #24578a;
+    color: #ffffff;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+QPushButton#addButton:hover, QPushButton#editButton:hover,
+QPushButton#deleteButton:hover {
+    background: #326ba4;
+}
+
+QPushButton#addButton:disabled, QPushButton#editButton:disabled,
+QPushButton#deleteButton:disabled {
+    background: #dce4ef;
+    color: #71839a;
 }
