@@ -1,112 +1,184 @@
 #include "main_window.h"
 
 #include <QFile>
-#include <QFrame>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QWidget>
+#include <QListWidgetItem>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    setupUi();
+}
+
+MainWindow::~MainWindow() {}
+
+void MainWindow::setupUi() {
     setWindowTitle(QStringLiteral("Tech Dictionary"));
-    setMinimumSize(760, 520);
-    resize(1080, 700);
-
+    setMinimumSize(800, 560);
+    resize(1100, 720);
     QFile styleFile(QStringLiteral(":/styles.qss"));
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         setStyleSheet(QString::fromUtf8(styleFile.readAll()));
     }
+    // Root Widget (Khớp với styles.qss)
+    centralWidget = new QWidget(this);
+    centralWidget->setObjectName("root");
+    setCentralWidget(centralWidget);
 
-    auto* root = new QWidget(this);
-    root->setObjectName(QStringLiteral("root"));
-    setCentralWidget(root);
+    QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    auto* rootLayout = new QHBoxLayout(root);
-    rootLayout->setContentsMargins(0, 0, 0, 0);
-    rootLayout->setSpacing(0);
+    // ==========================================
+    // 1. SIDEBAR BÊN TRÁI (Kèm setObjectName)
+    // ==========================================
+    sidebarFrame = new QFrame(this);
+    sidebarFrame->setObjectName("sidebar");
+    sidebarFrame->setFixedWidth(240);
 
-    auto* sidebar = new QFrame(root);
-    sidebar->setObjectName(QStringLiteral("sidebar"));
-    sidebar->setFixedWidth(220);
-    auto* sidebarLayout = new QVBoxLayout(sidebar);
-    sidebarLayout->setContentsMargins(20, 28, 20, 24);
-    sidebarLayout->setSpacing(10);
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebarFrame);
+    sidebarLayout->setContentsMargins(16, 20, 16, 20);
 
-    auto* brand = new QLabel(QStringLiteral("TECH\nDICTIONARY"), sidebar);
-    brand->setObjectName(QStringLiteral("brand"));
-    sidebarLayout->addWidget(brand);
-    sidebarLayout->addSpacing(38);
+    brandLabel = new QLabel("TECH DICT", sidebarFrame);
+    brandLabel->setObjectName("brand");
+    sidebarLayout->addWidget(brandLabel);
 
-    auto* navigationLabel = new QLabel(QStringLiteral("NAVIGATION"), sidebar);
-    navigationLabel->setObjectName(QStringLiteral("eyebrow"));
-    sidebarLayout->addWidget(navigationLabel);
+    eyebrowLabel = new QLabel("BỘ LỌC A-Z", sidebarFrame);
+    eyebrowLabel->setObjectName("eyebrow");
+    sidebarLayout->addWidget(eyebrowLabel);
 
-    const QString navNames[] = {
-        QStringLiteral("Dictionary · Soon"),
-        QStringLiteral("A–Z · Soon"),
-        QStringLiteral("Settings · Soon")
-    };
-    for (const QString& name : navNames) {
-        auto* button = new QPushButton(name, sidebar);
-        button->setObjectName(QStringLiteral("navButton"));
-        button->setEnabled(false);
-        sidebarLayout->addWidget(button);
+    // Nút Filter A-Z
+    QStringList filters = {"All Words", "A - E", "F - J", "K - O", "P - T", "U - Z"};
+    for (const QString &filter : filters) {
+        QPushButton *btn = new QPushButton(filter, sidebarFrame);
+        btn->setObjectName("navButton");
+        btn->setEnabled(false);
+        filterButtons_.append(btn);
+        connect(btn, &QPushButton::clicked, this, &MainWindow::onNavButtonClicked);
+        sidebarLayout->addWidget(btn);
     }
+
     sidebarLayout->addStretch();
 
-    auto* version = new QLabel(QStringLiteral("Version 0.1.0 · Foundation"), sidebar);
-    version->setObjectName(QStringLiteral("sidebarFooter"));
-    sidebarLayout->addWidget(version);
-    rootLayout->addWidget(sidebar);
+    sidebarFooterLabel = new QLabel("v0.1.0 - Technical Dictionary", sidebarFrame);
+    sidebarFooterLabel->setObjectName("sidebarFooter");
+    sidebarLayout->addWidget(sidebarFooterLabel);
 
-    auto* content = new QWidget(root);
-    content->setObjectName(QStringLiteral("content"));
-    auto* contentLayout = new QVBoxLayout(content);
-    contentLayout->setContentsMargins(48, 42, 48, 48);
-    contentLayout->setSpacing(24);
+    mainLayout->addWidget(sidebarFrame);
 
-    auto* sectionLabel = new QLabel(QStringLiteral("ENGLISH ↔ VIETNAMESE IT TERMS"), content);
-    sectionLabel->setObjectName(QStringLiteral("eyebrow"));
-    contentLayout->addWidget(sectionLabel);
+    // ==========================================
+    // 2. VÙNG NỘI DUNG CHÍNH (BÊN PHẢI)
+    // ==========================================
+    contentWidget = new QWidget(this);
+    contentWidget->setObjectName("content");
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(20, 20, 20, 20);
+    contentLayout->setSpacing(15);
 
-    auto* heading = new QLabel(QStringLiteral("Your technical vocabulary,\nall in one place."), content);
-    heading->setObjectName(QStringLiteral("heading"));
-    heading->setWordWrap(true);
-    contentLayout->addWidget(heading);
+    headingLabel = new QLabel("Từ Điển Thuật Ngữ Công Nghệ", contentWidget);
+    headingLabel->setObjectName("heading");
+    headingLabel->setWordWrap(true);
+    contentLayout->addWidget(headingLabel);
 
-    auto* description = new QLabel(
-        QString::fromUtf8("Tra cứu thuật ngữ công nghệ thông tin Anh–Việt."), content);
-    description->setObjectName(QStringLiteral("description"));
-    description->setWordWrap(true);
-    contentLayout->addWidget(description);
+    descriptionLabel = new QLabel("Tra cứu và quản lý thuật ngữ chuyên ngành CNTT", contentWidget);
+    descriptionLabel->setObjectName("description");
+    descriptionLabel->setWordWrap(true);
+    contentLayout->addWidget(descriptionLabel);
 
-    auto* searchField = new QLineEdit(content);
-    searchField->setObjectName(QStringLiteral("searchField"));
-    searchField->setPlaceholderText(QStringLiteral("Search for a term (coming soon)"));
-    searchField->setEnabled(false);
-    contentLayout->addWidget(searchField);
+    // VÙNG NHÚNG SEARCH WIDGET CỦA TV3
+    QWidget *searchContainer = new QWidget(contentWidget);
+    searchContainerLayout = new QVBoxLayout(searchContainer);
+    searchContainerLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->addWidget(searchContainer);
 
-    auto* card = new QFrame(content);
-    card->setObjectName(QStringLiteral("welcomeCard"));
-    auto* cardLayout = new QVBoxLayout(card);
-    cardLayout->setContentsMargins(32, 30, 32, 30);
-    cardLayout->setSpacing(12);
-    auto* cardTag = new QLabel(QStringLiteral("WELCOME"), card);
-    cardTag->setObjectName(QStringLiteral("eyebrow"));
-    cardLayout->addWidget(cardTag);
-    auto* cardTitle = new QLabel(QStringLiteral("A dictionary built for learning."), card);
-    cardTitle->setObjectName(QStringLiteral("cardTitle"));
-    cardTitle->setWordWrap(true);
-    cardLayout->addWidget(cardTitle);
-    auto* cardText = new QLabel(
-        QStringLiteral("The dictionary, search, editing and file storage modules are in development. "
-                       "This first version establishes the application layout."), card);
-    cardText->setObjectName(QStringLiteral("cardText"));
-    cardText->setWordWrap(true);
-    cardLayout->addWidget(cardText);
-    contentLayout->addWidget(card);
-    contentLayout->addStretch();
-    rootLayout->addWidget(content, 1);
+    // VÙNG CHỨA DANH SÁCH & CHI TIẾT
+    QHBoxLayout *dataLayout = new QHBoxLayout();
+    
+    wordListWidget = new QListWidget(contentWidget);
+    wordListWidget->setObjectName("wordList");
+    connect(wordListWidget, &QListWidget::itemSelectionChanged, this, &MainWindow::onItemSelectionChanged);
+    dataLayout->addWidget(wordListWidget, 1);
+
+    wordDetailTextEdit = new QTextEdit(contentWidget);
+    wordDetailTextEdit->setObjectName("wordDetail");
+    wordDetailTextEdit->setReadOnly(true);
+    wordDetailTextEdit->setPlainText(QStringLiteral("Select a word to view its meaning."));
+    dataLayout->addWidget(wordDetailTextEdit, 2);
+
+    contentLayout->addLayout(dataLayout, 1);
+
+    // NÚT THAO TÁC THÊM / SỬA / XÓA (KẾT NỐI VỚI TV4)
+    QHBoxLayout *actionLayout = new QHBoxLayout();
+    btnAdd = new QPushButton("Thêm từ mới", contentWidget);
+    btnEdit = new QPushButton("Sửa từ", contentWidget);
+    btnDelete = new QPushButton("Xóa từ", contentWidget);
+    btnAdd->setObjectName("addButton");
+    btnEdit->setObjectName("editButton");
+    btnDelete->setObjectName("deleteButton");
+    btnAdd->setEnabled(false);
+    btnEdit->setEnabled(false);
+    btnDelete->setEnabled(false);
+
+    connect(btnAdd, &QPushButton::clicked, this, &MainWindow::onAddClicked);
+    connect(btnEdit, &QPushButton::clicked, this, &MainWindow::onEditClicked);
+    connect(btnDelete, &QPushButton::clicked, this, &MainWindow::onDeleteClicked);
+
+    actionLayout->addWidget(btnAdd);
+    actionLayout->addWidget(btnEdit);
+    actionLayout->addWidget(btnDelete);
+    actionLayout->addStretch();
+
+    contentLayout->addLayout(actionLayout);
+    mainLayout->addWidget(contentWidget, 1);
+}
+
+void MainWindow::onNavButtonClicked() {
+    QPushButton *btn = qobject_cast<QPushButton*>(sender());
+    if (btn) {
+        emit filterRequested(btn->text());
+    }
+}
+
+void MainWindow::onAddClicked() { emit addWordRequested(); }
+void MainWindow::onEditClicked() { emit editWordRequested(); }
+void MainWindow::onDeleteClicked() { emit deleteWordRequested(); }
+
+void MainWindow::onItemSelectionChanged() {
+    QListWidgetItem *item = wordListWidget->currentItem();
+    btnEdit->setEnabled(interactionEnabled_ && item != nullptr);
+    btnDelete->setEnabled(interactionEnabled_ && item != nullptr);
+    wordDetailTextEdit->setPlainText(QStringLiteral("Select a word to view its meaning."));
+    if (item) {
+        emit wordSelected(item->text());
+    }
+}
+
+void MainWindow::setWordList(const QStringList &words) {
+    wordListWidget->clear();
+    wordListWidget->addItems(words);
+    onItemSelectionChanged();
+}
+
+void MainWindow::setWordDetail(const QString &title, const QString &definition) {
+    if (title.isEmpty() && definition.isEmpty()) {
+        wordDetailTextEdit->setPlainText(QStringLiteral("Select a word to view its meaning."));
+        return;
+    }
+    wordDetailTextEdit->setHtml(QStringLiteral("<h2>%1</h2><p>%2</p>")
+        .arg(title.toHtmlEscaped(), definition.toHtmlEscaped()));
+}
+
+QString MainWindow::selectedWord() const {
+    const QListWidgetItem* item = wordListWidget->currentItem();
+    return item == nullptr ? QString{} : item->text();
+}
+
+void MainWindow::setInteractionEnabled(bool enabled) {
+    interactionEnabled_ = enabled;
+    for (QPushButton* button : filterButtons_) button->setEnabled(enabled);
+    btnAdd->setEnabled(enabled);
+    const bool hasSelection = wordListWidget->currentItem() != nullptr;
+    btnEdit->setEnabled(enabled && hasSelection);
+    btnDelete->setEnabled(enabled && hasSelection);
+}
+
+QVBoxLayout* MainWindow::getSearchContainerLayout() const {
+    return searchContainerLayout;
 }
