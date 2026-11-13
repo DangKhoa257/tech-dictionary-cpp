@@ -85,6 +85,10 @@ void WordDialog::setValidationMessage(const QString& message) {
     validationLabel_->setText(message);
 }
 
+void WordDialog::showSaveError(const QString& message) {
+    setValidationMessage(message);
+}
+
 void WordDialog::handleSave() {
     const QString english = englishWord();
     const QString vietnamese = vietnameseMeaning();
@@ -110,6 +114,6 @@ void WordDialog::handleSave() {
         return;
     }
 
+    setValidationMessage({});
     emit saveRequested(english, vietnamese);
-    
 }

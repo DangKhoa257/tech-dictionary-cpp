@@ -22,6 +22,7 @@ public:
 
     QString englishWord() const;
     QString vietnameseMeaning() const;
+    void showSaveError(const QString& message);
 
 signals:
     void saveRequested(const QString& english, const QString& vietnamese);

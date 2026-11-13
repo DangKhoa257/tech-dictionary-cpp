@@ -31,6 +31,8 @@ public:
     bool canRedo() const noexcept;
 
     // Restore the previous/next snapshot. Returns false if no operation exists.
+    // Restoring reallocates WordNodes, invalidating earlier non-owning pointers;
+    // the caller must refresh displayed UI data after a successful Undo/Redo.
     bool undo(Dictionary& dictionary);
     bool redo(Dictionary& dictionary);
 

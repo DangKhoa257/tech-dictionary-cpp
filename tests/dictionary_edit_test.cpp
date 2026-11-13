@@ -1,6 +1,7 @@
 #include "dictionary.h"
 #include "dictionary_history.h"
 
+#include <cstdio>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -96,8 +97,25 @@ void testUpdateEmptyMeaning() {
            "empty meaning is rejected");
     expect(!updateWordMeaning(dictionary, "Book", "   "),
            "whitespace-only meaning is rejected");
-    expect(findExact(dictionary, 1, "Book")->vietnamese == "sach",
-           "invalid meaning does not overwrite existing meaning");
+    expect(!updateWordMeaning(dictionary, "Book", "bad\tmeaning"),
+           "tab in meaning is rejected");
+    expect(!updateWordMeaning(dictionary, "Book", "bad\nmeaning"),
+           "newline in meaning is rejected");
+    expect(!updateWordMeaning(dictionary, "Book", std::string("bad\xFF", 4)),
+           "invalid UTF-8 meaning is rejected");
+    expect(updateWordMeaning(dictionary, "Book", "  Sách  "),
+           "valid padded meaning is normalized");
+    expect(findExact(dictionary, 1, "Book")->vietnamese == "Sách",
+           "updated meaning is savable without outer spaces");
+    const std::string path = "tv4_roundtrip_test.txt";
+    expect(saveDictionary(dictionary, path), "updated dictionary saves through TV6");
+    Dictionary loaded{};
+    expect(loadDictionary(loaded, path), "updated dictionary reloads through TV6");
+    const WordNode* reloaded = findWord(loaded, "book");
+    expect(reloaded != nullptr && reloaded->vietnamese == "Sách",
+           "TV3 search finds reloaded update");
+    clearDictionary(loaded);
+    std::remove(path.c_str());
 
     clearDictionary(dictionary);
 }
