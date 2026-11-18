@@ -18,6 +18,9 @@ struct ControllerResult {
     ControllerStatus status;
     QString message;
     QString vietnamese;
+    QString partOfSpeech;
+    QString example;
+    QString category;
 };
 
 class AppController : public QObject {
@@ -30,8 +33,14 @@ public:
 
     int run();
     ControllerResult searchWord(const QString& english) const;
-    ControllerResult addWord(const QString& english, const QString& vietnamese);
+    ControllerResult addWord(const QString& english, const QString& vietnamese,
+                             const QString& partOfSpeech = {}, const QString& example = {},
+                             const QString& category = {});
     ControllerResult updateWord(const QString& english, const QString& vietnamese);
+    ControllerResult updateWord(const QString& english, const QString& vietnamese,
+                                const QString& partOfSpeech, const QString& example,
+                                const QString& category);
+    QStringList suggestions(const QString& prefix) const;
     ControllerResult deleteWord(const QString& english);
     ControllerResult loadFromFile(const QString& path);
     ControllerResult saveToFile(const QString& path);

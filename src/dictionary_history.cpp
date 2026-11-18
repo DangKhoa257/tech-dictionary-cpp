@@ -28,7 +28,8 @@ DictionaryHistory::Snapshot DictionaryHistory::capture(const Dictionary& diction
     for (std::size_t bucket = 0; bucket < snapshot.size(); ++bucket) {
         for (const WordNode* node = dictionary.buckets[bucket];
              node != nullptr; node = node->next) {
-            snapshot[bucket].push_back({node->english, node->vietnamese});
+            snapshot[bucket].push_back({node->english, node->vietnamese,
+                                        node->partOfSpeech, node->example, node->category});
         }
     }
 
@@ -62,7 +63,8 @@ bool DictionaryHistory::restore(Dictionary& dictionary, const Snapshot& snapshot
         for (std::size_t bucket = 0; bucket < snapshot.size(); ++bucket) {
             WordNode** tail = &replacement[bucket];
             for (const Entry& entry : snapshot[bucket]) {
-                *tail = new WordNode{entry.english, entry.vietnamese, nullptr};
+                *tail = new WordNode{entry.english, entry.vietnamese, nullptr,
+                                     entry.partOfSpeech, entry.example, entry.category};
                 tail = &((*tail)->next);
             }
         }

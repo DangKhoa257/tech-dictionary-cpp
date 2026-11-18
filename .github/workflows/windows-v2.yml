@@ -1,0 +1,110 @@
+name: Windows V2 build and package
+
+on:
+  push:
+    branches: [feature/final-integration]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-v2:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      QTFRAMEWORK_BYPASS_LICENSE_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6.12.0 and matching MinGW 13.1.0
+        uses: jurplel/install-qt-action@v4.5.0
+        with:
+          version: '6.12.0'
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          tools: 'tools_mingw1310,qt.tools.win64_mingw1310'
+          cache: true
+
+      - name: Verify toolchain
+        shell: pwsh
+        run: |
+          $mingwBin = Join-Path $env:IQTA_TOOLS 'mingw1310_64/bin'
+          if (-not (Test-Path -LiteralPath (Join-Path $mingwBin 'g++.exe'))) {
+            throw "MinGW 13.1.0 compiler was not installed at $mingwBin"
+          }
+          $env:PATH = "$mingwBin;$env:PATH"
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $mingwBin
+          $qtVersion = & (Join-Path $env:QT_ROOT_DIR 'bin/qmake.exe') -query QT_VERSION
+          $compilerVersion = & (Join-Path $mingwBin 'g++.exe') -dumpfullversion
+          if ($qtVersion -ne '6.12.0' -or $compilerVersion -ne '13.1.0') {
+            throw "Unexpected Qt/MinGW combination: $qtVersion / $compilerVersion"
+          }
+          Write-Output "Qt $qtVersion; MinGW $compilerVersion"
+
+      - name: Validate bundled dictionary
+        shell: pwsh
+        run: python scripts/validate_seed.py
+
+      - name: Build Debug
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          cmake -S . -B build-debug -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
+          if ($LASTEXITCODE -ne 0) { throw 'Debug configuration failed' }
+          cmake --build build-debug --parallel 4
+          if ($LASTEXITCODE -ne 0) { throw 'Debug build failed' }
+
+      - name: Build Release
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          cmake -S . -B build-release -G 'MinGW Makefiles' -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
+          if ($LASTEXITCODE -ne 0) { throw 'Release configuration failed' }
+          cmake --build build-release --parallel 4
+          if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
+
+      - name: Package Release with windeployqt
+        shell: pwsh
+        run: |
+          ./scripts/package_windows.ps1 -BuildDir build-release -QtRoot $env:QT_ROOT_DIR
+
+      - name: Smoke test packaged GUI and capture screenshot
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
+          $screenshot = Join-Path $env:RUNNER_TEMP 'tech-dictionary-v2-smoke.png'
+          & $packageExe --ci-smoke $screenshot
+          if ($LASTEXITCODE -ne 0) { throw "Packaged GUI smoke test failed: $LASTEXITCODE" }
+          if (-not (Test-Path -LiteralPath $screenshot -PathType Leaf)) {
+            throw 'GUI screenshot was not created'
+          }
+          Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
+
+      - name: Run all seven Debug tests
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          ctest --test-dir build-debug --output-on-failure
+          if ($LASTEXITCODE -ne 0) { throw 'Debug tests failed' }
+
+      - name: Run all seven Release tests
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          ctest --test-dir build-release --output-on-failure
+          if ($LASTEXITCODE -ne 0) { throw 'Release tests failed' }
+
+      - name: Upload Release package and GUI screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TechDictionary-v0.2.0-win64
+          path: |
+            dist/TechDictionary-v0.2.0-win64.zip
+            dist/tech-dictionary-v2-smoke.png
+          if-no-files-found: warn

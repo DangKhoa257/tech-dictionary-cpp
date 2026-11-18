@@ -118,6 +118,20 @@ bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
     return false;
 }
 
+bool updateEntry(Dictionary& dictionary, const std::string& english,
+                 const std::string& vietnamese, const std::string& partOfSpeech,
+                 const std::string& example, const std::string& category) {
+    // Reuse the existing edit validator and preserve metadata on failure.
+    if (!isValidEntryMetadata(partOfSpeech) || !isValidEntryMetadata(example) ||
+        !isValidEntryMetadata(category)) return false;
+    WordNode* node = const_cast<WordNode*>(findWord(dictionary, english));
+    if (!node || !updateWordMeaning(dictionary, english, vietnamese)) return false;
+    node->partOfSpeech = partOfSpeech;
+    node->example = example;
+    node->category = category;
+    return true;
+}
+
 bool deleteWord(Dictionary& dictionary, const std::string& english) {
     if (!isValidUtf8TsvField(english)) return false;
     const std::string normalizedEnglish = trimSpaces(english);

@@ -19,6 +19,8 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QTextEdit>
+#include <QCompleter>
+#include <QAbstractItemModel>
 
 #include <iostream>
 #include <new>
@@ -86,6 +88,69 @@ int main(int argc, char* argv[]) {
     expect(temporary.isValid(), "temporary directory");
     const QString path = temporary.filePath(QString::fromUtf8("từ-điển.txt"));
     const QString badPath = temporary.filePath(QStringLiteral("bad.txt"));
+
+    {
+        AppController v2(application, temporary.filePath(QStringLiteral("v2-user.txt")),
+                         temporary.filePath(QStringLiteral("v2-seed.txt")));
+        const QString example = QStringLiteral("The compiler checks syntax before generating code.");
+        expect(v2.addWord(QStringLiteral("Compiler"), QStringLiteral("Trình biên dịch"),
+                          QStringLiteral("Noun"), example,
+                          QStringLiteral("Programming")).status == ControllerStatus::Success,
+               "enriched controller add");
+        expect(v2.addWord(QStringLiteral("Computer"), QStringLiteral("Máy tính")).status == ControllerStatus::Success,
+               "legacy-style controller add");
+        expect(v2.suggestions(QStringLiteral(" COMP ")).size() == 2, "controller prefix suggestions");
+        auto* input = v2.window().findChild<QLineEdit*>(QStringLiteral("searchInput"));
+        expect(input != nullptr, "autocomplete input exists");
+        if (input) {
+            input->setText(QStringLiteral("comp"));
+            expect(input->completer() && input->completer()->model()->rowCount() == 2,
+                   "suggestions update while typing");
+            QMetaObject::invokeMethod(input->completer(), "activated",
+                                      Q_ARG(QString, QStringLiteral("Compiler")));
+            auto* chosenList = v2.window().findChild<QListWidget*>(QStringLiteral("wordList"));
+            expect(chosenList && chosenList->currentItem() &&
+                   chosenList->currentItem()->text() == QStringLiteral("Compiler"),
+                   "suggestion activation opens entry");
+            input->clear();
+            expect(input->completer()->model()->rowCount() == 0,
+                   "clearing query removes suggestions");
+        }
+        auto* list = v2.window().findChild<QListWidget*>(QStringLiteral("wordList"));
+        auto* detail = v2.window().findChild<QTextEdit*>(QStringLiteral("wordDetail"));
+        if (list && detail) {
+            const auto matches = list->findItems(QStringLiteral("Compiler"), Qt::MatchExactly);
+            if (!matches.isEmpty()) list->setCurrentItem(matches.front());
+            expect(detail->toPlainText().contains(example) &&
+                   detail->toPlainText().contains(QStringLiteral("Noun")),
+                   "enriched detail visible");
+        }
+        expect(v2.updateWord(QStringLiteral("Compiler"), QStringLiteral("Bộ biên dịch"),
+                             QStringLiteral("Noun"), QStringLiteral("A compiler translates code."),
+                             QStringLiteral("Programming")).status == ControllerStatus::Success,
+               "enriched edit");
+        expect(v2.undo().status == ControllerStatus::Success && v2.searchWord(QStringLiteral("Compiler")).example == example,
+               "controller undo restores example");
+        expect(v2.redo().status == ControllerStatus::Success &&
+               v2.searchWord(QStringLiteral("Compiler")).example == QStringLiteral("A compiler translates code."),
+               "controller redo restores example");
+        expect(v2.updateWord(QStringLiteral("Compiler"), QStringLiteral("Bộ biên dịch"),
+                             {}, {}, {}).status == ControllerStatus::Success &&
+               v2.searchWord(QStringLiteral("Compiler")).example.isEmpty(),
+               "explicit rich edit can clear metadata");
+        expect(v2.undo().status == ControllerStatus::Success &&
+               v2.searchWord(QStringLiteral("Compiler")).example == QStringLiteral("A compiler translates code."),
+               "undo restores cleared metadata");
+        const QString v2Path = temporary.filePath(QStringLiteral("v2-roundtrip.txt"));
+        expect(v2.saveToFile(v2Path).status == ControllerStatus::Success, "enriched controller save");
+        expect(v2.deleteWord(QStringLiteral("Compiler")).status == ControllerStatus::Success &&
+               v2.suggestions(QStringLiteral("comp")).size() == 1, "delete refreshes suggestions");
+        expect(v2.undo().status == ControllerStatus::Success &&
+               v2.suggestions(QStringLiteral("comp")).size() == 2, "undo refreshes suggestions");
+        expect(v2.loadFromFile(v2Path).status == ControllerStatus::Success &&
+               v2.searchWord(QStringLiteral("Compiler")).category == QStringLiteral("Programming"),
+               "enriched controller reload");
+    }
 
     {
         AppController controller(application);
@@ -388,7 +453,14 @@ int main(int argc, char* argv[]) {
                "unwritable destination fails");
         expect(controller.currentPath() == saveB && controller.isDirty() && !QFileInfo::exists(impossible),
                "failed write keeps metadata and destination absent");
-        expect(readBytes(saveB).contains("Alpha\thai\n"), "failed write keeps prior saved data");
+        Dictionary persisted{};
+        const QByteArray savedBytes = readBytes(saveB);
+        expect(savedBytes.startsWith("#TECHDICTIONARY\t2\n") &&
+               loadDictionary(persisted, saveB.toUtf8().toStdString()) &&
+               findWord(persisted, "Alpha") &&
+               findWord(persisted, "Alpha")->vietnamese == "hai" &&
+               !findWord(persisted, "Beta"), "failed write keeps prior saved data");
+        clearDictionary(persisted);
         expect(controller.undo().status == ControllerStatus::Success && !controller.isDirty(),
                "undo after failed write reaches saved state");
         expect(controller.redo().status == ControllerStatus::Success && controller.isDirty(),

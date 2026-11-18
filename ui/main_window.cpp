@@ -59,7 +59,7 @@ void MainWindow::setupUi() {
     totalWordCountLabel_ = new QLabel(QStringLiteral("Tổng cộng: 0 từ"), sidebarFrame);
     totalWordCountLabel_->setObjectName(QStringLiteral("totalWordCount"));
     sidebarLayout->addWidget(totalWordCountLabel_);
-    sidebarFooterLabel = new QLabel(QStringLiteral("Phiên bản 0.1.0"), sidebarFrame);
+    sidebarFooterLabel = new QLabel(QStringLiteral("Phiên bản 0.2.0"), sidebarFrame);
     sidebarFooterLabel->setObjectName(QStringLiteral("sidebarFooter"));
     sidebarLayout->addWidget(sidebarFooterLabel);
     mainLayout->addWidget(sidebarFrame);
@@ -194,17 +194,33 @@ void MainWindow::setTotalWordCount(int count) {
     totalWordCountLabel_->setText(QStringLiteral("Tổng cộng: %1 từ").arg(count));
 }
 
-void MainWindow::setWordDetail(const QString& title, const QString& definition) {
+void MainWindow::setWordDetail(const QString& title, const QString& definition,
+                               const QString& partOfSpeech, const QString& example,
+                               const QString& category) {
     if (title.isEmpty()) {
         wordDetailTextEdit->setHtml(QStringLiteral("<div style='color:#64748B; margin-top:26px; font-size:14px;'>Chọn một thuật ngữ trong danh sách để xem nghĩa tiếng Việt.</div>"));
         return;
     }
-    wordDetailTextEdit->setHtml(QStringLiteral(
+    QString html = QStringLiteral(
         "<div style='font-family:Segoe UI; color:#172B4D;'>"
-        "<h2 style='font-size:25px; margin-bottom:10px;'>%1</h2>"
+        "<h2 style='font-size:25px; margin-bottom:10px;'>%1</h2>")
+        .arg(title.toHtmlEscaped());
+    if (!partOfSpeech.isEmpty())
+        html += QStringLiteral("<p style='font-size:13px; color:#526783;'>%1</p>")
+                    .arg(partOfSpeech.toHtmlEscaped());
+    html += QStringLiteral(
         "<div style='font-size:12px; color:#64748B;'>NGHĨA TIẾNG VIỆT</div>"
-        "<p style='font-size:16px; line-height:1.5;'>%2</p></div>")
-        .arg(title.toHtmlEscaped(), definition.toHtmlEscaped()));
+        "<p style='font-size:16px; line-height:1.5;'>%1</p>")
+        .arg(definition.toHtmlEscaped());
+    if (!example.isEmpty())
+        html += QStringLiteral(
+            "<div style='font-size:12px; color:#64748B;'>VÍ DỤ TIẾNG ANH</div>"
+            "<p style='font-size:15px; line-height:1.5;'>%1</p>")
+            .arg(example.toHtmlEscaped());
+    if (!category.isEmpty())
+        html += QStringLiteral("<p style='font-size:13px; color:#526783;'>CHỦ ĐỀ · %1</p>")
+                    .arg(category.toHtmlEscaped());
+    wordDetailTextEdit->setHtml(html + QStringLiteral("</div>"));
 }
 
 QString MainWindow::selectedWord() const {
@@ -219,6 +235,11 @@ void MainWindow::setInteractionEnabled(bool enabled) {
     const bool selected = wordListWidget->currentItem() != nullptr;
     btnEdit->setEnabled(enabled && selected);
     btnDelete->setEnabled(enabled && selected);
+}
+
+void MainWindow::setActiveFilter(const QString& filter) {
+    for (auto* button : filterButtons_)
+        button->setChecked(button->property("filterKey").toString() == filter);
 }
 
 QVBoxLayout* MainWindow::getSearchContainerLayout() const { return searchContainerLayout; }

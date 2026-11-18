@@ -1,7 +1,7 @@
 # Tests
 
-No dictionary algorithms are implemented in v0.1.0, so there are no behavior tests yet.
-Add focused tests with each feature module, especially for bucket boundaries,
-linked-list deletion, duplicate words, UTF-8 meanings, and file errors.
+Configure with Qt 6 Widgets and a matching compiler, then run `ctest --test-dir build-debug --output-on-failure` or the Release equivalent. Qt widget tests use the offscreen platform plugin. Keep the matching Qt and MinGW `bin` directories on `PATH` on Windows.
 
-The Qt window currently requires a manual launch check in a Qt 6 environment.
+The suite covers core search, editing, storage, history, dialogs, main window, and controller behavior. `DictionaryV2` exercises legacy loading, version 2 save/load, escaped metadata, Unicode filenames, transactional failures, undo/redo, suggestions, and actual bundled seed loading. `AppControllerBoundary` also checks enriched entries and suggestion refresh after mutations.
+
+Run `python scripts/validate_seed.py` separately for deterministic seed counts, uniqueness, UTF-8, enrichment, category coverage, and retention of all original terms. The validator does not replace the C++ load test.

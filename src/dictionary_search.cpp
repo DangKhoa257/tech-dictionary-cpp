@@ -1,6 +1,7 @@
 #include "dictionary.h"
 
 #include <string>
+#include <algorithm>
 
 namespace {
 
@@ -118,7 +119,18 @@ bool equalsIgnoreCaseAscii(const std::string& left,
     return true;
 }
 
+std::string lowerAscii(std::string value) {
+    for (char& c : value) if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    return value;
+}
+
 }  // namespace
+
+bool isValidEntryMetadata(const std::string& value) {
+    std::string flattened = value;
+    for (char& c : flattened) if (c == '\t' || c == '\n' || c == '\r') c = ' ';
+    return isValidUtf8TsvField(flattened);
+}
 
 bool addWord(Dictionary& dictionary, const std::string& english,
              const std::string& vietnamese) {
@@ -194,4 +206,42 @@ const WordNode* findWord(const Dictionary& dictionary,
     }
 
     return nullptr;
+}
+
+bool addEntry(Dictionary& dictionary, const std::string& english,
+              const std::string& vietnamese, const std::string& partOfSpeech,
+              const std::string& example, const std::string& category) {
+    if (!isValidEntryMetadata(vietnamese) || vietnamese.empty() ||
+        !isValidEntryMetadata(partOfSpeech) || !isValidEntryMetadata(example) ||
+        !isValidEntryMetadata(category)) return false;
+    std::string meaning = vietnamese;
+    std::string part = partOfSpeech;
+    std::string sentence = example;
+    std::string topic = category;
+    if (!addWord(dictionary, english, isValidUtf8TsvField(vietnamese) ? vietnamese : "-")) return false;
+    WordNode* node = const_cast<WordNode*>(findWord(dictionary, english));
+    node->vietnamese.swap(meaning);
+    node->partOfSpeech.swap(part);
+    node->example.swap(sentence);
+    node->category.swap(topic);
+    return true;
+}
+
+std::vector<std::string> suggestWords(const Dictionary& dictionary,
+                                      const std::string& prefix, std::size_t limit) {
+    const std::string query = lowerAscii(trimWhitespace(prefix));
+    if (query.empty() || limit == 0 || hashWord(query) >= 26) return {};
+    std::vector<std::string> matches;
+    for (const WordNode* node = dictionary.buckets[hashWord(query)];
+         node != nullptr; node = node->next) {
+        if (lowerAscii(node->english).rfind(query, 0) == 0) matches.push_back(node->english);
+    }
+    std::sort(matches.begin(), matches.end(), [&](const auto& a, const auto& b) {
+        const bool aExact = lowerAscii(a) == query;
+        const bool bExact = lowerAscii(b) == query;
+        if (aExact != bExact) return aExact;
+        return lowerAscii(a) < lowerAscii(b);
+    });
+    if (matches.size() > limit) matches.resize(limit);
+    return matches;
 }

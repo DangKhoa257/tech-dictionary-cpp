@@ -9,6 +9,9 @@ struct WordNode {
     std::string english;
     std::string vietnamese;
     WordNode* next = nullptr;
+    std::string partOfSpeech;
+    std::string example;
+    std::string category;
 };
 
 // Bucket 0 holds A/a, bucket 25 holds Z/z. Each bucket is a singly linked list.
@@ -25,6 +28,10 @@ void clearDictionary(Dictionary& dictionary);
 
 // Insert one English word and Vietnamese meaning; return false for invalid or duplicate input.
 bool addWord(Dictionary& dictionary, const std::string& english, const std::string& vietnamese);
+bool addEntry(Dictionary& dictionary, const std::string& english, const std::string& vietnamese,
+              const std::string& partOfSpeech, const std::string& example,
+              const std::string& category);
+bool isValidEntryMetadata(const std::string& value);
 
 // Return a non-owning pointer to a matching node, or nullptr when absent.
 const WordNode* findWord(const Dictionary& dictionary, const std::string& english);
@@ -32,6 +39,11 @@ const WordNode* findWord(const Dictionary& dictionary, const std::string& englis
 // Change an existing word's meaning; return false when the word is absent.
 bool updateWordMeaning(Dictionary& dictionary, const std::string& english,
                        const std::string& vietnamese);
+bool updateEntry(Dictionary& dictionary, const std::string& english,
+                 const std::string& vietnamese, const std::string& partOfSpeech,
+                 const std::string& example, const std::string& category);
+std::vector<std::string> suggestWords(const Dictionary& dictionary,
+                                      const std::string& prefix, std::size_t limit = 8);
 
 // Remove a matching node and free its memory; return false when absent.
 bool deleteWord(Dictionary& dictionary, const std::string& english);
@@ -42,9 +54,9 @@ std::vector<const WordNode*> listBucket(const Dictionary& dictionary, std::size_
 // Return non-owning pointers to every node in bucket order.
 std::vector<const WordNode*> listAllWords(const Dictionary& dictionary);
 
-// Load UTF-8 entries from path; return false on I/O or format failure.
+// Load legacy or version 2 UTF-8 entries; return false on I/O or format failure.
 // The storage module will define the exact file format and failure behavior.
 bool loadDictionary(Dictionary& dictionary, const std::string& path);
 
-// Write UTF-8 entries to path; return false on I/O failure.
+// Write version 2 UTF-8 entries to path; return false on I/O failure.
 bool saveDictionary(const Dictionary& dictionary, const std::string& path);

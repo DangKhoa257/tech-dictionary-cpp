@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TechDictionary VERSION 0.1.0 LANGUAGES CXX)
+project(TechDictionary VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -151,4 +151,21 @@ if(BUILD_TESTING)
         target_compile_options(DictionaryEditTests PRIVATE /utf-8)
     endif()
     add_test(NAME DictionaryEdit COMMAND DictionaryEditTests)
+
+    add_executable(DictionaryV2Tests
+        tests/dictionary_v2_test.cpp
+        src/dictionary_core.cpp
+        src/dictionary_search.cpp
+        src/dictionary_edit.cpp
+        src/dictionary_history.cpp
+        src/dictionary_display.cpp
+        src/dictionary_storage.cpp
+    )
+    target_include_directories(DictionaryV2Tests PRIVATE include)
+    target_compile_definitions(DictionaryV2Tests PRIVATE
+        TECH_DICTIONARY_SEED_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary.txt")
+    if(MSVC)
+        target_compile_options(DictionaryV2Tests PRIVATE /utf-8)
+    endif()
+    add_test(NAME DictionaryV2 COMMAND DictionaryV2Tests)
 endif()

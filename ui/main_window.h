@@ -20,10 +20,13 @@ public:
     // Các hàm cho TV1 kết nối danh sách từ và hiển thị chi tiết
     void setWordList(const QStringList &words);
     void setTotalWordCount(int count);
-    void setWordDetail(const QString &title, const QString &definition);
+    void setWordDetail(const QString &title, const QString &definition,
+                       const QString &partOfSpeech = {}, const QString &example = {},
+                       const QString &category = {});
     // Empty when no word is selected. Controller enables requests after wiring.
     QString selectedWord() const;
     void setInteractionEnabled(bool enabled);
+    void setActiveFilter(const QString& filter);
 
     // Hàm lấy layout để TV1 nhúng SearchWidget của TV3
     QVBoxLayout* getSearchContainerLayout() const;

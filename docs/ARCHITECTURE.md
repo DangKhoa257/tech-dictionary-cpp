@@ -37,4 +37,10 @@ Repeat with `build-release` and `-DCMAKE_BUILD_TYPE=Release`. `AppControllerBoun
 
 ## Limits
 
-Search is exact and ASCII case insensitive for English keys. A term must start with A–Z; punctuation can follow. Invalid UTF-8 TSV is rejected. History is per session. The application has no in-app prefix/fuzzy search or import merge. TV2–TV6 retain ownership of their original implementations; TV1 owns this integration layer.
+English keys must start with A–Z; punctuation can follow. History is per session. There is no fuzzy search or import merge.
+
+## Version 2 extension
+
+TV1 extended the shared WordNode, DictionaryHistory snapshots, and storage contract to preserve part of speech, English example, and category. The original 26-bucket linked-list store remains intact. SearchWidget requests prefix suggestions from the controller on every text change; the controller scans only the matching bucket, sorts case-insensitively, limits to eight values, and returns copied strings. Selecting a suggestion performs an exact lookup and selects its list entry. A refresh after mutation or load recomputes suggestions, so Qt widgets hold no WordNode pointers.
+
+The bundled seed is version 2 TSV with an explicit header and five escaped fields. The original 288-term seed is preserved separately. Storage accepts legacy two-column UTF-8 TSV, then writes the version 2 format only when the user saves. Invalid versioned records reject the entire load, leaving the current dictionary untouched. Save still replaces through a validated sibling temporary file. Metadata participates in Undo/Redo snapshots and dirty-state comparison. TV2–TV6 retain attribution for their original modules; these V2 contract changes belong to TV1.

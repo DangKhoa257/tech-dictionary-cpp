@@ -112,10 +112,22 @@ ControllerResult AppController::searchWord(const QString& english) const {
     const WordNode* node = ::findWord(dictionary_, utf8(english));
     if (!node) return {ControllerStatus::NotFound, QStringLiteral("Không tìm thấy: %1").arg(english.trimmed()), {}};
     return {ControllerStatus::Success, QStringLiteral("Đã tìm thấy thuật ngữ."),
-            QString::fromUtf8(node->vietnamese.c_str())};
+            QString::fromUtf8(node->vietnamese.c_str()),
+            QString::fromUtf8(node->partOfSpeech.c_str()),
+            QString::fromUtf8(node->example.c_str()),
+            QString::fromUtf8(node->category.c_str())};
 }
 
-ControllerResult AppController::addWord(const QString& english, const QString& vietnamese) {
+QStringList AppController::suggestions(const QString& prefix) const {
+    QStringList result;
+    for (const auto& word : suggestWords(dictionary_, utf8(prefix.trimmed())))
+        result.append(QString::fromUtf8(word.c_str()));
+    return result;
+}
+
+ControllerResult AppController::addWord(const QString& english, const QString& vietnamese,
+                                        const QString& partOfSpeech, const QString& example,
+                                        const QString& category) {
     if (!validEnglish(english) || !validField(vietnamese))
         return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh và nghĩa tiếng Việt hợp lệ."));
     if (::findWord(dictionary_, utf8(english))) return invalid(QStringLiteral("Thuật ngữ này đã tồn tại."));
@@ -123,7 +135,8 @@ ControllerResult AppController::addWord(const QString& english, const QString& v
     bool historyRecorded = false;
     try {
         auto before = DictionaryHistory::capture(dictionary_);
-        if (!::addWord(dictionary_, utf8(english), utf8(vietnamese)))
+        if (!::addEntry(dictionary_, utf8(english), utf8(vietnamese),
+                        utf8(partOfSpeech), utf8(example), utf8(category)))
             return invalid(QStringLiteral("Thuật ngữ hoặc nghĩa không hợp lệ."));
         changed = true;
         history_.recordChange(std::move(before), DictionaryHistory::capture(dictionary_));
@@ -140,6 +153,17 @@ ControllerResult AppController::addWord(const QString& english, const QString& v
 }
 
 ControllerResult AppController::updateWord(const QString& english, const QString& vietnamese) {
+    const WordNode* original = ::findWord(dictionary_, utf8(english));
+    if (!original) return updateWord(english, vietnamese, {}, {}, {});
+    return updateWord(english, vietnamese,
+                      QString::fromUtf8(original->partOfSpeech.c_str()),
+                      QString::fromUtf8(original->example.c_str()),
+                      QString::fromUtf8(original->category.c_str()));
+}
+
+ControllerResult AppController::updateWord(const QString& english, const QString& vietnamese,
+                                           const QString& partOfSpeech, const QString& example,
+                                           const QString& category) {
     if (!validEnglish(english) || !validField(vietnamese))
         return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh và nghĩa tiếng Việt hợp lệ."));
     if (!::findWord(dictionary_, utf8(english))) return {ControllerStatus::NotFound, QStringLiteral("Không tìm thấy thuật ngữ."), {}};
@@ -147,7 +171,8 @@ ControllerResult AppController::updateWord(const QString& english, const QString
     bool changed = false;
     try {
         auto before = DictionaryHistory::capture(dictionary_);
-        if (!::updateWordMeaning(dictionary_, utf8(english), utf8(vietnamese)))
+        if (!::updateEntry(dictionary_, utf8(english), utf8(vietnamese),
+                           utf8(partOfSpeech), utf8(example), utf8(category)))
             return failed(QStringLiteral("Không thể sửa nghĩa."));
         changed = true;
         history_.recordChange(std::move(before), DictionaryHistory::capture(dictionary_));
@@ -276,16 +301,27 @@ ControllerResult AppController::redo() {
 void AppController::connectUi() {
     searchWidget_ = new SearchWidget(&mainWindow_);
     mainWindow_.getSearchContainerLayout()->addWidget(searchWidget_);
+    connect(searchWidget_, &SearchWidget::suggestionRequested, this,
+            [this](const QString& prefix) { searchWidget_->setSuggestions(suggestions(prefix)); });
     connect(searchWidget_, &SearchWidget::searchRequested, this, [this](const QString& term) {
         const auto result = searchWord(term);
-        if (result.status == ControllerStatus::Success) searchWidget_->showFoundResult(term, result.vietnamese);
+        if (result.status == ControllerStatus::Success) {
+            const WordNode* found = ::findWord(dictionary_, utf8(term));
+            currentFilter_ = QStringLiteral("All Words");
+            mainWindow_.setActiveFilter(currentFilter_);
+            refreshList(QString::fromUtf8(found->english.c_str()));
+            searchWidget_->hideSuggestions();
+            searchWidget_->showFoundResult(QString::fromUtf8(found->english.c_str()), result.vietnamese);
+        }
         else if (result.status == ControllerStatus::NotFound) searchWidget_->showNotFound(term);
         else searchWidget_->clearResult();
         showResult(result);
     });
     connect(&mainWindow_, &MainWindow::wordSelected, this, [this](const QString& term) {
         const auto result = searchWord(term);
-        mainWindow_.setWordDetail(result.status == ControllerStatus::Success ? term : QString(), result.vietnamese);
+        mainWindow_.setWordDetail(result.status == ControllerStatus::Success ? term : QString(),
+                                  result.vietnamese, result.partOfSpeech, result.example,
+                                  result.category);
     });
     connect(&mainWindow_, &MainWindow::filterRequested, this, [this](const QString& filter) {
         currentFilter_ = filter;
@@ -319,6 +355,8 @@ void AppController::connectUi() {
 
 void AppController::refreshList(const QString& select) {
     if (searchWidget_) searchWidget_->clearResult();
+    if (searchWidget_ && !searchWidget_->query().trimmed().isEmpty())
+        searchWidget_->setSuggestions(suggestions(searchWidget_->query()));
     const QString selected = select.isEmpty() ? mainWindow_.selectedWord() : select;
     QStringList words;
     std::vector<const WordNode*> nodes;
@@ -465,11 +503,17 @@ void AppController::openWordDialog(bool edit) {
     const QString term = mainWindow_.selectedWord();
     if (edit && term.isEmpty()) return;
     const auto existing = edit ? searchWord(term) : ControllerResult{};
-    auto* dialog = edit ? new WordDialog(WordDialog::Mode::Edit, term, existing.vietnamese, &mainWindow_)
+    auto* dialog = edit ? new WordDialog(WordDialog::Mode::Edit, term, existing.vietnamese,
+                                        existing.partOfSpeech, existing.example,
+                                        existing.category, &mainWindow_)
                         : new WordDialog(WordDialog::Mode::Add, &mainWindow_);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    connect(dialog, &WordDialog::saveRequested, this, [this, dialog, edit](const QString& english, const QString& vietnamese) {
-        const auto result = edit ? updateWord(english, vietnamese) : addWord(english, vietnamese);
+    connect(dialog, &WordDialog::richSaveRequested, this,
+            [this, dialog, edit](const QString& english, const QString& vietnamese,
+                                  const QString& partOfSpeech, const QString& example,
+                                  const QString& category) {
+        const auto result = edit ? updateWord(english, vietnamese, partOfSpeech, example, category)
+                                 : addWord(english, vietnamese, partOfSpeech, example, category);
         if (result.status == ControllerStatus::Success) {
             showResult(result);
             dialog->accept();

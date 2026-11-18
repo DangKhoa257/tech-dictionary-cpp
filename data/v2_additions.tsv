@@ -1,0 +1,300 @@
+Basic Computing	Address bus	bus địa chỉ	Noun phrase	The address bus identifies the memory location requested by the processor.
+Basic Computing	ALU	bộ số học và logic	Abbreviation	The ALU performs integer addition and logical comparisons.
+Basic Computing	BIOS	hệ thống vào ra cơ bản	Abbreviation	The BIOS initializes the hardware before the operating system starts.
+Basic Computing	Bootloader	bộ nạp khởi động	Noun	The bootloader loads the operating system kernel into memory.
+Basic Computing	Clock cycle	chu kỳ xung nhịp	Noun phrase	A processor can complete several operations during one clock cycle.
+Basic Computing	Core count	số lượng lõi xử lý	Noun phrase	The core count affects how many tasks can run at once.
+Basic Computing	Data bus	bus dữ liệu	Noun phrase	The data bus carries values between memory and the processor.
+Basic Computing	Device driver	trình điều khiển thiết bị	Noun phrase	Install the device driver before connecting the scanner.
+Basic Computing	Display adapter	bộ điều hợp hiển thị	Noun phrase	The display adapter sends image data to the monitor.
+Basic Computing	Flash memory	bộ nhớ flash	Noun phrase	The camera stores photos in flash memory.
+Basic Computing	Instruction set	tập lệnh	Noun phrase	The instruction set defines operations supported by a processor.
+Basic Computing	L1 cache	bộ nhớ đệm cấp một	Noun phrase	Frequently used instructions remain in the L1 cache.
+Basic Computing	Peripheral	thiết bị ngoại vi	Noun	A keyboard is a peripheral connected through USB.
+Basic Computing	Pixel density	mật độ điểm ảnh	Noun phrase	Higher pixel density makes small text look sharper.
+Basic Computing	Read-only memory	bộ nhớ chỉ đọc	Noun phrase	Firmware is often stored in read-only memory.
+Basic Computing	Register	thanh ghi	Noun	The register holds a value while the processor executes an instruction.
+Basic Computing	System bus	bus hệ thống	Noun phrase	The system bus connects the processor to main memory.
+Basic Computing	Thermal throttling	giảm xung nhịp do nhiệt	Noun phrase	Thermal throttling slowed the laptop during the stress test.
+Basic Computing	Touchscreen	màn hình cảm ứng	Noun	The touchscreen accepts input without a mouse.
+Basic Computing	USB controller	bộ điều khiển USB	Noun phrase	The USB controller manages transfers to connected devices.
+Programming	C++ standard library	thư viện chuẩn C++	Noun phrase	The C++ standard library provides containers and algorithms.
+Programming	Cast	phép ép kiểu	Noun	An explicit cast converts the integer to a floating-point value.
+Programming	Compilation unit	đơn vị biên dịch	Noun phrase	Each source file becomes a separate compilation unit.
+Programming	Constexpr	biểu thức hằng lúc biên dịch	Other / Technical term	Constexpr allows this value to be computed during compilation.
+Programming	Destructor	hàm hủy	Noun	The destructor releases the file handle when the object goes out of scope.
+Programming	Enum	kiểu liệt kê	Noun	An enum gives readable names to the possible states.
+Programming	Function template	mẫu hàm	Noun phrase	The function template works with both integers and strings.
+Programming	Include guard	bảo vệ tệp tiêu đề	Noun phrase	An include guard prevents duplicate declarations.
+Programming	Lambda expression	biểu thức lambda	Noun phrase	The lambda expression compares two records during sorting.
+Programming	Lvalue	giá trị trái	Other / Technical term	The assignment target must be an lvalue.
+Programming	Move semantics	ngữ nghĩa di chuyển	Noun phrase	Move semantics transfers ownership without copying the buffer.
+Programming	Namespace	không gian tên	Noun	The namespace prevents a collision between identical class names.
+Programming	Preprocessor	bộ tiền xử lý	Noun	The preprocessor expands macros before compilation.
+Programming	RAII	quản lý tài nguyên theo vòng đời đối tượng	Abbreviation	RAII closes the socket when its owner is destroyed.
+Programming	Reference	tham chiếu	Noun	The function receives the vector by reference.
+Programming	Rvalue	giá trị phải	Other / Technical term	A temporary object is commonly treated as an rvalue.
+Programming	Smart pointer	con trỏ thông minh	Noun phrase	A smart pointer releases allocated memory automatically.
+Programming	Template specialization	chuyên biệt hóa mẫu	Noun phrase	Template specialization changes behavior for a particular type.
+Programming	Undefined behavior	hành vi không xác định	Noun phrase	Reading past the end of an array causes undefined behavior.
+Programming	Value category	loại giá trị biểu thức	Noun phrase	The value category determines whether an expression can be moved.
+Object-Oriented Programming	Abstract class	lớp trừu tượng	Noun phrase	An abstract class defines a common interface for derived classes.
+Object-Oriented Programming	Base class	lớp cơ sở	Noun phrase	The base class declares the virtual method.
+Object-Oriented Programming	Composition	sự kết hợp đối tượng	Noun	Composition lets a car object contain an engine object.
+Object-Oriented Programming	Constructor	hàm tạo	Noun	The constructor initializes the object's fields.
+Object-Oriented Programming	Derived class	lớp dẫn xuất	Noun phrase	The derived class adds behavior to the base interface.
+Object-Oriented Programming	Dynamic dispatch	điều phối động	Noun phrase	Dynamic dispatch selects the overridden method at runtime.
+Object-Oriented Programming	Encapsulation	đóng gói	Noun	Encapsulation keeps internal state behind public methods.
+Object-Oriented Programming	Factory method	phương thức tạo đối tượng	Noun phrase	The factory method returns the appropriate parser instance.
+Object-Oriented Programming	Getter	phương thức lấy giá trị	Noun	A getter exposes the account balance without allowing direct changes.
+Object-Oriented Programming	Interface segregation	phân tách giao diện	Noun phrase	Interface segregation keeps clients from depending on unused methods.
+Object-Oriented Programming	Method overriding	ghi đè phương thức	Noun phrase	Method overriding gives the derived class a specialized response.
+Object-Oriented Programming	Multiple inheritance	đa kế thừa	Noun phrase	Multiple inheritance combines behavior from two base classes.
+Object-Oriented Programming	Object lifetime	vòng đời đối tượng	Noun phrase	The object lifetime ends when its scope closes.
+Object-Oriented Programming	Overload resolution	phân giải hàm quá tải	Noun phrase	Overload resolution chooses the best matching function signature.
+Object-Oriented Programming	Private member	thành viên riêng tư	Noun phrase	The private member cannot be modified directly by callers.
+Object-Oriented Programming	Protected member	thành viên được bảo vệ	Noun phrase	A derived class can access the protected member.
+Object-Oriented Programming	Pure virtual function	hàm ảo thuần túy	Noun phrase	A pure virtual function requires an implementation in concrete classes.
+Object-Oriented Programming	Setter	phương thức đặt giá trị	Noun	The setter validates the new temperature before storing it.
+Object-Oriented Programming	Virtual destructor	hàm hủy ảo	Noun phrase	A virtual destructor ensures the derived object is cleaned up.
+Object-Oriented Programming	Virtual method	phương thức ảo	Noun phrase	The virtual method runs the subclass implementation.
+Data Structures	Adjacency list	danh sách kề	Noun phrase	The adjacency list stores each vertex's neighbors.
+Data Structures	Adjacency matrix	ma trận kề	Noun phrase	An adjacency matrix uses a cell for every pair of vertices.
+Data Structures	AVL tree	cây AVL	Noun phrase	The AVL tree rotates nodes to remain balanced.
+Data Structures	Circular buffer	bộ đệm vòng	Noun phrase	The circular buffer reuses space after old samples are consumed.
+Data Structures	Deque	hàng đợi hai đầu	Noun	A deque supports insertion at both ends.
+Data Structures	Disjoint set	tập hợp rời nhau	Noun phrase	A disjoint set tracks which vertices share a component.
+Data Structures	Doubly linked list	danh sách liên kết đôi	Noun phrase	A doubly linked list supports traversal in either direction.
+Data Structures	Fenwick tree	cây Fenwick	Noun phrase	The Fenwick tree updates prefix sums efficiently.
+Data Structures	Hash collision	xung đột băm	Noun phrase	A hash collision places two keys in the same bucket.
+Data Structures	Hash function	hàm băm	Noun phrase	The hash function maps each key to a bucket index.
+Data Structures	Heap node	nút trong đống	Noun phrase	The heap node rises when its priority increases.
+Data Structures	Min heap	đống nhỏ nhất	Noun phrase	A min heap keeps the smallest value at its root.
+Data Structures	Priority queue	hàng đợi ưu tiên	Noun phrase	The priority queue processes urgent jobs first.
+Data Structures	Red-black tree	cây đỏ đen	Noun phrase	The red-black tree balances searches through color rules.
+Data Structures	Segment tree	cây đoạn	Noun phrase	The segment tree answers range minimum queries.
+Data Structures	Singly linked list	danh sách liên kết đơn	Noun phrase	A singly linked list stores one link per node.
+Data Structures	Sparse matrix	ma trận thưa	Noun phrase	A sparse matrix stores only nonzero values.
+Data Structures	Trie	cây tiền tố	Noun	A trie groups words by their shared prefixes.
+Data Structures	Union-find	cấu trúc hợp và tìm	Noun	Union-find detects whether two nodes belong to one component.
+Data Structures	Weighted graph	đồ thị có trọng số	Noun phrase	A weighted graph assigns a cost to each edge.
+Algorithms	A* search	thuật toán tìm kiếm A sao	Noun phrase	A* search uses a heuristic to guide the route search.
+Algorithms	Backtracking	quay lui	Noun	Backtracking explores choices and reverses invalid ones.
+Algorithms	Bellman-Ford algorithm	thuật toán Bellman-Ford	Noun phrase	The Bellman-Ford algorithm handles negative edge weights.
+Algorithms	Lower bound	vị trí đầu tiên không nhỏ hơn giá trị cần tìm	Noun phrase	A lower bound search finds the first element that is not less than the target.
+Algorithms	Dijkstra's algorithm	thuật toán Dijkstra	Noun phrase	Dijkstra's algorithm finds shortest paths with nonnegative weights.
+Algorithms	Divide and conquer	chia để trị	Noun phrase	Divide and conquer splits the problem into smaller pieces.
+Algorithms	Floyd-Warshall algorithm	thuật toán Floyd-Warshall	Noun phrase	The Floyd-Warshall algorithm computes shortest paths between all pairs.
+Algorithms	Heuristic	hàm đánh giá gần đúng	Noun	A heuristic estimates the remaining distance to the goal.
+Algorithms	Kruskal's algorithm	thuật toán Kruskal	Noun phrase	Kruskal's algorithm builds a minimum spanning tree from sorted edges.
+Algorithms	Memoization	ghi nhớ kết quả trung gian	Noun	Memoization avoids repeating the same recursive calculation.
+Algorithms	Minimum spanning tree	cây khung nhỏ nhất	Noun phrase	A minimum spanning tree connects all vertices at minimum total cost.
+Algorithms	O(n)	độ phức tạp tuyến tính	Other / Technical term	O(n) describes work that grows linearly with input size.
+Algorithms	O(log n)	độ phức tạp lôgarit	Other / Technical term	O(log n) often describes a balanced tree lookup.
+Algorithms	Partition step	bước phân hoạch	Noun phrase	The partition step separates values around a pivot.
+Algorithms	Prefix sum	tổng tiền tố	Noun phrase	A prefix sum answers range sum queries quickly.
+Algorithms	Pseudocode	mã giả	Noun	Pseudocode describes the algorithm without language syntax.
+Algorithms	Radix sort	sắp xếp cơ số	Noun phrase	Radix sort groups integers by successive digits.
+Algorithms	Stable sort	sắp xếp ổn định	Noun phrase	A stable sort preserves the order of equal keys.
+Algorithms	Topological sort	sắp xếp tô pô	Noun phrase	Topological sort orders tasks by their dependencies.
+Algorithms	Worst-case complexity	độ phức tạp trường hợp xấu nhất	Noun phrase	Worst-case complexity bounds the work for any valid input.
+Database	ACID	bốn tính chất giao dịch cơ sở dữ liệu	Abbreviation	ACID helps keep transactions reliable after failures.
+Database	Aggregate function	hàm tổng hợp	Noun phrase	An aggregate function calculates the average order value.
+Database	Candidate key	khóa ứng viên	Noun phrase	A candidate key uniquely identifies each row.
+Database	Columnar storage	lưu trữ theo cột	Noun phrase	Columnar storage speeds up scans of selected fields.
+Database	Commit	xác nhận giao dịch	Verb	Commit the transaction only after all checks pass.
+Database	Composite key	khóa ghép	Noun phrase	A composite key combines the order and product identifiers.
+Database	Database index	chỉ mục cơ sở dữ liệu	Noun phrase	The database index speeds up customer searches.
+Database	Foreign key constraint	ràng buộc khóa ngoại	Noun phrase	The foreign key constraint prevents orphaned order rows.
+Database	Full-text search	tìm kiếm toàn văn	Noun phrase	Full-text search locates documents containing the phrase.
+Database	Isolation level	mức cô lập giao dịch	Noun phrase	The isolation level controls which concurrent changes are visible.
+Database	Join	phép nối bảng	Noun	The join combines orders with their customer records.
+Database	Query planner	bộ lập kế hoạch truy vấn	Noun phrase	The query planner chooses an index for the filter.
+Database	Replication	nhân bản dữ liệu	Noun	Replication copies changes to a second database server.
+Database	Rollback	hoàn tác giao dịch	Verb	Rollback the transaction if validation fails.
+Database	Row lock	khóa hàng	Noun phrase	A row lock prevents conflicting updates to one account.
+Database	SQL injection	tiêm lệnh SQL	Noun phrase	Parameterized queries prevent SQL injection.
+Database	Table scan	quét bảng	Noun phrase	A table scan reads every record in the table.
+Database	Unique constraint	ràng buộc duy nhất	Noun phrase	A unique constraint rejects duplicate email addresses.
+Database	Write-ahead log	nhật ký ghi trước	Noun phrase	The write-ahead log records changes before data pages are updated.
+Database	Query parameter	tham số truy vấn	Noun phrase	Bind the search value as a query parameter.
+Networking	ARP	giao thức phân giải địa chỉ	Abbreviation	ARP maps a local IP address to a hardware address.
+Networking	BGP	giao thức định tuyến cổng biên	Abbreviation	BGP exchanges routing information between autonomous systems.
+Networking	CIDR	định tuyến liên miền không phân lớp	Abbreviation	CIDR notation expresses the network prefix length.
+Networking	Congestion control	điều khiển tắc nghẽn	Noun phrase	Congestion control slows transmission when the network is overloaded.
+Networking	DHCP	giao thức cấp phát địa chỉ động	Abbreviation	DHCP assigns an IP address to the new laptop.
+Networking	Ethernet frame	khung Ethernet	Noun phrase	The Ethernet frame includes source and destination MAC addresses.
+Networking	Handshake	quá trình bắt tay kết nối	Noun	The handshake establishes a TCP connection.
+Networking	Hop count	số chặng mạng	Noun phrase	The hop count increases at each router on the path.
+Networking	IPv6	giao thức Internet phiên bản sáu	Abbreviation	IPv6 provides a much larger address space.
+Networking	Load balancer	bộ cân bằng tải	Noun phrase	The load balancer distributes requests across servers.
+Networking	NAT	biên dịch địa chỉ mạng	Abbreviation	NAT maps private addresses to a public address.
+Networking	Network interface card	card giao tiếp mạng	Noun phrase	The network interface card connects the desktop to Ethernet.
+Networking	Packet loss	mất gói tin	Noun phrase	Packet loss caused the video call to freeze.
+Networking	Ping	lệnh kiểm tra kết nối	Noun	Ping confirmed that the server was reachable.
+Networking	Routing table	bảng định tuyến	Noun phrase	The routing table selects the next hop for a packet.
+Networking	TLS	giao thức bảo mật tầng truyền tải	Abbreviation	TLS protects traffic between the browser and server.
+Networking	UDP	giao thức gói dữ liệu người dùng	Abbreviation	UDP sends datagrams without establishing a connection.
+Networking	VLAN	mạng cục bộ ảo	Abbreviation	A VLAN separates guest traffic from office traffic.
+Networking	WebSocket	giao thức kết nối hai chiều trên web	Noun	WebSocket keeps a bidirectional connection open for chat.
+Networking	Zero trust network	mạng không tin cậy mặc định	Noun phrase	A zero trust network verifies each access request.
+Operating Systems	Context switch	chuyển ngữ cảnh	Noun phrase	A context switch saves one thread's state before another runs.
+Operating Systems	Daemon	tiến trình nền	Noun	The daemon monitors disk usage in the background.
+Operating Systems	File descriptor	bộ mô tả tệp	Noun phrase	The process closes the file descriptor after reading.
+Operating Systems	Filesystem	hệ thống tệp	Noun	The filesystem organizes directories and files on the disk.
+Operating Systems	Interrupt	ngắt	Noun	An interrupt tells the processor that input is ready.
+Operating Systems	Mutex	khóa loại trừ lẫn nhau	Noun	The mutex protects the shared counter.
+Operating Systems	Page fault	lỗi trang bộ nhớ	Noun phrase	A page fault occurs when the requested page is not in memory.
+Operating Systems	Paging	phân trang	Noun	Paging moves fixed-size memory blocks between storage and RAM.
+Operating Systems	Process	tiến trình	Noun	Each process has its own virtual address space.
+Operating Systems	Process scheduler	bộ lập lịch tiến trình	Noun phrase	The process scheduler decides which task runs next.
+Operating Systems	Race condition	tình trạng tranh chấp	Noun phrase	A race condition makes the result depend on execution order.
+Operating Systems	Semaphore	đèn hiệu đồng bộ	Noun	A semaphore limits the number of concurrent workers.
+Operating Systems	Shared memory	bộ nhớ dùng chung	Noun phrase	Two processes exchange data through shared memory.
+Operating Systems	Signal handler	hàm xử lý tín hiệu	Noun phrase	The signal handler requests a graceful shutdown.
+Operating Systems	Swap space	không gian hoán đổi	Noun phrase	The system used swap space when RAM became full.
+Operating Systems	System call	lời gọi hệ thống	Noun phrase	A system call asks the kernel to open a file.
+Operating Systems	Virtual address	địa chỉ ảo	Noun phrase	The virtual address is translated to a physical memory location.
+Operating Systems	Virtual memory	bộ nhớ ảo	Noun phrase	Virtual memory gives each process an isolated address space.
+Operating Systems	Zombie process	tiến trình zombie	Noun phrase	The parent must collect the zombie process's exit status.
+Operating Systems	Thread pool	bể luồng	Noun phrase	The thread pool reuses workers for incoming requests.
+Cybersecurity	Attack surface	bề mặt tấn công	Noun phrase	Disabling unused services reduces the attack surface.
+Cybersecurity	Brute-force attack	tấn công vét cạn	Noun phrase	Rate limits slow a brute-force attack on passwords.
+Cybersecurity	Certificate authority	tổ chức phát hành chứng chỉ	Noun phrase	The certificate authority signs the server certificate.
+Cybersecurity	Credential stuffing	nhồi thông tin đăng nhập	Noun phrase	Credential stuffing reuses leaked passwords across websites.
+Cybersecurity	Cross-site scripting	tấn công chèn mã trên trang web	Noun phrase	Output escaping reduces cross-site scripting risks.
+Cybersecurity	Data breach	rò rỉ dữ liệu	Noun phrase	The company notified users after the data breach.
+Cybersecurity	Defense in depth	phòng thủ nhiều lớp	Noun phrase	Defense in depth combines access controls with monitoring.
+Cybersecurity	Hashing	băm dữ liệu	Noun	Hashing turns a password into a fixed-length digest.
+Cybersecurity	Least privilege	đặc quyền tối thiểu	Noun phrase	Least privilege limits the service account to read access.
+Cybersecurity	Man-in-the-middle attack	tấn công xen giữa	Noun phrase	Certificate validation blocks a man-in-the-middle attack.
+Cybersecurity	Multi-factor authentication	xác thực đa yếu tố	Noun phrase	Multi-factor authentication requires a second proof of identity.
+Cybersecurity	Penetration test	kiểm thử xâm nhập	Noun phrase	The penetration test found an exposed admin panel.
+Cybersecurity	Ransomware	mã độc tống tiền	Noun	Ransomware encrypted files on the compromised workstation.
+Cybersecurity	Salt	giá trị ngẫu nhiên thêm vào mật khẩu	Noun	A unique salt makes precomputed password attacks harder.
+Cybersecurity	Security patch	bản vá bảo mật	Noun phrase	Install the security patch before exposing the server.
+Cybersecurity	Session hijacking	chiếm đoạt phiên	Noun phrase	Secure cookies help prevent session hijacking.
+Cybersecurity	Threat model	mô hình mối đe dọa	Noun phrase	The threat model identifies likely attacks on the login flow.
+Cybersecurity	Vulnerability	lỗ hổng bảo mật	Noun	The scanner reported a vulnerability in the web framework.
+Cybersecurity	WAF	tường lửa ứng dụng web	Abbreviation	The WAF filters suspicious HTTP requests.
+Cybersecurity	Zero-day exploit	mã khai thác lỗ hổng chưa có bản vá	Noun phrase	A zero-day exploit targeted the outdated browser.
+Artificial Intelligence	Agentic workflow	quy trình tác tử tự động	Noun phrase	An agentic workflow plans and executes several tool calls.
+Artificial Intelligence	Attention mechanism	cơ chế chú ý	Noun phrase	The attention mechanism weighs relevant tokens in the sentence.
+Artificial Intelligence	Beam search	tìm kiếm chùm	Noun phrase	Beam search keeps several candidate outputs at each step.
+Artificial Intelligence	Chain of thought	chuỗi suy luận	Noun phrase	The model's chain of thought can contain intermediate steps.
+Artificial Intelligence	Context window	cửa sổ ngữ cảnh	Noun phrase	The context window limits how much text the model can process.
+Artificial Intelligence	Embedding	biểu diễn nhúng	Noun	The embedding represents a document as a numeric vector.
+Artificial Intelligence	Hallucination	nội dung bịa đặt của mô hình	Noun	A hallucination can cite a source that does not exist.
+Artificial Intelligence	Inference	quá trình suy luận mô hình	Noun	Inference generates an answer from a trained model.
+Artificial Intelligence	Knowledge graph	đồ thị tri thức	Noun phrase	The knowledge graph links entities and their relationships.
+Artificial Intelligence	Language model	mô hình ngôn ngữ	Noun phrase	The language model predicts the next token in a sequence.
+Artificial Intelligence	Multimodal model	mô hình đa phương thức	Noun phrase	A multimodal model can analyze text and images together.
+Artificial Intelligence	Prompt injection	tấn công chèn chỉ dẫn vào đầu vào	Noun phrase	Prompt injection can hide malicious instructions in a web page.
+Artificial Intelligence	Reasoning model	mô hình suy luận	Noun phrase	The reasoning model checks intermediate steps before answering.
+Artificial Intelligence	Retrieval augmented generation	sinh nội dung tăng cường truy xuất	Noun phrase	Retrieval augmented generation grounds answers in retrieved documents.
+Artificial Intelligence	Semantic search	tìm kiếm ngữ nghĩa	Noun phrase	Semantic search finds related documents without exact keywords.
+Artificial Intelligence	Speech recognition	nhận dạng tiếng nói	Noun phrase	Speech recognition converts the recording into text.
+Artificial Intelligence	System prompt	chỉ dẫn hệ thống	Noun phrase	The system prompt defines the assistant's operating rules.
+Artificial Intelligence	Text generation	sinh văn bản	Noun phrase	Text generation creates a draft from the user's outline.
+Artificial Intelligence	Tokenization	phân tách thành đơn vị token	Noun	Tokenization splits the sentence into model input units.
+Artificial Intelligence	Tool calling	gọi công cụ từ mô hình	Noun phrase	Tool calling lets the assistant request a database lookup.
+Machine Learning	Batch size	kích thước lô huấn luyện	Noun phrase	A larger batch size uses more GPU memory.
+Machine Learning	Cross-validation	kiểm định chéo	Noun	Cross-validation estimates performance across several data splits.
+Machine Learning	Decision tree	cây quyết định	Noun phrase	The decision tree divides samples by feature values.
+Machine Learning	Dropout	kỹ thuật bỏ ngẫu nhiên nơron	Noun	Dropout reduces overfitting during neural network training.
+Machine Learning	Epoch	vòng huấn luyện	Noun	One epoch processes the entire training dataset.
+Machine Learning	Feature engineering	thiết kế đặc trưng	Noun phrase	Feature engineering turns timestamps into useful time features.
+Machine Learning	Fine-tuning	tinh chỉnh mô hình	Noun	Fine-tuning adapts a pretrained model to medical text.
+Machine Learning	Gradient descent	hạ dốc gradient	Noun phrase	Gradient descent updates parameters to reduce loss.
+Machine Learning	Hyperparameter	siêu tham số	Noun	The learning rate is a hyperparameter set before training.
+Machine Learning	Learning rate	tốc độ học	Noun phrase	A high learning rate can make training unstable.
+Machine Learning	Loss function	hàm mất mát	Noun phrase	The loss function measures prediction error.
+Machine Learning	Model checkpoint	bản lưu trạng thái mô hình	Noun phrase	The model checkpoint preserves weights after each epoch.
+Machine Learning	Optimizer	bộ tối ưu hóa	Noun	The optimizer adjusts weights using computed gradients.
+Machine Learning	Regularization	chính quy hóa	Noun	Regularization discourages overly complex models.
+Machine Learning	Supervised learning	học có giám sát	Noun phrase	Supervised learning uses labeled examples for training.
+Machine Learning	Transformer	kiến trúc Transformer	Noun	The Transformer processes token relationships with attention.
+Machine Learning	Unsupervised learning	học không giám sát	Noun phrase	Unsupervised learning groups data without target labels.
+Machine Learning	Validation set	tập kiểm định	Noun phrase	The validation set helps choose model settings.
+Machine Learning	Weight decay	suy giảm trọng số	Noun phrase	Weight decay discourages large model parameters.
+Machine Learning	XGBoost	thuật toán tăng cường độ dốc XGBoost	Other / Technical term	XGBoost trained a strong classifier on tabular data.
+Data Science	Bayesian inference	suy luận Bayes	Noun phrase	Bayesian inference updates a probability after new evidence.
+Data Science	Confidence interval	khoảng tin cậy	Noun phrase	The confidence interval describes uncertainty around the estimate.
+Data Science	Correlation	mối tương quan	Noun	Correlation does not by itself establish causation.
+Data Science	Data cleaning	làm sạch dữ liệu	Noun phrase	Data cleaning removed duplicate records before analysis.
+Data Science	Dataframe	bảng dữ liệu có nhãn	Noun	The dataframe stores columns with names and types.
+Data Science	Distribution	phân phối dữ liệu	Noun	The distribution shows how response times vary.
+Data Science	Exploratory data analysis	phân tích dữ liệu khám phá	Noun phrase	Exploratory data analysis revealed an unexpected outlier.
+Data Science	Hypothesis test	kiểm định giả thuyết	Noun phrase	A hypothesis test assessed whether the groups differed.
+Data Science	Median	trung vị	Noun	The median remained stable despite an extreme value.
+Data Science	Missing value	giá trị thiếu	Noun phrase	The missing value was marked before computing the average.
+Data Science	Outlier	giá trị ngoại lai	Noun	The outlier came from a faulty temperature sensor.
+Data Science	P-value	giá trị p	Noun	The p-value was computed under the null hypothesis.
+Data Science	Percentile	phân vị	Noun	The 95th percentile summarizes slow request times.
+Data Science	Sampling bias	thiên lệch lấy mẫu	Noun phrase	Sampling bias appeared because only active users replied.
+Data Science	Standard deviation	độ lệch chuẩn	Noun phrase	The standard deviation measures spread around the mean.
+Data Science	Statistical power	lực thống kê	Noun phrase	Statistical power improves with a larger sample.
+Data Science	Time series	chuỗi thời gian	Noun phrase	The time series shows daily traffic over six months.
+Data Science	Variance	phương sai	Noun	The variance increased after the system change.
+Data Science	Z-score	điểm chuẩn hóa z	Noun	A z-score expresses distance from the mean in standard deviations.
+Data Science	Confusion matrix	ma trận nhầm lẫn	Noun phrase	The confusion matrix shows each prediction outcome.
+Software Engineering	Acceptance criteria	tiêu chí chấp nhận	Noun phrase	The acceptance criteria define when the feature is complete.
+Software Engineering	Code review	rà soát mã nguồn	Noun phrase	Code review caught an error before the release.
+Software Engineering	Commit hash	mã băm của bản ghi Git	Noun phrase	The commit hash identifies the exact source revision.
+Software Engineering	Continuous delivery	chuyển giao phần mềm liên tục	Noun phrase	Continuous delivery keeps each build ready for deployment.
+Software Engineering	Dependency injection	tiêm phụ thuộc	Noun phrase	Dependency injection makes the service easier to test.
+Software Engineering	Feature branch	nhánh phát triển tính năng	Noun phrase	The developer opened a feature branch for the search update.
+Software Engineering	Integration test	kiểm thử tích hợp	Noun phrase	The integration test verifies the controller and storage together.
+Software Engineering	Issue tracker	hệ thống theo dõi vấn đề	Noun phrase	The issue tracker records defects and planned work.
+Software Engineering	Merge conflict	xung đột hợp nhất	Noun phrase	The merge conflict occurred because both branches changed one line.
+Software Engineering	Observability	khả năng quan sát hệ thống	Noun	Observability helped diagnose the slow request path.
+Software Engineering	Peer review	đánh giá đồng cấp	Noun phrase	Peer review improved the design before implementation.
+Software Engineering	Refactoring	tái cấu trúc mã	Noun	Refactoring simplified the parser without changing its behavior.
+Software Engineering	Release candidate	bản ứng viên phát hành	Noun phrase	The release candidate passed all regression tests.
+Software Engineering	Revert commit	bản ghi đảo ngược thay đổi	Noun phrase	A revert commit safely undid the faulty change.
+Software Engineering	Semantic versioning	đánh số phiên bản theo ngữ nghĩa	Noun phrase	Semantic versioning communicates compatibility changes.
+Software Engineering	Sprint	chu kỳ phát triển ngắn	Noun	The team planned the login feature for the next sprint.
+Software Engineering	Technical debt	nợ kỹ thuật	Noun phrase	Technical debt grew when temporary fixes became permanent.
+Software Engineering	Test coverage	mức độ bao phủ kiểm thử	Noun phrase	Test coverage showed that error paths needed more checks.
+Software Engineering	Traceability	khả năng truy vết	Noun	Traceability links each requirement to its test case.
+Software Engineering	Working tree	cây làm việc Git	Noun phrase	The working tree contains edits that have not been committed.
+Cloud Computing	Availability zone	vùng sẵn sàng	Noun phrase	The service runs in two availability zones for resilience.
+Cloud Computing	Autoscaling	tự động mở rộng tài nguyên	Noun	Autoscaling adds instances when traffic rises.
+Cloud Computing	Cloud region	vùng địa lý đám mây	Noun phrase	The cloud region was chosen near the users.
+Cloud Computing	Cold start	độ trễ khởi tạo ban đầu	Noun phrase	A cold start delayed the first serverless request.
+Cloud Computing	Container image	ảnh vùng chứa	Noun phrase	The container image packages the app and its dependencies.
+Cloud Computing	Cost allocation	phân bổ chi phí	Noun phrase	Cost allocation assigns compute spending to each team.
+Cloud Computing	Edge computing	điện toán biên	Noun phrase	Edge computing processes sensor data near the device.
+Cloud Computing	Elasticity	khả năng co giãn tài nguyên	Noun	Elasticity lets capacity follow changing demand.
+Cloud Computing	Infrastructure as code	hạ tầng dưới dạng mã	Noun phrase	Infrastructure as code recreates the test environment reliably.
+Cloud Computing	Kubernetes	điều phối vùng chứa Kubernetes	Other / Technical term	Kubernetes schedules containers across cluster nodes.
+Cloud Computing	Object storage	lưu trữ đối tượng	Noun phrase	Object storage holds uploaded images and backups.
+Cloud Computing	Orchestration	điều phối tài nguyên	Noun	Orchestration restarts failed containers automatically.
+Cloud Computing	Provisioning	cấp phát tài nguyên	Noun	Provisioning created a new database instance for testing.
+Cloud Computing	SaaS	phần mềm dưới dạng dịch vụ	Abbreviation	The company uses a SaaS tool for project management.
+Cloud Computing	Serverless function	hàm không máy chủ	Noun phrase	A serverless function resizes each uploaded image.
+Cloud Computing	Service level agreement	thỏa thuận mức dịch vụ	Noun phrase	The service level agreement specifies the uptime target.
+Cloud Computing	Shared responsibility model	mô hình trách nhiệm chung	Noun phrase	The shared responsibility model separates provider and customer duties.
+Cloud Computing	Virtual private cloud	đám mây riêng ảo	Noun phrase	The virtual private cloud isolates application resources.
+Cloud Computing	Workload	khối lượng công việc	Noun	The workload moved to a larger instance during peak traffic.
+Cloud Computing	Multi-tenancy	kiến trúc đa bên thuê	Noun	Multi-tenancy lets customers share infrastructure with isolation.
+Web Development	ARIA label	nhãn hỗ trợ truy cập ARIA	Noun phrase	The ARIA label gives the icon button an accessible name.
+Web Development	Browser cache	bộ nhớ đệm trình duyệt	Noun phrase	The browser cache reused the stylesheet on the second visit.
+Web Development	CORS	chia sẻ tài nguyên khác nguồn	Abbreviation	CORS controls which origins can read the API response.
+Web Development	CSS selector	bộ chọn CSS	Noun phrase	The CSS selector targets buttons inside the toolbar.
+Web Development	DOM	mô hình đối tượng tài liệu	Abbreviation	The DOM represents the page as a tree of nodes.
+Web Development	Event listener	bộ lắng nghe sự kiện	Noun phrase	The event listener reacts when the user clicks Save.
+Web Development	Fetch API	giao diện truy xuất tài nguyên Fetch	Noun phrase	The Fetch API requests JSON from the server.
+Web Development	Form validation	xác thực biểu mẫu	Noun phrase	Form validation rejects an invalid email address.
+Web Development	HTTP cookie	cookie HTTP	Noun phrase	The HTTP cookie stores the session identifier.
+Web Development	Hydration	kích hoạt tương tác phía trình duyệt	Noun	Hydration attaches event handlers to rendered HTML.
+Web Development	Media query	truy vấn phương tiện CSS	Noun phrase	A media query changes the layout on narrow screens.
+Web Development	Progressive web app	ứng dụng web tiến bộ	Noun phrase	The progressive web app works offline after installation.
+Web Development	Same-origin policy	chính sách cùng nguồn	Noun phrase	The same-origin policy restricts cross-site script access.
+Web Development	Semantic HTML	HTML có ngữ nghĩa	Noun phrase	Semantic HTML helps screen readers identify headings.
+Web Development	Service worker	tiến trình nền của ứng dụng web	Noun phrase	The service worker caches assets for offline use.
+Web Development	Single-page application	ứng dụng một trang	Noun phrase	The single-page application updates content without full reloads.
+Web Development	Viewport	vùng hiển thị trình duyệt	Noun	The viewport becomes narrower on a phone.
+Web Development	Web component	thành phần web tái sử dụng	Noun phrase	The web component encapsulates its own markup and behavior.
+Web Development	Web performance	hiệu năng web	Noun phrase	Web performance improved after image compression.
+Web Development	Web accessibility	khả năng truy cập web	Noun phrase	Web accessibility allows keyboard users to complete the form.

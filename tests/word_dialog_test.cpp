@@ -2,6 +2,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QComboBox>
+#include <QTextEdit>
 
 #include <iostream>
 
@@ -35,6 +37,24 @@ int main(int argc, char* argv[]) {
     fields[1]->setText(QStringLiteral("Thuật toán"));
     buttons[0]->click();
     check(requests == 1 && add.isVisible(), "valid save request keeps dialog open");
+    auto* example = add.findChild<QTextEdit*>(QStringLiteral("exampleInput"));
+    const auto categories = add.findChildren<QComboBox*>();
+    int richRequests = 0;
+    QObject::connect(&add, &WordDialog::richSaveRequested, &add,
+                     [&richRequests](const QString&, const QString&, const QString& part,
+                                     const QString& sentence, const QString& category) {
+        if (part == QStringLiteral("Noun") &&
+            sentence == QStringLiteral("The algorithm sorts the array.") &&
+            category == QStringLiteral("Algorithms")) ++richRequests;
+    });
+    check(example && categories.size() == 2, "enriched fields exist");
+    if (example && categories.size() == 2) {
+        categories[0]->setCurrentText(QStringLiteral("Noun"));
+        categories[1]->setCurrentText(QStringLiteral("Algorithms"));
+        example->setPlainText(QStringLiteral("The algorithm sorts the array."));
+        buttons[0]->click();
+        check(richRequests == 1, "enriched save signal includes metadata");
+    }
     add.showSaveError(QStringLiteral("Save failed"));
     bool feedbackVisible = false;
     for (QLabel* label : add.findChildren<QLabel*>()) {

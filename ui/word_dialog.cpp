@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QComboBox>
+#include <QTextEdit>
 
 namespace {
 
@@ -20,6 +22,19 @@ bool hasInvalidText(const QString& text) {
         } else if (QChar::isLowSurrogate(value)) {
             return true;
         }
+    }
+    return false;
+}
+
+bool hasInvalidExample(const QString& text) {
+    for (qsizetype i = 0; i < text.size(); ++i) {
+        const ushort value = text.at(i).unicode();
+        if ((value < 0x20 && value != '\t' && value != '\n' && value != '\r') || value == 0x7F)
+            return true;
+        if (QChar::isHighSurrogate(value)) {
+            if (++i >= text.size() || !QChar::isLowSurrogate(text.at(i).unicode()))
+                return true;
+        } else if (QChar::isLowSurrogate(value)) return true;
     }
     return false;
 }
@@ -53,12 +68,21 @@ WordDialog::WordDialog(Mode mode, const QString& english, const QString& vietnam
     }
 }
 
+WordDialog::WordDialog(Mode mode, const QString& english, const QString& vietnamese,
+                       const QString& partOfSpeech, const QString& example,
+                       const QString& category, QWidget* parent)
+    : WordDialog(mode, english, vietnamese, parent) {
+    partOfSpeechEdit_->setCurrentText(partOfSpeech);
+    exampleEdit_->setPlainText(example);
+    categoryEdit_->setCurrentText(category);
+}
+
 void WordDialog::setupUi() {
     setWindowTitle(mode_ == Mode::Add ? QStringLiteral("Thêm từ")
                                       : QStringLiteral("Sửa nghĩa từ"));
     setModal(true);
     setMinimumWidth(440);
-    resize(460, 210);
+    resize(500, 350);
 
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(24, 22, 24, 22);
@@ -68,6 +92,23 @@ void WordDialog::setupUi() {
 
     englishEdit_ = new QLineEdit(this);
     vietnameseEdit_ = new QLineEdit(this);
+    partOfSpeechEdit_ = new QComboBox(this);
+    partOfSpeechEdit_->addItems({QStringLiteral(""), QStringLiteral("Noun"),
+        QStringLiteral("Verb"), QStringLiteral("Adjective"), QStringLiteral("Adverb"),
+        QStringLiteral("Noun phrase"), QStringLiteral("Verb phrase"),
+        QStringLiteral("Abbreviation"), QStringLiteral("Other / Technical term")});
+    exampleEdit_ = new QTextEdit(this);
+    exampleEdit_->setObjectName(QStringLiteral("exampleInput"));
+    exampleEdit_->setMaximumHeight(76);
+    categoryEdit_ = new QComboBox(this);
+    categoryEdit_->addItems({QStringLiteral(""), QStringLiteral("Basic Computing"),
+        QStringLiteral("Programming"), QStringLiteral("Object-Oriented Programming"),
+        QStringLiteral("Data Structures"), QStringLiteral("Algorithms"),
+        QStringLiteral("Database"), QStringLiteral("Networking"),
+        QStringLiteral("Operating Systems"), QStringLiteral("Cybersecurity"),
+        QStringLiteral("Artificial Intelligence"), QStringLiteral("Machine Learning"),
+        QStringLiteral("Data Science"), QStringLiteral("Software Engineering"),
+        QStringLiteral("Cloud Computing"), QStringLiteral("Web Development")});
     validationLabel_ = new QLabel(this);
     saveButton_ = new QPushButton(QStringLiteral("Lưu"), this);
     auto* cancelButton = new QPushButton(QStringLiteral("Hủy"), this);
@@ -81,6 +122,9 @@ void WordDialog::setupUi() {
 
     formLayout->addRow(QStringLiteral("Từ tiếng Anh:"), englishEdit_);
     formLayout->addRow(QStringLiteral("Nghĩa tiếng Việt:"), vietnameseEdit_);
+    formLayout->addRow(QStringLiteral("Từ loại:"), partOfSpeechEdit_);
+    formLayout->addRow(QStringLiteral("Ví dụ tiếng Anh:"), exampleEdit_);
+    formLayout->addRow(QStringLiteral("Chủ đề:"), categoryEdit_);
 
     auto* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch();
@@ -107,6 +151,10 @@ QString WordDialog::vietnameseMeaning() const {
     return vietnameseEdit_->text().trimmed();
 }
 
+QString WordDialog::partOfSpeech() const { return partOfSpeechEdit_->currentText(); }
+QString WordDialog::example() const { return exampleEdit_->toPlainText().trimmed(); }
+QString WordDialog::category() const { return categoryEdit_->currentText(); }
+
 void WordDialog::setValidationMessage(const QString& message) {
     validationLabel_->setText(message);
 }
@@ -116,7 +164,8 @@ void WordDialog::showSaveError(const QString& message) {
 }
 
 void WordDialog::handleSave() {
-    if (hasInvalidText(englishEdit_->text()) || hasInvalidText(vietnameseEdit_->text())) {
+    if (hasInvalidText(englishEdit_->text()) || hasInvalidText(vietnameseEdit_->text()) ||
+        hasInvalidExample(exampleEdit_->toPlainText())) {
         setValidationMessage(QStringLiteral("Không dùng ký tự điều khiển hoặc văn bản không hợp lệ."));
         return;
     }
@@ -145,5 +194,6 @@ void WordDialog::handleSave() {
     }
 
     setValidationMessage({});
+    emit richSaveRequested(english, vietnamese, partOfSpeech(), example(), category());
     emit saveRequested(english, vietnamese);
 }

@@ -1,0 +1,288 @@
+Algorithm	Thuật toán
+Application	Ứng dụng
+Array	Mảng
+Artificial Intelligence	Trí tuệ nhân tạo
+Assembly Language	Ngôn ngữ hợp ngữ
+Attribute	Thuộc tính
+Authentication	Xác thực
+Automation	Tự động hóa
+Backup	Sao lưu
+Bandwidth	Băng thông
+Binary	Nhị phân
+Binary Search	Tìm kiếm nhị phân
+Binary Tree	Cây nhị phân
+Bit	Bit
+Boolean	Kiểu logic
+Bug	Lỗi phần mềm
+Byte	Byte
+Cache	Bộ nhớ đệm
+Class	Lớp
+Cloud Computing	Điện toán đám mây
+Code	Mã nguồn
+Compiler	Trình biên dịch
+Computer	Máy tính
+Computer Network	Mạng máy tính
+Constant	Hằng số
+CPU	Bộ xử lý trung tâm
+Cybersecurity	An ninh mạng
+Data	Dữ liệu
+Data Analysis	Phân tích dữ liệu
+Data Mining	Khai phá dữ liệu
+Data Science	Khoa học dữ liệu
+Data Structure	Cấu trúc dữ liệu
+Database	Cơ sở dữ liệu
+Database Management System	Hệ quản trị cơ sở dữ liệu
+Debugging	Gỡ lỗi
+Default	Mặc định
+Delete	Xóa
+Deployment	Triển khai
+Digital	Kỹ thuật số
+DNS	Hệ thống tên miền
+Download	Tải xuống
+Encryption	Mã hóa
+Exception	Ngoại lệ
+Execution	Thực thi
+Expression	Biểu thức
+Extension	Phần mở rộng
+File	Tệp
+Firewall	Tường lửa
+Framework	Khung phát triển
+Function	Hàm
+Gateway	Cổng mạng
+Git	Hệ thống quản lý phiên bản Git
+GPU	Bộ xử lý đồ họa
+Graph	Đồ thị
+GUI	Giao diện đồ họa người dùng
+Hardware	Phần cứng
+Hash Table	Bảng băm
+Heap	Đống
+Host	Máy chủ lưu trữ
+HTML	Ngôn ngữ đánh dấu siêu văn bản
+HTTP	Giao thức truyền tải siêu văn bản
+IDE	Môi trường phát triển tích hợp
+Index	Chỉ mục
+Inheritance	Tính kế thừa
+Input	Đầu vào
+Instance	Thể hiện đối tượng
+Integer	Số nguyên
+Interface	Giao diện
+Internet	Mạng Internet
+IP Address	Địa chỉ IP
+Iteration	Vòng lặp
+Java	Ngôn ngữ Java
+JavaScript	Ngôn ngữ JavaScript
+Kernel	Nhân hệ điều hành
+Key	Khóa
+Keyword	Từ khóa
+LAN	Mạng cục bộ
+Library	Thư viện
+Linked List	Danh sách liên kết
+Linux	Hệ điều hành Linux
+Load	Tải
+Loop	Vòng lặp
+Machine Learning	Học máy
+Mainboard	Bo mạch chủ
+Memory	Bộ nhớ
+Method	Phương thức
+Model	Mô hình
+Module	Mô-đun
+Multithreading	Đa luồng
+Network	Mạng
+Node	Nút
+Normalization	Chuẩn hóa
+Null	Giá trị rỗng
+Number	Số
+Object	Đối tượng
+Object-Oriented Programming	Lập trình hướng đối tượng
+Operating System	Hệ điều hành
+Optimization	Tối ưu hóa
+Output	Đầu ra
+Packet	Gói tin
+Parameter	Tham số
+Password	Mật khẩu
+Pointer	Con trỏ
+Polymorphism	Tính đa hình
+Port	Cổng
+Processor	Bộ xử lý
+Program	Chương trình
+Programming Language	Ngôn ngữ lập trình
+Protocol	Giao thức
+Python	Ngôn ngữ Python
+Query	Truy vấn
+Queue	Hàng đợi
+RAM	Bộ nhớ truy cập ngẫu nhiên
+Recursion	Đệ quy
+Repository	Kho lưu trữ mã nguồn
+Resolution	Độ phân giải
+Router	Bộ định tuyến
+Runtime	Thời gian chạy
+Scalar	Đại lượng vô hướng
+Schema	Lược đồ dữ liệu
+search	Tìm kiếm
+Server	Máy chủ
+Software	Phần mềm
+Sorting	Sắp xếp
+Source Code	Mã nguồn
+SQL	Ngôn ngữ truy vấn có cấu trúc
+Stack	Ngăn xếp
+Statement	Câu lệnh
+String	Chuỗi ký tự
+Structure	Cấu trúc
+Syntax	Cú pháp
+System	Hệ thống
+TCP	Giao thức điều khiển truyền vận
+Thread	Luồng
+Token	Mã thông báo
+Topology	Cấu trúc mạng
+Tree	Cây
+Type	Kiểu dữ liệu
+UML	Ngôn ngữ mô hình hóa thống nhất
+Unicode	Bộ mã ký tự Unicode
+Unit Test	Kiểm thử đơn vị
+Update	Cập nhật
+Upload	Tải lên
+URL	Địa chỉ tài nguyên
+Variable	Biến
+Vector	Vectơ
+Version	Phiên bản
+Virtual Machine	Máy ảo
+VPN	Mạng riêng ảo
+WAN	Mạng diện rộng
+Web Browser	Trình duyệt web
+Website	Trang web
+Wi-Fi	Mạng không dây Wi-Fi
+Windows	Hệ điều hành Windows
+XML	Ngôn ngữ đánh dấu mở rộng
+XOR	Phép XOR
+YAML	Định dạng dữ liệu YAML
+Zero-Day	Lỗ hổng chưa có bản vá
+Access Control	Kiểm soát truy cập
+Agile	Phương pháp phát triển linh hoạt
+API	Giao diện lập trình ứng dụng
+Asynchronous	Bất đồng bộ
+Big Data	Dữ liệu lớn
+Blockchain	Chuỗi khối
+Cloud Storage	Lưu trữ đám mây
+Concurrency	Tính đồng thời
+Container	Bộ chứa
+Data Warehouse	Kho dữ liệu
+Deep Learning	Học sâu
+Encryption Key	Khóa mã hóa
+Front-end	Phía giao diện người dùng
+Back-end	Phía máy chủ
+Full Stack	Phát triển toàn diện cả front-end và back-end
+Neural Network	Mạng nơ-ron
+Natural Language Processing	Xử lý ngôn ngữ tự nhiên
+Computer Vision	Thị giác máy tính
+Open Source	Mã nguồn mở
+Overfitting	Quá khớp
+Underfitting	Chưa khớp
+Regression	Hồi quy
+Classification	Phân loại
+Training Data	Dữ liệu huấn luyện
+Testing Data	Dữ liệu kiểm thử
+Feature	Đặc trưng
+Label	Nhãn
+Accuracy	Độ chính xác
+Precision	Độ chuẩn xác
+Recall	Độ bao phủ
+Data Pipeline	Luồng xử lý dữ liệu
+ETL	Trích xuất, chuyển đổi và tải dữ liệu
+NoSQL	Cơ sở dữ liệu NoSQL
+Relational Database	Cơ sở dữ liệu quan hệ
+Primary Key	Khóa chính
+Foreign Key	Khóa ngoại
+Transaction	Giao dịch
+Stored Procedure	Thủ tục lưu trữ
+View	Khung nhìn
+Indexing	Đánh chỉ mục
+Deadlock	Bế tắc
+Memory Leak	Rò rỉ bộ nhớ
+Garbage Collection	Thu gom rác
+API Endpoint	Điểm cuối API
+REST	Kiểu kiến trúc REST
+JSON	Định dạng JSON
+Authentication Token	Mã xác thực
+Two-Factor Authentication	Xác thực hai yếu tố
+Malware	Phần mềm độc hại
+Phishing	Lừa đảo trực tuyến
+Latency	Độ trễ
+Throughput	Thông lượng
+Virtualization	Ảo hóa
+DevOps	Phát triển và vận hành
+Continuous Integration	Tích hợp liên tục
+Continuous Deployment	Triển khai liên tục
+Version Control	Quản lý phiên bản
+Merge	Hợp nhất
+Branch	Nhánh
+Pull Request	Yêu cầu hợp nhất mã
+Test Case	Ca kiểm thử
+Software Testing	Kiểm thử phần mềm
+User Interface	Giao diện người dùng
+User Experience	Trải nghiệm người dùng
+Responsive Design	Thiết kế tương thích nhiều màn hình
+Accessibility	Khả năng tiếp cận
+Cloud	Điện toán đám mây
+Data Visualization	Trực quan hóa dữ liệu
+Dashboard	Bảng điều khiển
+Spreadsheet	Bảng tính
+Compiler Optimization	Tối ưu trình biên dịch
+Source File	Tệp mã nguồn
+Header File	Tệp tiêu đề
+Build	Biên dịch và xây dựng chương trình
+Debug	Gỡ lỗi
+Command Line	Dòng lệnh
+Terminal	Cửa sổ dòng lệnh
+Operating System Kernel	Nhân hệ điều hành
+Firmware	Phần mềm nhúng
+Embedded System	Hệ thống nhúng
+Sensor	Cảm biến
+Robotics	Robot học
+Internet of Things	Internet vạn vật
+IoT	Internet vạn vật
+Simulation	Mô phỏng
+Algorithm Complexity	Độ phức tạp thuật toán
+Time Complexity	Độ phức tạp thời gian
+Space Complexity	Độ phức tạp bộ nhớ
+Big O Notation	Ký hiệu Big O
+Linear Search	Tìm kiếm tuyến tính
+Binary Search Tree	Cây tìm kiếm nhị phân
+Sorting Algorithm	Thuật toán sắp xếp
+Bubble Sort	Sắp xếp nổi bọt
+Insertion Sort	Sắp xếp chèn
+Selection Sort	Sắp xếp chọn
+Quick Sort	Sắp xếp nhanh
+Merge Sort	Sắp xếp trộn
+Graph Traversal	Duyệt đồ thị
+Breadth-First Search	Tìm kiếm theo chiều rộng
+Depth-First Search	Tìm kiếm theo chiều sâu
+Dynamic Programming	Quy hoạch động
+Greedy Algorithm	Thuật toán tham lam
+Artificial Neural Network	Mạng nơ-ron nhân tạo
+Prompt	Câu lệnh đầu vào cho AI
+Large Language Model	Mô hình ngôn ngữ lớn
+Generative AI	Trí tuệ nhân tạo tạo sinh
+Computer Architecture	Kiến trúc máy tính
+Cache Memory	Bộ nhớ cache
+Hard Disk Drive	Ổ đĩa cứng
+Solid State Drive	Ổ cứng thể rắn
+Graphics Processing Unit	Bộ xử lý đồ họa
+Central Processing Unit	Bộ xử lý trung tâm
+Motherboard	Bo mạch chủ
+Power Supply	Bộ nguồn
+Localhost	Máy chủ cục bộ
+Socket	Ổ cắm/kết nối socket
+Client	Máy khách
+Peer-to-Peer	Mạng ngang hàng
+Data Packet	Gói dữ liệu
+Subnet	Mạng con
+Subnet Mask	Mặt nạ mạng con
+MAC Address	Địa chỉ MAC
+Domain Name	Tên miền
+Cloud Computing Service	Dịch vụ điện toán đám mây
+Data Integrity	Tính toàn vẹn dữ liệu
+Data Backup	Sao lưu dữ liệu
+Data Recovery	Khôi phục dữ liệu
+Encryption Algorithm	Thuật toán mã hóa
+Digital Signature	Chữ ký số
+OpenAI	Tên riêng thương hiệu/công nghệ OpenAI
