@@ -13,7 +13,7 @@ ctest --test-dir build-debug --output-on-failure
 ./build-debug/TechDictionary.exe
 ```
 
-For Release, use `build-release` and `-DCMAKE_BUILD_TYPE=Release`. Adjust the Qt path to your installed version. Qt 6 Widgets is required; configuration stops if it is missing. To deploy outside a Qt-enabled shell, use Qt's `windeployqt` and retain the `data/dictionary.txt` directory beside the executable.
+For Release, use `build-release` and `-DCMAKE_BUILD_TYPE=Release`. Adjust the Qt path to your installed version. Qt 6 Widgets is required; configuration stops if it is missing. A direct executable launch needs the matching Qt and MinGW `bin` directories on `PATH`. For a standalone test copy, place `TechDictionary.exe` and `data/dictionary.txt` together in a new directory, then run the matching kit's `windeployqt --release --compiler-runtime --dir <directory> <directory>/TechDictionary.exe`. This copies Qt DLLs, the Windows platform plugin and the compiler runtime beside the test executable; it does not change system directories.
 
 ## Using the application
 

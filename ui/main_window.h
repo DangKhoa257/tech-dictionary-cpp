@@ -19,6 +19,7 @@ public:
 
     // Các hàm cho TV1 kết nối danh sách từ và hiển thị chi tiết
     void setWordList(const QStringList &words);
+    void setTotalWordCount(int count);
     void setWordDetail(const QString &title, const QString &definition);
     // Empty when no word is selected. Controller enables requests after wiring.
     QString selectedWord() const;
@@ -58,6 +59,9 @@ private:
     QLabel *headingLabel;
     QLabel *descriptionLabel;
     QLabel *sidebarFooterLabel;
+    QLabel *totalWordCountLabel_;
+    QLabel *visibleCountLabel_;
+    QLabel *emptyStateLabel_;
 
     QListWidget *wordListWidget;
     QTextEdit *wordDetailTextEdit;

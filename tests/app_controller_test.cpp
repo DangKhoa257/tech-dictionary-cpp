@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
         }
         controller.window().show();
-        auto* openAction = actionNamed(controller.window(), QStringLiteral("&Open…"));
+        auto* openAction = actionNamed(controller.window(), QStringLiteral("&Mở…"));
         expect(openAction != nullptr, "Open menu action exists");
         if (openAction) {
             QTimer::singleShot(0, [] {
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
             expect(box != nullptr, "corrupt startup offers recovery");
             if (box) {
                 for (auto* button : box->buttons())
-                    if (button->text() == QStringLiteral("Load bundled dictionary")) button->click();
+                    if (button->text() == QStringLiteral("Nạp dữ liệu mẫu")) button->click();
             }
             QTimer::singleShot(0, &application, &QCoreApplication::quit);
         });
@@ -286,7 +286,7 @@ int main(int argc, char* argv[]) {
             expect(box != nullptr, "recovery offered without seed");
             if (box) {
                 for (auto* button : box->buttons())
-                    if (button->text() == QStringLiteral("Start empty")) button->click();
+                    if (button->text() == QStringLiteral("Bắt đầu rỗng")) button->click();
             }
             QTimer::singleShot(0, &application, &QCoreApplication::quit);
         });
@@ -312,7 +312,7 @@ int main(int argc, char* argv[]) {
             });
             if (box) {
                 for (auto* button : box->buttons())
-                    if (button->text() == QStringLiteral("Open another file…")) button->click();
+                    if (button->text() == QStringLiteral("Mở tệp khác…")) button->click();
             }
         });
         expect(controller.run() == 0, "open another file during recovery");
@@ -333,8 +333,8 @@ int main(int argc, char* argv[]) {
     const QString saveB = temporary.filePath(QStringLiteral("save-b.txt"));
     {
         FaultySaveController controller(application);
-        auto* undoAction = actionNamed(controller.window(), QStringLiteral("&Undo"));
-        auto* redoAction = actionNamed(controller.window(), QStringLiteral("&Redo"));
+        auto* undoAction = actionNamed(controller.window(), QStringLiteral("&Hoàn tác"));
+        auto* redoAction = actionNamed(controller.window(), QStringLiteral("&Làm lại"));
         expect(undoAction && redoAction && !undoAction->isEnabled() && !redoAction->isEnabled(),
                "history actions initially disabled");
         expect(controller.addWord(QStringLiteral("Alpha"), QStringLiteral("một")).status == ControllerStatus::Success,
@@ -400,7 +400,7 @@ int main(int argc, char* argv[]) {
         expect(controller.deleteWord(QStringLiteral("Gamma")).status == ControllerStatus::Success,
                "delete after new branch");
         expect(controller.window().selectedWord().isEmpty() && detail &&
-               detail->toPlainText().contains(QStringLiteral("Select a word")),
+               detail->toPlainText().contains(QStringLiteral("Chọn một thuật ngữ")),
                "delete clears stale selection and detail");
     }
 
@@ -437,7 +437,7 @@ int main(int argc, char* argv[]) {
         expect(controller.loadFromFile(saveA).status == ControllerStatus::Success, "load for Open Discard");
         expect(controller.addWord(QStringLiteral("DiscardOnOpen"), QStringLiteral("tạm")).status == ControllerStatus::Success,
                "dirty before Open Discard");
-        auto* open = actionNamed(controller.window(), QStringLiteral("&Open…"));
+        auto* open = actionNamed(controller.window(), QStringLiteral("&Mở…"));
         expect(open != nullptr, "Open action for Discard");
         if (open) {
             queueOpenChoice(QMessageBox::Discard, saveB);
@@ -453,7 +453,7 @@ int main(int argc, char* argv[]) {
         expect(controller.loadFromFile(saveA).status == ControllerStatus::Success, "load for Open Save");
         expect(controller.addWord(QStringLiteral("SaveOnOpen"), QStringLiteral("đã lưu")).status == ControllerStatus::Success,
                "dirty before Open Save");
-        auto* open = actionNamed(controller.window(), QStringLiteral("&Open…"));
+        auto* open = actionNamed(controller.window(), QStringLiteral("&Mở…"));
         expect(open != nullptr, "Open action for Save");
         if (open) {
             queueOpenChoice(QMessageBox::Save, saveB);

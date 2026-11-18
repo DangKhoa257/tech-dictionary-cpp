@@ -57,20 +57,27 @@ void WordDialog::setupUi() {
     setWindowTitle(mode_ == Mode::Add ? QStringLiteral("Thêm từ")
                                       : QStringLiteral("Sửa nghĩa từ"));
     setModal(true);
-    resize(420, 180);
+    setMinimumWidth(440);
+    resize(460, 210);
 
     auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 22, 24, 22);
+    mainLayout->setSpacing(16);
     auto* formLayout = new QFormLayout();
+    formLayout->setSpacing(12);
 
     englishEdit_ = new QLineEdit(this);
     vietnameseEdit_ = new QLineEdit(this);
     validationLabel_ = new QLabel(this);
     saveButton_ = new QPushButton(QStringLiteral("Lưu"), this);
     auto* cancelButton = new QPushButton(QStringLiteral("Hủy"), this);
+    saveButton_->setObjectName(QStringLiteral("primaryButton"));
+    cancelButton->setObjectName(QStringLiteral("secondaryButton"));
 
     englishEdit_->setPlaceholderText(QStringLiteral("Nhập từ tiếng Anh"));
     vietnameseEdit_->setPlaceholderText(QStringLiteral("Nhập nghĩa tiếng Việt"));
     validationLabel_->setWordWrap(true);
+    validationLabel_->setStyleSheet(QStringLiteral("color:#B42318; font-size:12px;"));
 
     formLayout->addRow(QStringLiteral("Từ tiếng Anh:"), englishEdit_);
     formLayout->addRow(QStringLiteral("Nghĩa tiếng Việt:"), vietnameseEdit_);

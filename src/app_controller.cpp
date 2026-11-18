@@ -108,101 +108,101 @@ int AppController::run() {
 }
 
 ControllerResult AppController::searchWord(const QString& english) const {
-    if (!validEnglish(english)) return invalid(QStringLiteral("Enter an English term beginning with A-Z."));
+    if (!validEnglish(english)) return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh bắt đầu bằng A–Z."));
     const WordNode* node = ::findWord(dictionary_, utf8(english));
-    if (!node) return {ControllerStatus::NotFound, QStringLiteral("Term not found: %1").arg(english.trimmed()), {}};
-    return {ControllerStatus::Success, QStringLiteral("Term found."),
+    if (!node) return {ControllerStatus::NotFound, QStringLiteral("Không tìm thấy: %1").arg(english.trimmed()), {}};
+    return {ControllerStatus::Success, QStringLiteral("Đã tìm thấy thuật ngữ."),
             QString::fromUtf8(node->vietnamese.c_str())};
 }
 
 ControllerResult AppController::addWord(const QString& english, const QString& vietnamese) {
     if (!validEnglish(english) || !validField(vietnamese))
-        return invalid(QStringLiteral("Enter a valid English term and Vietnamese meaning."));
-    if (::findWord(dictionary_, utf8(english))) return invalid(QStringLiteral("Term already exists."));
+        return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh và nghĩa tiếng Việt hợp lệ."));
+    if (::findWord(dictionary_, utf8(english))) return invalid(QStringLiteral("Thuật ngữ này đã tồn tại."));
     bool changed = false;
     bool historyRecorded = false;
     try {
         auto before = DictionaryHistory::capture(dictionary_);
         if (!::addWord(dictionary_, utf8(english), utf8(vietnamese)))
-            return invalid(QStringLiteral("Invalid term or meaning."));
+            return invalid(QStringLiteral("Thuật ngữ hoặc nghĩa không hợp lệ."));
         changed = true;
         history_.recordChange(std::move(before), DictionaryHistory::capture(dictionary_));
         historyRecorded = true;
     } catch (const std::exception&) {
-        if (!changed) return failed(QStringLiteral("Could not add term."));
+        if (!changed) return failed(QStringLiteral("Không thể thêm thuật ngữ."));
         history_.clear();
     }
     try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
     catch (const std::exception&) { dirty_ = true; }
     refreshList(english.trimmed());
     refreshActions();
-    return success(historyRecorded ? QStringLiteral("Term added.") : QStringLiteral("Term added; Undo history unavailable."));
+    return success(historyRecorded ? QStringLiteral("Đã thêm thuật ngữ.") : QStringLiteral("Đã thêm từ; lịch sử Hoàn tác không khả dụng."));
 }
 
 ControllerResult AppController::updateWord(const QString& english, const QString& vietnamese) {
     if (!validEnglish(english) || !validField(vietnamese))
-        return invalid(QStringLiteral("Enter a valid English term and Vietnamese meaning."));
-    if (!::findWord(dictionary_, utf8(english))) return {ControllerStatus::NotFound, QStringLiteral("Term not found."), {}};
+        return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh và nghĩa tiếng Việt hợp lệ."));
+    if (!::findWord(dictionary_, utf8(english))) return {ControllerStatus::NotFound, QStringLiteral("Không tìm thấy thuật ngữ."), {}};
     bool historyRecorded = false;
     bool changed = false;
     try {
         auto before = DictionaryHistory::capture(dictionary_);
         if (!::updateWordMeaning(dictionary_, utf8(english), utf8(vietnamese)))
-            return failed(QStringLiteral("Could not update term."));
+            return failed(QStringLiteral("Không thể sửa nghĩa."));
         changed = true;
         history_.recordChange(std::move(before), DictionaryHistory::capture(dictionary_));
         historyRecorded = true;
     } catch (const std::exception&) {
-        if (!changed) return failed(QStringLiteral("Could not update term."));
+        if (!changed) return failed(QStringLiteral("Không thể sửa nghĩa."));
         history_.clear();
     }
     try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
     catch (const std::exception&) { dirty_ = true; }
     refreshList(english.trimmed());
     refreshActions();
-    return success(historyRecorded ? QStringLiteral("Meaning updated.") :
-                                     QStringLiteral("Meaning updated; Undo history unavailable."));
+    return success(historyRecorded ? QStringLiteral("Đã sửa nghĩa.") :
+                                     QStringLiteral("Đã sửa nghĩa; lịch sử Hoàn tác không khả dụng."));
 }
 
 ControllerResult AppController::deleteWord(const QString& english) {
-    if (!validEnglish(english)) return invalid(QStringLiteral("Enter a valid English term."));
-    if (!::findWord(dictionary_, utf8(english))) return {ControllerStatus::NotFound, QStringLiteral("Term not found."), {}};
+    if (!validEnglish(english)) return invalid(QStringLiteral("Nhập thuật ngữ tiếng Anh hợp lệ."));
+    if (!::findWord(dictionary_, utf8(english))) return {ControllerStatus::NotFound, QStringLiteral("Không tìm thấy thuật ngữ."), {}};
     bool historyRecorded = false;
     bool changed = false;
     try {
         auto before = DictionaryHistory::capture(dictionary_);
-        if (!::deleteWord(dictionary_, utf8(english))) return failed(QStringLiteral("Could not delete term."));
+        if (!::deleteWord(dictionary_, utf8(english))) return failed(QStringLiteral("Không thể xóa thuật ngữ."));
         changed = true;
         history_.recordChange(std::move(before), DictionaryHistory::capture(dictionary_));
         historyRecorded = true;
     } catch (const std::exception&) {
-        if (!changed) return failed(QStringLiteral("Could not delete term."));
+        if (!changed) return failed(QStringLiteral("Không thể xóa thuật ngữ."));
         history_.clear();
     }
     try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
     catch (const std::exception&) { dirty_ = true; }
     refreshList();
     refreshActions();
-    return success(historyRecorded ? QStringLiteral("Term deleted.") :
-                                     QStringLiteral("Term deleted; Undo history unavailable."));
+    return success(historyRecorded ? QStringLiteral("Đã xóa thuật ngữ.") :
+                                     QStringLiteral("Đã xóa từ; lịch sử Hoàn tác không khả dụng."));
 }
 
 ControllerResult AppController::loadFromFile(const QString& path) {
-    if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Choose a dictionary file to open."));
+    if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Chọn tệp từ điển để mở."));
     DictionaryGuard incoming;
     DictionaryHistory::Snapshot incomingSnapshot;
     QString nextPath;
     bool restoresProtected = false;
     try {
         if (!::loadDictionary(incoming.value, utf8(path)))
-            return failed(QStringLiteral("Could not open dictionary. Check the path and UTF-8 TSV format."));
+            return failed(QStringLiteral("Không thể mở từ điển. Kiểm tra đường dẫn và định dạng TSV UTF-8."));
         incomingSnapshot = DictionaryHistory::capture(incoming.value);
         nextPath = samePath(path, seedPath())
             ? (protectedStartupPath_.isEmpty() ? editableDefaultPath() : QString{})
             : QFileInfo(path).absoluteFilePath();
         restoresProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
     } catch (const std::exception&) {
-        return failed(QStringLiteral("Could not open dictionary. Existing data was kept."));
+        return failed(QStringLiteral("Không thể mở từ điển. Dữ liệu hiện tại được giữ nguyên."));
     }
     for (std::size_t i = 0; i < 26; ++i) std::swap(dictionary_.buckets[i], incoming.value.buckets[i]);
     history_.clear();
@@ -212,7 +212,7 @@ ControllerResult AppController::loadFromFile(const QString& path) {
     dirty_ = false;
     refreshList();
     refreshActions();
-    return success(QStringLiteral("Dictionary opened."));
+    return success(QStringLiteral("Đã mở từ điển."));
 }
 
 ControllerResult AppController::saveToFile(const QString& path) {
@@ -220,24 +220,24 @@ ControllerResult AppController::saveToFile(const QString& path) {
 }
 
 ControllerResult AppController::saveToFileImpl(const QString& path, bool allowProtectedOverwrite) {
-    if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Choose a dictionary file to save."));
-    if (samePath(path, seedPath())) return invalid(QStringLiteral("The shipped dictionary is a read-only seed. Choose another file."));
+    if (path.trimmed().isEmpty()) return invalid(QStringLiteral("Chọn tệp để lưu từ điển."));
+    if (samePath(path, seedPath())) return invalid(QStringLiteral("Không thể ghi đè dữ liệu mẫu. Hãy chọn tệp khác."));
     const bool replacesProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
     if (replacesProtected && !allowProtectedOverwrite)
-        return invalid(QStringLiteral("This unreadable startup file is protected. Use Save As and explicitly confirm replacement."));
+        return invalid(QStringLiteral("Tệp cá nhân bị lỗi đang được bảo vệ. Dùng Lưu thành và xác nhận thay thế."));
     DictionaryHistory::Snapshot prepared;
     QString nextPath;
     try {
         prepared = snapshotForSave();
         nextPath = QFileInfo(path).absoluteFilePath();
     } catch (const std::exception&) {
-        return failed(QStringLiteral("Could not prepare the save. No file was written."));
+        return failed(QStringLiteral("Không thể chuẩn bị lưu. Chưa ghi tệp."));
     }
     try {
         if (!::saveDictionary(dictionary_, utf8(path)))
-            return failed(QStringLiteral("Could not save dictionary. Check the destination permissions."));
+            return failed(QStringLiteral("Không thể lưu từ điển. Kiểm tra quyền ghi của thư mục."));
     } catch (const std::exception&) {
-        return failed(QStringLiteral("Could not save dictionary. Check the destination permissions."));
+        return failed(QStringLiteral("Không thể lưu từ điển. Kiểm tra quyền ghi của thư mục."));
     }
     static_assert(std::is_nothrow_swappable<DictionaryHistory::Snapshot>::value,
                   "Committing a saved snapshot must not throw after disk write");
@@ -246,7 +246,7 @@ ControllerResult AppController::saveToFileImpl(const QString& path, bool allowPr
     if (replacesProtected) protectedStartupPath_.clear();
     dirty_ = false;
     refreshActions();
-    return success(QStringLiteral("Dictionary saved."));
+    return success(QStringLiteral("Đã lưu từ điển."));
 }
 
 DictionaryHistory::Snapshot AppController::snapshotForSave() const {
@@ -254,23 +254,23 @@ DictionaryHistory::Snapshot AppController::snapshotForSave() const {
 }
 
 ControllerResult AppController::undo() {
-    if (!history_.canUndo()) return {ControllerStatus::NotFound, QStringLiteral("Nothing to undo."), {}};
-    if (!history_.undo(dictionary_)) return failed(QStringLiteral("Could not undo change."));
+    if (!history_.canUndo()) return {ControllerStatus::NotFound, QStringLiteral("Không có thao tác để hoàn tác."), {}};
+    if (!history_.undo(dictionary_)) return failed(QStringLiteral("Không thể hoàn tác."));
     try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
     catch (const std::exception&) { dirty_ = true; }
     refreshList();
     refreshActions();
-    return success(QStringLiteral("Change undone."));
+    return success(QStringLiteral("Đã hoàn tác."));
 }
 
 ControllerResult AppController::redo() {
-    if (!history_.canRedo()) return {ControllerStatus::NotFound, QStringLiteral("Nothing to redo."), {}};
-    if (!history_.redo(dictionary_)) return failed(QStringLiteral("Could not redo change."));
+    if (!history_.canRedo()) return {ControllerStatus::NotFound, QStringLiteral("Không có thao tác để làm lại."), {}};
+    if (!history_.redo(dictionary_)) return failed(QStringLiteral("Không thể làm lại."));
     try { dirty_ = DictionaryHistory::capture(dictionary_) != savedSnapshot_; }
     catch (const std::exception&) { dirty_ = true; }
     refreshList();
     refreshActions();
-    return success(QStringLiteral("Change redone."));
+    return success(QStringLiteral("Đã làm lại."));
 }
 
 void AppController::connectUi() {
@@ -295,24 +295,24 @@ void AppController::connectUi() {
     connect(&mainWindow_, &MainWindow::editWordRequested, this, [this] { openWordDialog(true); });
     connect(&mainWindow_, &MainWindow::deleteWordRequested, this, [this] { deleteSelectedWord(); });
 
-    auto* fileMenu = mainWindow_.menuBar()->addMenu(QStringLiteral("&File"));
-    auto* openAction = fileMenu->addAction(QStringLiteral("&Open…"));
+    auto* fileMenu = mainWindow_.menuBar()->addMenu(QStringLiteral("&Tệp"));
+    auto* openAction = fileMenu->addAction(QStringLiteral("&Mở…"));
     openAction->setShortcut(QKeySequence::Open);
     connect(openAction, &QAction::triggered, this, [this] { openFile(); });
-    auto* saveAction = fileMenu->addAction(QStringLiteral("&Save"));
+    auto* saveAction = fileMenu->addAction(QStringLiteral("&Lưu"));
     saveAction->setShortcut(QKeySequence::Save);
     connect(saveAction, &QAction::triggered, this, [this] { saveFile(false); });
-    auto* saveAsAction = fileMenu->addAction(QStringLiteral("Save &As…"));
+    auto* saveAsAction = fileMenu->addAction(QStringLiteral("Lưu &thành…"));
     connect(saveAsAction, &QAction::triggered, this, [this] { saveFile(true); });
     fileMenu->addSeparator();
-    auto* exitAction = fileMenu->addAction(QStringLiteral("E&xit"));
+    auto* exitAction = fileMenu->addAction(QStringLiteral("T&hoát"));
     connect(exitAction, &QAction::triggered, &mainWindow_, &QWidget::close);
 
-    auto* editMenu = mainWindow_.menuBar()->addMenu(QStringLiteral("&Edit"));
-    undoAction_ = editMenu->addAction(QStringLiteral("&Undo"));
+    auto* editMenu = mainWindow_.menuBar()->addMenu(QStringLiteral("&Chỉnh sửa"));
+    undoAction_ = editMenu->addAction(QStringLiteral("&Hoàn tác"));
     undoAction_->setShortcut(QKeySequence::Undo);
     connect(undoAction_, &QAction::triggered, this, [this] { showResult(undo()); });
-    redoAction_ = editMenu->addAction(QStringLiteral("&Redo"));
+    redoAction_ = editMenu->addAction(QStringLiteral("&Làm lại"));
     redoAction_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y));
     connect(redoAction_, &QAction::triggered, this, [this] { showResult(redo()); });
 }
@@ -337,6 +337,7 @@ void AppController::refreshList(const QString& select) {
         }
     }
     for (const auto* node : nodes) words.push_back(QString::fromUtf8(node->english.c_str()));
+    mainWindow_.setTotalWordCount(static_cast<int>(listAllWords(dictionary_).size()));
     mainWindow_.setWordList(words);
     if (!selected.isEmpty()) {
         auto* list = mainWindow_.findChild<QListWidget*>(QStringLiteral("wordList"));
@@ -346,8 +347,8 @@ void AppController::refreshList(const QString& select) {
         }
     }
     if (mainWindow_.selectedWord().isEmpty()) mainWindow_.setWordDetail({}, {});
-    mainWindow_.statusBar()->showMessage(words.isEmpty() ? QStringLiteral("No terms in this range.") :
-                                        QStringLiteral("%1 terms").arg(words.size()));
+    mainWindow_.statusBar()->showMessage(words.isEmpty() ? QStringLiteral("Không có thuật ngữ trong mục này.") :
+                                        QStringLiteral("Đang hiển thị %1 thuật ngữ.").arg(words.size()));
 }
 
 void AppController::refreshActions() {
@@ -375,43 +376,52 @@ void AppController::loadStartupDictionary() {
     const QString editable = editableDefaultPath();
     if (QFileInfo::exists(editable)) {
         const auto result = loadFromFile(editable);
-        if (result.status == ControllerStatus::Success) { showResult(result); return; }
+        if (result.status == ControllerStatus::Success) {
+            mainWindow_.statusBar()->showMessage(listAllWords(dictionary_).empty()
+                ? QStringLiteral("Tệp từ điển cá nhân đang rỗng: %1. Dữ liệu mẫu không được nạp.").arg(editable)
+                : QStringLiteral("Đã nạp %1 thuật ngữ từ tệp cá nhân: %2").arg(listAllWords(dictionary_).size()).arg(editable));
+            return;
+        }
         protectedStartupPath_ = editable;
         currentPath_.clear();
         QMessageBox recovery(&mainWindow_);
         recovery.setIcon(QMessageBox::Warning);
-        recovery.setWindowTitle(QStringLiteral("Dictionary recovery"));
-        recovery.setText(QStringLiteral("Your dictionary file could not be loaded. It has been left unchanged."));
+        recovery.setWindowTitle(QStringLiteral("Khôi phục từ điển"));
+        recovery.setText(QStringLiteral("Không thể mở từ điển cá nhân. Tệp gốc được giữ nguyên."));
         const bool hasSeed = QFileInfo::exists(seedPath());
         recovery.setInformativeText(hasSeed
-            ? QStringLiteral("Open another file, load the bundled dictionary, or start empty. Saving will not overwrite the unreadable file without your confirmation.")
-            : QStringLiteral("Open another file or start empty. Saving will not overwrite the unreadable file without your confirmation."));
-        auto* openButton = recovery.addButton(QStringLiteral("Open another file…"), QMessageBox::ActionRole);
+            ? QStringLiteral("Mở tệp khác, nạp dữ liệu mẫu hoặc bắt đầu với từ điển rỗng. Ứng dụng sẽ hỏi trước khi thay thế tệp lỗi.")
+            : QStringLiteral("Mở tệp khác hoặc bắt đầu với từ điển rỗng. Ứng dụng sẽ hỏi trước khi thay thế tệp lỗi."));
+        auto* openButton = recovery.addButton(QStringLiteral("Mở tệp khác…"), QMessageBox::ActionRole);
         auto* seedButton = hasSeed
-            ? recovery.addButton(QStringLiteral("Load bundled dictionary"), QMessageBox::ActionRole) : nullptr;
-        auto* emptyButton = recovery.addButton(QStringLiteral("Start empty"), QMessageBox::AcceptRole);
+            ? recovery.addButton(QStringLiteral("Nạp dữ liệu mẫu"), QMessageBox::ActionRole) : nullptr;
+        auto* emptyButton = recovery.addButton(QStringLiteral("Bắt đầu rỗng"), QMessageBox::AcceptRole);
         recovery.setDefaultButton(qobject_cast<QPushButton*>(emptyButton));
         recovery.exec();
         if (recovery.clickedButton() == openButton) {
-            const QString other = QFileDialog::getOpenFileName(&mainWindow_, QStringLiteral("Open dictionary"),
+            const QString other = QFileDialog::getOpenFileName(&mainWindow_, QStringLiteral("Mở từ điển"),
                 QFileInfo(editable).absolutePath(), QStringLiteral("Dictionary TSV (*.txt *.tsv);;All files (*)"));
             if (!other.isEmpty()) showResult(loadFromFile(other));
         } else if (seedButton && recovery.clickedButton() == seedButton) {
             const auto seedResult = loadFromFile(seedPath());
             if (seedResult.status == ControllerStatus::Success) showResult(seedResult);
-            else mainWindow_.statusBar()->showMessage(QStringLiteral("Bundled dictionary could not be loaded. Started empty."));
+            else mainWindow_.statusBar()->showMessage(QStringLiteral("Không thể nạp dữ liệu mẫu. Từ điển đang rỗng."));
         }
         return;
     }
-    if (QFileInfo::exists(seedPath())) showResult(loadFromFile(seedPath()));
-    else mainWindow_.statusBar()->showMessage(QStringLiteral("No dictionary seed found. You can add terms or open a file."));
+    if (QFileInfo::exists(seedPath())) {
+        const auto result = loadFromFile(seedPath());
+        if (result.status == ControllerStatus::Success)
+            mainWindow_.statusBar()->showMessage(QStringLiteral("Đã nạp %1 thuật ngữ từ dữ liệu mẫu.").arg(listAllWords(dictionary_).size()));
+        else showResult(result);
+    } else mainWindow_.statusBar()->showMessage(QStringLiteral("Không tìm thấy dữ liệu mẫu. Hãy mở tệp từ điển hoặc thêm từ mới."));
     if (currentPath_.isEmpty()) currentPath_ = editable;
 }
 
 bool AppController::confirmDiscardChanges() {
     if (!dirty_) return true;
-    const auto choice = QMessageBox::warning(&mainWindow_, QStringLiteral("Unsaved changes"),
-        QStringLiteral("Save changes to the dictionary?"),
+    const auto choice = QMessageBox::warning(&mainWindow_, QStringLiteral("Thay đổi chưa lưu"),
+        QStringLiteral("Bạn có muốn lưu thay đổi vào từ điển không?"),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     if (choice == QMessageBox::Cancel) return false;
     if (choice == QMessageBox::Discard) return true;
@@ -428,7 +438,7 @@ bool AppController::eventFilter(QObject* watched, QEvent* event) {
 
 void AppController::openFile() {
     if (!confirmDiscardChanges()) return;
-    const QString path = QFileDialog::getOpenFileName(&mainWindow_, QStringLiteral("Open dictionary"),
+    const QString path = QFileDialog::getOpenFileName(&mainWindow_, QStringLiteral("Mở từ điển"),
         QFileInfo(currentPath_).absolutePath(), QStringLiteral("Dictionary TSV (*.txt *.tsv);;All files (*)"));
     if (!path.isEmpty()) showResult(loadFromFile(path));
 }
@@ -436,7 +446,7 @@ void AppController::openFile() {
 bool AppController::saveFile(bool saveAs) {
     QString path = currentPath_;
     if (saveAs || path.isEmpty()) path = QFileDialog::getSaveFileName(&mainWindow_,
-        QStringLiteral("Save dictionary"), path, QStringLiteral("Dictionary TSV (*.txt *.tsv);;All files (*)"));
+        QStringLiteral("Lưu từ điển"), path, QStringLiteral("Từ điển TSV (*.txt *.tsv);;Tất cả tệp (*)"));
     if (path.isEmpty()) return false;
     const bool replacingProtected = !protectedStartupPath_.isEmpty() && samePath(path, protectedStartupPath_);
     if (replacingProtected) {
