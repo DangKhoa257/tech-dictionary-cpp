@@ -69,24 +69,6 @@ jobs:
           cmake --build build-release --parallel 4
           if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
 
-      - name: Package Release with windeployqt
-        shell: pwsh
-        run: |
-          ./scripts/package_windows.ps1 -BuildDir build-release -QtRoot $env:QT_ROOT_DIR
-
-      - name: Smoke test packaged GUI and capture screenshot
-        shell: pwsh
-        run: |
-          $env:QT_QPA_PLATFORM = 'offscreen'
-          $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
-          $screenshot = Join-Path $env:RUNNER_TEMP 'tech-dictionary-v2-smoke.png'
-          & $packageExe --ci-smoke $screenshot
-          if ($LASTEXITCODE -ne 0) { throw "Packaged GUI smoke test failed: $LASTEXITCODE" }
-          if (-not (Test-Path -LiteralPath $screenshot -PathType Leaf)) {
-            throw 'GUI screenshot was not created'
-          }
-          Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
-
       - name: Run all seven Debug tests
         shell: pwsh
         run: |
@@ -100,6 +82,24 @@ jobs:
           $env:QT_QPA_PLATFORM = 'offscreen'
           ctest --test-dir build-release --output-on-failure
           if ($LASTEXITCODE -ne 0) { throw 'Release tests failed' }
+
+      - name: Package Release with windeployqt
+        shell: pwsh
+        run: |
+          ./scripts/package_windows.ps1 -BuildDir build-release -QtRoot $env:QT_ROOT_DIR
+
+      - name: Smoke test packaged GUI and capture screenshot
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
+          $screenshot = Join-Path $env:RUNNER_TEMP 'tech-dictionary-v2-smoke.png'
+          $process = Start-Process -FilePath $packageExe -ArgumentList @('--ci-smoke', $screenshot) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Packaged GUI smoke test failed: $($process.ExitCode)" }
+          if (-not (Test-Path -LiteralPath $screenshot -PathType Leaf)) {
+            throw 'GUI screenshot was not created'
+          }
+          Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
 
       - name: Upload Release package and GUI screenshot
         if: always()
