@@ -9,6 +9,8 @@ class QListWidget;
 class QPushButton;
 class QCompleter;
 class QStringListModel;
+class QPropertyAnimation;
+class QGraphicsOpacityEffect;
 
 // A self-contained search panel. It emits a request and does not access
 // Dictionary directly; the controller/owner supplies the result.
@@ -34,6 +36,8 @@ private slots:
     void requestSearch();
 
 private:
+    void setupCompleterPopup();
+
     QLineEdit* searchInput_;
     QPushButton* searchButton_;
     QLabel* statusLabel_;

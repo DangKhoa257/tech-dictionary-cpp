@@ -319,9 +319,20 @@ void AppController::connectUi() {
     });
     connect(&mainWindow_, &MainWindow::wordSelected, this, [this](const QString& term) {
         const auto result = searchWord(term);
+        QStringList related;
+        if (result.status == ControllerStatus::Success && !result.category.isEmpty()) {
+            const std::string currentEng = utf8(term);
+            const std::string targetCat = utf8(result.category);
+            for (const auto* node : listAllWords(dictionary_)) {
+                if (node->english != currentEng && node->category == targetCat) {
+                    related.append(QString::fromUtf8(node->english.c_str()));
+                    if (related.size() >= 4) break;
+                }
+            }
+        }
         mainWindow_.setWordDetail(result.status == ControllerStatus::Success ? term : QString(),
                                   result.vietnamese, result.partOfSpeech, result.example,
-                                  result.category);
+                                  result.category, related);
     });
     connect(&mainWindow_, &MainWindow::filterRequested, this, [this](const QString& filter) {
         currentFilter_ = filter;

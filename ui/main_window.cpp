@@ -1,171 +1,418 @@
 #include "main_window.h"
+#include "icon_helper.h"
 
+#include <QApplication>
+#include <QEasingCurve>
 #include <QFile>
+#include <QGraphicsOpacityEffect>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QListWidgetItem>
+#include <QPropertyAnimation>
 #include <QSplitter>
+#include <QVBoxLayout>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) { setupUi(); }
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+    setupUi();
+}
+
 MainWindow::~MainWindow() = default;
 
 void MainWindow::setupUi() {
     setWindowTitle(QStringLiteral("Tech Dictionary"));
     setMinimumSize(800, 560);
     resize(1120, 730);
+
     QFile styleFile(QStringLiteral(":/styles.qss"));
-    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+    }
 
     centralWidget = new QWidget(this);
     centralWidget->setObjectName(QStringLiteral("root"));
     setCentralWidget(centralWidget);
+
     auto* mainLayout = new QHBoxLayout(centralWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    sidebarFrame = new QFrame(centralWidget);
-    sidebarFrame->setObjectName(QStringLiteral("sidebar"));
-    sidebarFrame->setFixedWidth(218);
-    auto* sidebarLayout = new QVBoxLayout(sidebarFrame);
-    sidebarLayout->setContentsMargins(18, 26, 18, 20);
-    sidebarLayout->setSpacing(8);
-    brandLabel = new QLabel(QStringLiteral("Tech Dictionary"), sidebarFrame);
-    brandLabel->setObjectName(QStringLiteral("brand"));
-    sidebarLayout->addWidget(brandLabel);
-    auto* tagline = new QLabel(QStringLiteral("TỪ ĐIỂN CÔNG NGHỆ"), sidebarFrame);
-    tagline->setObjectName(QStringLiteral("brandTagline"));
-    sidebarLayout->addWidget(tagline);
-    sidebarLayout->addSpacing(28);
-    eyebrowLabel = new QLabel(QStringLiteral("DUYỆT THUẬT NGỮ"), sidebarFrame);
-    eyebrowLabel->setObjectName(QStringLiteral("eyebrow"));
-    sidebarLayout->addWidget(eyebrowLabel);
-
-    const QStringList filters = {QStringLiteral("All Words"), QStringLiteral("A - E"),
-        QStringLiteral("F - J"), QStringLiteral("K - O"), QStringLiteral("P - T"),
-        QStringLiteral("U - Z")};
-    for (const QString& filter : filters) {
-        auto* button = new QPushButton(filter == QLatin1String("All Words")
-            ? QStringLiteral("Tất cả từ") : filter, sidebarFrame);
-        button->setObjectName(QStringLiteral("navButton"));
-        button->setProperty("filterKey", filter);
-        button->setCheckable(true);
-        button->setChecked(filter == QLatin1String("All Words"));
-        button->setEnabled(false);
-        button->setCursor(Qt::PointingHandCursor);
-        filterButtons_.append(button);
-        connect(button, &QPushButton::clicked, this, &MainWindow::onNavButtonClicked);
-        sidebarLayout->addWidget(button);
-    }
-    sidebarLayout->addStretch();
-    totalWordCountLabel_ = new QLabel(QStringLiteral("Tổng cộng: 0 từ"), sidebarFrame);
-    totalWordCountLabel_->setObjectName(QStringLiteral("totalWordCount"));
-    sidebarLayout->addWidget(totalWordCountLabel_);
-    sidebarFooterLabel = new QLabel(QStringLiteral("Phiên bản 0.2.0"), sidebarFrame);
-    sidebarFooterLabel->setObjectName(QStringLiteral("sidebarFooter"));
-    sidebarLayout->addWidget(sidebarFooterLabel);
-    mainLayout->addWidget(sidebarFrame);
+    setupSidebar(mainLayout);
 
     contentWidget = new QWidget(centralWidget);
     contentWidget->setObjectName(QStringLiteral("content"));
     auto* contentLayout = new QVBoxLayout(contentWidget);
-    contentLayout->setContentsMargins(28, 24, 28, 24);
-    contentLayout->setSpacing(18);
+    contentLayout->setContentsMargins(28, 22, 28, 22);
+    contentLayout->setSpacing(16);
+
+    setupHeader(contentLayout);
+    setupSearchArea(contentLayout);
+    setupStatsCards(contentLayout);
+    setupContentSplitter(contentLayout);
+
+    mainLayout->addWidget(contentWidget, 1);
+
+    setWordDetail({}, {});
+    setWordList({});
+}
+
+void MainWindow::setupSidebar(QHBoxLayout* mainLayout) {
+    sidebarFrame = new QFrame(centralWidget);
+    sidebarFrame->setObjectName(QStringLiteral("sidebar"));
+    sidebarFrame->setFixedWidth(240);
+
+    auto* sidebarLayout = new QVBoxLayout(sidebarFrame);
+    sidebarLayout->setContentsMargins(16, 22, 16, 18);
+    sidebarLayout->setSpacing(8);
+
+    // Branding header
+    auto* brandLayout = new QHBoxLayout();
+    brandLayout->setContentsMargins(0, 0, 0, 0);
+    brandLayout->setSpacing(12);
+
+    auto* logoLabel = new QLabel(sidebarFrame);
+    logoLabel->setPixmap(IconHelper::brandLogoPixmap(38));
+    logoLabel->setFixedSize(38, 38);
+    brandLayout->addWidget(logoLabel);
+
+    auto* brandTextLayout = new QVBoxLayout();
+    brandTextLayout->setContentsMargins(0, 0, 0, 0);
+    brandTextLayout->setSpacing(2);
+
+    brandLabel = new QLabel(QStringLiteral("Tech Dictionary"), sidebarFrame);
+    brandLabel->setObjectName(QStringLiteral("brand"));
+    brandTextLayout->addWidget(brandLabel);
+
+    auto* tagline = new QLabel(QStringLiteral("TỪ ĐIỂN CÔNG NGHỆ"), sidebarFrame);
+    tagline->setObjectName(QStringLiteral("brandTagline"));
+    brandTextLayout->addWidget(tagline);
+    brandLayout->addLayout(brandTextLayout);
+    sidebarLayout->addLayout(brandLayout);
+
+    sidebarLayout->addSpacing(18);
+
+    // Active primary feature nav item: "Tra cứu từ điển"
+    auto* navLookup = new QPushButton(QStringLiteral("  Tra cứu từ điển"), sidebarFrame);
+    navLookup->setObjectName(QStringLiteral("navSectionLookup"));
+    navLookup->setIcon(IconHelper::lookupIcon(Qt::white, 16));
+    navLookup->setCursor(Qt::PointingHandCursor);
+    sidebarLayout->addWidget(navLookup);
+    connect(navLookup, &QPushButton::clicked, this, [this] {
+        if (!filterButtons_.isEmpty()) {
+            filterButtons_[0]->click();
+        }
+    });
+
+    sidebarLayout->addSpacing(12);
+
+    // Section title
+    eyebrowLabel = new QLabel(QStringLiteral("DANH MỤC THEO CHỮ CÁI"), sidebarFrame);
+    eyebrowLabel->setObjectName(QStringLiteral("eyebrow"));
+    sidebarLayout->addWidget(eyebrowLabel);
+
+    // 6 Alphabetical filter buttons
+    const QStringList filters = {
+        QStringLiteral("All Words"),
+        QStringLiteral("A - E"),
+        QStringLiteral("F - J"),
+        QStringLiteral("K - O"),
+        QStringLiteral("P - T"),
+        QStringLiteral("U - Z")
+    };
+
+    for (int i = 0; i < filters.size(); ++i) {
+        const QString& filter = filters[i];
+        auto* button = new QPushButton(sidebarFrame);
+        button->setObjectName(QStringLiteral("navButton"));
+        button->setProperty("filterKey", filter);
+        button->setCheckable(true);
+        button->setChecked(i == 0);
+        button->setEnabled(false);
+        button->setCursor(Qt::PointingHandCursor);
+
+        if (i == 0) {
+            button->setText(QStringLiteral("  Tất cả từ"));
+            button->setIcon(IconHelper::gridIcon(Qt::white, 16));
+        } else {
+            button->setText(QStringLiteral("  ") + filter);
+            button->setIcon(IconHelper::folderIcon(QColor(QStringLiteral("#94A3B8")), 16));
+        }
+
+        filterButtons_.append(button);
+        connect(button, &QPushButton::clicked, this, &MainWindow::onNavButtonClicked);
+        sidebarLayout->addWidget(button);
+    }
+
+    sidebarLayout->addStretch();
+
+    // Bottom total count and version
+    totalWordCountLabel_ = new QLabel(QStringLiteral("Tổng cộng: 0 từ"), sidebarFrame);
+    totalWordCountLabel_->setObjectName(QStringLiteral("totalWordCount"));
+    sidebarLayout->addWidget(totalWordCountLabel_);
+
+    sidebarFooterLabel = new QLabel(QStringLiteral("Phiên bản 0.2.0"), sidebarFrame);
+    sidebarFooterLabel->setObjectName(QStringLiteral("sidebarFooter"));
+    sidebarLayout->addWidget(sidebarFooterLabel);
+
+    mainLayout->addWidget(sidebarFrame);
+}
+
+void MainWindow::setupHeader(QVBoxLayout* contentLayout) {
     auto* headerLayout = new QHBoxLayout();
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->setSpacing(14);
+
+    // Header icon box (soft blue with laptop)
+    auto* iconBox = new QFrame(contentWidget);
+    iconBox->setObjectName(QStringLiteral("headerIconBox"));
+    iconBox->setFixedSize(48, 48);
+    auto* iconBoxLayout = new QVBoxLayout(iconBox);
+    iconBoxLayout->setContentsMargins(0, 0, 0, 0);
+    iconBoxLayout->setAlignment(Qt::AlignCenter);
+    auto* iconLabel = new QLabel(iconBox);
+    iconLabel->setPixmap(IconHelper::laptopPixmap(QColor(QStringLiteral("#2563EB")), 28));
+    iconBoxLayout->addWidget(iconLabel);
+    headerLayout->addWidget(iconBox);
+
     auto* titleLayout = new QVBoxLayout();
-    titleLayout->setSpacing(4);
+    titleLayout->setContentsMargins(0, 0, 0, 0);
+    titleLayout->setSpacing(2);
+
     headingLabel = new QLabel(QStringLiteral("Từ điển thuật ngữ CNTT"), contentWidget);
     headingLabel->setObjectName(QStringLiteral("heading"));
     titleLayout->addWidget(headingLabel);
-    descriptionLabel = new QLabel(QStringLiteral("Tra cứu và quản lý thuật ngữ công nghệ Anh – Việt"), contentWidget);
+
+    descriptionLabel = new QLabel(
+        QStringLiteral("Tra cứu và quản lý thuật ngữ công nghệ Anh – Việt"), contentWidget);
     descriptionLabel->setObjectName(QStringLiteral("description"));
     descriptionLabel->setWordWrap(true);
     titleLayout->addWidget(descriptionLabel);
     headerLayout->addLayout(titleLayout, 1);
+
     btnAdd = new QPushButton(QStringLiteral("+  Thêm từ mới"), contentWidget);
     btnAdd->setObjectName(QStringLiteral("addButton"));
     btnAdd->setEnabled(false);
     btnAdd->setCursor(Qt::PointingHandCursor);
     connect(btnAdd, &QPushButton::clicked, this, &MainWindow::onAddClicked);
-    headerLayout->addWidget(btnAdd, 0, Qt::AlignTop);
-    contentLayout->addLayout(headerLayout);
+    headerLayout->addWidget(btnAdd, 0, Qt::AlignVCenter);
 
+    contentLayout->addLayout(headerLayout);
+}
+
+void MainWindow::setupSearchArea(QVBoxLayout* contentLayout) {
     auto* searchContainer = new QFrame(contentWidget);
     searchContainer->setObjectName(QStringLiteral("searchCard"));
     searchContainerLayout = new QVBoxLayout(searchContainer);
-    searchContainerLayout->setContentsMargins(12, 10, 12, 10);
+    searchContainerLayout->setContentsMargins(8, 8, 8, 8);
     contentLayout->addWidget(searchContainer);
+}
 
+void MainWindow::setupStatsCards(QVBoxLayout* contentLayout) {
+    auto* statsLayout = new QHBoxLayout();
+    statsLayout->setContentsMargins(0, 0, 0, 0);
+    statsLayout->setSpacing(14);
+
+    // Card 1: Terms
+    auto* termsCard = new QFrame(contentWidget);
+    termsCard->setObjectName(QStringLiteral("statCardTerms"));
+    termsCard->setProperty("cardType", "statCard");
+    auto* termsLayout = new QHBoxLayout(termsCard);
+    termsLayout->setContentsMargins(14, 12, 14, 12);
+    termsLayout->setSpacing(12);
+
+    auto* termsIconBox = new QLabel(termsCard);
+    termsIconBox->setObjectName(QStringLiteral("statIconBoxBlue"));
+    termsIconBox->setFixedSize(38, 38);
+    termsIconBox->setAlignment(Qt::AlignCenter);
+    termsIconBox->setPixmap(IconHelper::renderPixmap(20, 20, [](QPainter& p, qreal w, qreal h) {
+        QIcon b = IconHelper::bookIcon(QColor(QStringLiteral("#2563EB")), 20);
+        b.paint(&p, QRect(0, 0, static_cast<int>(w), static_cast<int>(h)));
+    }));
+    termsLayout->addWidget(termsIconBox);
+
+    auto* termsTextLayout = new QVBoxLayout();
+    termsTextLayout->setContentsMargins(0, 0, 0, 0);
+    termsTextLayout->setSpacing(1);
+    statsTermsCountLabel_ = new QLabel(QStringLiteral("588 thuật ngữ"), termsCard);
+    statsTermsCountLabel_->setObjectName(QStringLiteral("statValue"));
+    termsTextLayout->addWidget(statsTermsCountLabel_);
+    auto* termsSub = new QLabel(QStringLiteral("Tổng số từ trong từ điển"), termsCard);
+    termsSub->setObjectName(QStringLiteral("statDesc"));
+    termsTextLayout->addWidget(termsSub);
+    termsLayout->addLayout(termsTextLayout);
+    statsLayout->addWidget(termsCard);
+
+    // Card 2: Categories
+    auto* catCard = new QFrame(contentWidget);
+    catCard->setObjectName(QStringLiteral("statCardCat"));
+    catCard->setProperty("cardType", "statCard");
+    auto* catLayout = new QHBoxLayout(catCard);
+    catLayout->setContentsMargins(14, 12, 14, 12);
+    catLayout->setSpacing(12);
+
+    auto* catIconBox = new QLabel(catCard);
+    catIconBox->setObjectName(QStringLiteral("statIconBoxPurple"));
+    catIconBox->setFixedSize(38, 38);
+    catIconBox->setAlignment(Qt::AlignCenter);
+    catIconBox->setPixmap(IconHelper::layersPixmap(QColor(QStringLiteral("#7C3AED")), 22));
+    catLayout->addWidget(catIconBox);
+
+    auto* catTextLayout = new QVBoxLayout();
+    catTextLayout->setContentsMargins(0, 0, 0, 0);
+    catTextLayout->setSpacing(1);
+    auto* catValue = new QLabel(QStringLiteral("15 chủ đề"), catCard);
+    catValue->setObjectName(QStringLiteral("statValue"));
+    catTextLayout->addWidget(catValue);
+    auto* catSub = new QLabel(QStringLiteral("Phân loại theo lĩnh vực CNTT"), catCard);
+    catSub->setObjectName(QStringLiteral("statDesc"));
+    catTextLayout->addWidget(catSub);
+    catLayout->addLayout(catTextLayout);
+    statsLayout->addWidget(catCard);
+
+    // Card 3: Quick Search
+    auto* speedCard = new QFrame(contentWidget);
+    speedCard->setObjectName(QStringLiteral("statCardSpeed"));
+    speedCard->setProperty("cardType", "statCard");
+    auto* speedLayout = new QHBoxLayout(speedCard);
+    speedLayout->setContentsMargins(14, 12, 14, 12);
+    speedLayout->setSpacing(12);
+
+    auto* speedIconBox = new QLabel(speedCard);
+    speedIconBox->setObjectName(QStringLiteral("statIconBoxGreen"));
+    speedIconBox->setFixedSize(38, 38);
+    speedIconBox->setAlignment(Qt::AlignCenter);
+    speedIconBox->setPixmap(IconHelper::lightningPixmap(QColor(QStringLiteral("#059669")), 20));
+    speedLayout->addWidget(speedIconBox);
+
+    auto* speedTextLayout = new QVBoxLayout();
+    speedTextLayout->setContentsMargins(0, 0, 0, 0);
+    speedTextLayout->setSpacing(1);
+    auto* speedValue = new QLabel(QStringLiteral("Tìm nhanh"), speedCard);
+    speedValue->setObjectName(QStringLiteral("statValue"));
+    speedTextLayout->addWidget(speedValue);
+    auto* speedSub = new QLabel(QStringLiteral("Tra cứu tức thì, kết quả chính xác"), speedCard);
+    speedSub->setObjectName(QStringLiteral("statDesc"));
+    speedTextLayout->addWidget(speedSub);
+    speedLayout->addLayout(speedTextLayout);
+    statsLayout->addWidget(speedCard);
+
+    contentLayout->addLayout(statsLayout);
+}
+
+void MainWindow::setupContentSplitter(QVBoxLayout* contentLayout) {
     auto* splitter = new QSplitter(Qt::Horizontal, contentWidget);
     splitter->setObjectName(QStringLiteral("contentSplitter"));
     splitter->setChildrenCollapsible(false);
+
+    // Left List Panel
     auto* listCard = new QFrame(splitter);
     listCard->setObjectName(QStringLiteral("listCard"));
     auto* listLayout = new QVBoxLayout(listCard);
-    listLayout->setContentsMargins(18, 18, 18, 18);
-    listLayout->setSpacing(12);
+    listLayout->setContentsMargins(18, 16, 18, 16);
+    listLayout->setSpacing(10);
+
     auto* listHeader = new QHBoxLayout();
+    listHeader->setContentsMargins(0, 0, 0, 0);
     auto* listTitle = new QLabel(QStringLiteral("Danh sách thuật ngữ"), listCard);
     listTitle->setObjectName(QStringLiteral("panelTitle"));
     listHeader->addWidget(listTitle);
     listHeader->addStretch();
+
     visibleCountLabel_ = new QLabel(QStringLiteral("0 từ"), listCard);
     visibleCountLabel_->setObjectName(QStringLiteral("visibleCount"));
     listHeader->addWidget(visibleCountLabel_);
     listLayout->addLayout(listHeader);
-    emptyStateLabel_ = new QLabel(QStringLiteral("Chưa có thuật ngữ trong mục này.\nHãy thêm từ mới hoặc mở một tệp từ điển."), listCard);
+
+    emptyStateLabel_ = new QLabel(
+        QStringLiteral("Chưa có thuật ngữ trong mục này.\nHãy thêm từ mới hoặc mở một tệp từ điển."),
+        listCard);
     emptyStateLabel_->setObjectName(QStringLiteral("emptyState"));
     emptyStateLabel_->setAlignment(Qt::AlignCenter);
     emptyStateLabel_->setWordWrap(true);
     listLayout->addWidget(emptyStateLabel_, 1);
+
     wordListWidget = new QListWidget(listCard);
     wordListWidget->setObjectName(QStringLiteral("wordList"));
     wordListWidget->setAlternatingRowColors(false);
     wordListWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    connect(wordListWidget, &QListWidget::itemSelectionChanged, this, &MainWindow::onItemSelectionChanged);
+    connect(wordListWidget, &QListWidget::itemSelectionChanged, this,
+            &MainWindow::onItemSelectionChanged);
     listLayout->addWidget(wordListWidget, 1);
 
+    // Right Detail Panel
     auto* detailCard = new QFrame(splitter);
     detailCard->setObjectName(QStringLiteral("detailCard"));
     auto* detailLayout = new QVBoxLayout(detailCard);
-    detailLayout->setContentsMargins(22, 18, 22, 18);
-    detailLayout->setSpacing(12);
-    auto* detailTitle = new QLabel(QStringLiteral("CHI TIẾT THUẬT NGỮ"), detailCard);
+    detailLayout->setContentsMargins(22, 16, 22, 16);
+    detailLayout->setSpacing(10);
+
+    auto* detailHeaderLayout = new QHBoxLayout();
+    detailHeaderLayout->setContentsMargins(0, 0, 0, 0);
+    auto* detailTitle = new QLabel(QStringLiteral("Chi tiết thuật ngữ"), detailCard);
     detailTitle->setObjectName(QStringLiteral("panelEyebrow"));
-    detailLayout->addWidget(detailTitle);
+    detailHeaderLayout->addWidget(detailTitle);
+    detailHeaderLayout->addStretch();
+    detailLayout->addLayout(detailHeaderLayout);
+
     wordDetailTextEdit = new QTextEdit(detailCard);
     wordDetailTextEdit->setObjectName(QStringLiteral("wordDetail"));
     wordDetailTextEdit->setReadOnly(true);
     wordDetailTextEdit->setFocusPolicy(Qt::NoFocus);
+
+    detailOpacityEffect_ = new QGraphicsOpacityEffect(wordDetailTextEdit);
+    detailOpacityEffect_->setOpacity(1.0);
+    wordDetailTextEdit->setGraphicsEffect(detailOpacityEffect_);
+
     detailLayout->addWidget(wordDetailTextEdit, 1);
+
     auto* actionLayout = new QHBoxLayout();
-    btnEdit = new QPushButton(QStringLiteral("Sửa nghĩa"), detailCard);
-    btnDelete = new QPushButton(QStringLiteral("Xóa từ"), detailCard);
+    actionLayout->setContentsMargins(0, 6, 0, 0);
+    actionLayout->setSpacing(10);
+
+    btnEdit = new QPushButton(QStringLiteral("  Sửa nghĩa"), detailCard);
+    btnDelete = new QPushButton(QStringLiteral("  Xóa từ"), detailCard);
     btnEdit->setObjectName(QStringLiteral("editButton"));
     btnDelete->setObjectName(QStringLiteral("deleteButton"));
+    btnEdit->setIcon(IconHelper::editIcon(QColor(QStringLiteral("#2563EB")), 16));
+    btnDelete->setIcon(IconHelper::deleteIcon(QColor(QStringLiteral("#DC2626")), 16));
     btnEdit->setEnabled(false);
     btnDelete->setEnabled(false);
     btnEdit->setCursor(Qt::PointingHandCursor);
     btnDelete->setCursor(Qt::PointingHandCursor);
+
     connect(btnEdit, &QPushButton::clicked, this, &MainWindow::onEditClicked);
     connect(btnDelete, &QPushButton::clicked, this, &MainWindow::onDeleteClicked);
+
+    actionLayout->addStretch();
     actionLayout->addWidget(btnEdit);
     actionLayout->addWidget(btnDelete);
-    actionLayout->addStretch();
     detailLayout->addLayout(actionLayout);
+
     splitter->addWidget(listCard);
     splitter->addWidget(detailCard);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 3);
-    splitter->setSizes({330, 500});
+    splitter->setSizes({340, 520});
+
     contentLayout->addWidget(splitter, 1);
-    mainLayout->addWidget(contentWidget, 1);
-    setWordDetail({}, {});
-    setWordList({});
 }
 
 void MainWindow::onNavButtonClicked() {
     auto* button = qobject_cast<QPushButton*>(sender());
     if (!button) return;
-    for (auto* nav : filterButtons_) nav->setChecked(nav == button);
+
+    for (int i = 0; i < filterButtons_.size(); ++i) {
+        auto* nav = filterButtons_[i];
+        const bool checked = (nav == button);
+        nav->setChecked(checked);
+
+        // Update active icon
+        if (i == 0) {
+            nav->setIcon(IconHelper::gridIcon(Qt::white, 16));
+        } else {
+            nav->setIcon(IconHelper::folderIcon(checked ? Qt::white : QColor(QStringLiteral("#94A3B8")), 16));
+        }
+    }
+
     emit filterRequested(button->property("filterKey").toString());
 }
 
@@ -177,13 +424,39 @@ void MainWindow::onItemSelectionChanged() {
     auto* item = wordListWidget->currentItem();
     btnEdit->setEnabled(interactionEnabled_ && item);
     btnDelete->setEnabled(interactionEnabled_ && item);
-    if (item) emit wordSelected(item->text());
-    else setWordDetail({}, {});
+    if (item) {
+        emit wordSelected(item->text());
+    } else {
+        setWordDetail({}, {});
+    }
+}
+
+void MainWindow::animateDetailTransition() {
+    if (!detailOpacityEffect_) return;
+
+    if (qEnvironmentVariableIsSet("QT_QPA_PLATFORM") ||
+        qEnvironmentVariableIsSet("TECH_DICTIONARY_NO_ANIMATION")) {
+        detailOpacityEffect_->setOpacity(1.0);
+        return;
+    }
+
+    auto* anim = new QPropertyAnimation(detailOpacityEffect_, "opacity", this);
+    anim->setDuration(190);
+    anim->setStartValue(0.35);
+    anim->setEndValue(1.0);
+    anim->setEasingCurve(QEasingCurve::OutCubic);
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void MainWindow::setWordList(const QStringList& words) {
     wordListWidget->clear();
-    wordListWidget->addItems(words);
+
+    const QIcon itemIcon = IconHelper::bookIcon(QColor(QStringLiteral("#2563EB")), 16);
+    for (const auto& word : words) {
+        auto* item = new QListWidgetItem(itemIcon, word);
+        wordListWidget->addItem(item);
+    }
+
     visibleCountLabel_->setText(QStringLiteral("%1 từ").arg(words.size()));
     emptyStateLabel_->setVisible(words.isEmpty());
     wordListWidget->setVisible(!words.isEmpty());
@@ -192,35 +465,90 @@ void MainWindow::setWordList(const QStringList& words) {
 
 void MainWindow::setTotalWordCount(int count) {
     totalWordCountLabel_->setText(QStringLiteral("Tổng cộng: %1 từ").arg(count));
+    if (statsTermsCountLabel_) {
+        statsTermsCountLabel_->setText(QStringLiteral("%1 thuật ngữ").arg(count));
+    }
 }
 
 void MainWindow::setWordDetail(const QString& title, const QString& definition,
                                const QString& partOfSpeech, const QString& example,
-                               const QString& category) {
+                               const QString& category, const QStringList& relatedWords) {
     if (title.isEmpty()) {
-        wordDetailTextEdit->setHtml(QStringLiteral("<div style='color:#64748B; margin-top:26px; font-size:14px;'>Chọn một thuật ngữ trong danh sách để xem nghĩa tiếng Việt.</div>"));
+        wordDetailTextEdit->setHtml(QStringLiteral(
+            "<div style='color:#64748B; padding:40px 16px; text-align:center; font-family:\"Segoe UI\", sans-serif;'>"
+            "<div style='font-size:16px; font-weight:600; color:#334155; margin-bottom:8px;'>Chọn một thuật ngữ</div>"
+            "<div style='font-size:13px;'>Chọn một thuật ngữ trong danh sách để xem nghĩa tiếng Việt và ví dụ chi tiết.</div>"
+            "</div>"));
         return;
     }
-    QString html = QStringLiteral(
-        "<div style='font-family:Segoe UI; color:#172B4D;'>"
-        "<h2 style='font-size:25px; margin-bottom:10px;'>%1</h2>")
-        .arg(title.toHtmlEscaped());
-    if (!partOfSpeech.isEmpty())
-        html += QStringLiteral("<p style='font-size:13px; color:#526783;'>%1</p>")
-                    .arg(partOfSpeech.toHtmlEscaped());
+
+    QString html;
+    html.reserve(1500);
+
     html += QStringLiteral(
-        "<div style='font-size:12px; color:#64748B;'>NGHĨA TIẾNG VIỆT</div>"
-        "<p style='font-size:16px; line-height:1.5;'>%1</p>")
-        .arg(definition.toHtmlEscaped());
-    if (!example.isEmpty())
+        "<div style='font-family:\"Segoe UI\", sans-serif; color:#102440; padding:2px 0px;'>"
+        "<div style='font-size:27px; font-weight:700; color:#0F172A; margin-bottom:10px;'>%1</div>"
+        "<div style='margin-bottom:14px;'>")
+        .arg(title.toHtmlEscaped());
+
+    if (!partOfSpeech.isEmpty()) {
         html += QStringLiteral(
-            "<div style='font-size:12px; color:#64748B;'>VÍ DỤ TIẾNG ANH</div>"
-            "<p style='font-size:15px; line-height:1.5;'>%1</p>")
+            "<span style='background-color:#DBEAFE; color:#1D4ED8; font-size:12px; font-weight:600; "
+            "padding:4px 11px; border-radius:6px; margin-right:8px;'>%1</span>")
+            .arg(partOfSpeech.toHtmlEscaped());
+    }
+
+    if (!category.isEmpty()) {
+        html += QStringLiteral(
+            "<span style='background-color:#EDE9FE; color:#6D28D9; font-size:12px; font-weight:600; "
+            "padding:4px 11px; border-radius:6px; margin-right:8px;'>%1</span>")
+            .arg(category.toHtmlEscaped());
+    }
+
+    html += QStringLiteral("</div>");
+
+    // Vietnamese Meaning
+    html += QStringLiteral(
+        "<div style='margin-top:16px;'>"
+        "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:6px;'>"
+        "<span style='color:#059669; font-weight:700;'>文A</span> &nbsp;Nghĩa tiếng Việt</div>"
+        "<div style='background-color:#EAF7EE; border:1px solid #D1F2E0; border-radius:8px; "
+        "padding:12px 16px; color:#14532D; font-size:16px; font-weight:700;'>%1</div>"
+        "</div>")
+        .arg(definition.toHtmlEscaped());
+
+    // English Example
+    if (!example.isEmpty()) {
+        html += QStringLiteral(
+            "<div style='margin-top:16px;'>"
+            "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:6px;'>"
+            "<span style='color:#2563EB; font-weight:700;'>“</span> &nbsp;Ví dụ</div>"
+            "<div style='background-color:#F1F5F9; border:1px solid #E2E8F0; border-radius:8px; "
+            "padding:12px 16px; color:#334155; font-size:14px; font-style:italic;'>%1</div>"
+            "</div>")
             .arg(example.toHtmlEscaped());
-    if (!category.isEmpty())
-        html += QStringLiteral("<p style='font-size:13px; color:#526783;'>CHỦ ĐỀ · %1</p>")
-                    .arg(category.toHtmlEscaped());
-    wordDetailTextEdit->setHtml(html + QStringLiteral("</div>"));
+    }
+
+    // Related Terms
+    if (!relatedWords.isEmpty()) {
+        html += QStringLiteral(
+            "<div style='margin-top:16px;'>"
+            "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:8px;'>"
+            "<span style='color:#2563EB; font-weight:700;'>🔗</span> &nbsp;Thuật ngữ liên quan</div>"
+            "<div>");
+        for (const auto& rel : relatedWords) {
+            html += QStringLiteral(
+                "<span style='background-color:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; "
+                "font-size:12px; font-weight:500; padding:4px 10px; border-radius:6px; margin-right:6px;'>%1</span>")
+                .arg(rel.toHtmlEscaped());
+        }
+        html += QStringLiteral("</div></div>");
+    }
+
+    html += QStringLiteral("</div>");
+
+    wordDetailTextEdit->setHtml(html);
+    animateDetailTransition();
 }
 
 QString MainWindow::selectedWord() const {
@@ -230,16 +558,28 @@ QString MainWindow::selectedWord() const {
 
 void MainWindow::setInteractionEnabled(bool enabled) {
     interactionEnabled_ = enabled;
-    for (auto* button : filterButtons_) button->setEnabled(enabled);
+    for (auto* button : filterButtons_) {
+        button->setEnabled(enabled);
+    }
     btnAdd->setEnabled(enabled);
-    const bool selected = wordListWidget->currentItem() != nullptr;
+    const bool selected = (wordListWidget->currentItem() != nullptr);
     btnEdit->setEnabled(enabled && selected);
     btnDelete->setEnabled(enabled && selected);
 }
 
 void MainWindow::setActiveFilter(const QString& filter) {
-    for (auto* button : filterButtons_)
-        button->setChecked(button->property("filterKey").toString() == filter);
+    for (int i = 0; i < filterButtons_.size(); ++i) {
+        auto* button = filterButtons_[i];
+        const bool match = (button->property("filterKey").toString() == filter);
+        button->setChecked(match);
+        if (i == 0) {
+            button->setIcon(IconHelper::gridIcon(Qt::white, 16));
+        } else {
+            button->setIcon(IconHelper::folderIcon(match ? Qt::white : QColor(QStringLiteral("#94A3B8")), 16));
+        }
+    }
 }
 
-QVBoxLayout* MainWindow::getSearchContainerLayout() const { return searchContainerLayout; }
+QVBoxLayout* MainWindow::getSearchContainerLayout() const {
+    return searchContainerLayout;
+}

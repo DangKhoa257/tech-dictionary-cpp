@@ -1,13 +1,13 @@
 #include "word_dialog.h"
 
+#include <QComboBox>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QVBoxLayout>
-#include <QComboBox>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 namespace {
 
@@ -46,6 +46,9 @@ WordDialog::WordDialog(Mode mode, QWidget* parent)
       mode_(mode),
       englishEdit_(nullptr),
       vietnameseEdit_(nullptr),
+      partOfSpeechEdit_(nullptr),
+      exampleEdit_(nullptr),
+      categoryEdit_(nullptr),
       validationLabel_(nullptr),
       saveButton_(nullptr) {
     setupUi();
@@ -57,6 +60,9 @@ WordDialog::WordDialog(Mode mode, const QString& english, const QString& vietnam
       mode_(mode),
       englishEdit_(nullptr),
       vietnameseEdit_(nullptr),
+      partOfSpeechEdit_(nullptr),
+      exampleEdit_(nullptr),
+      categoryEdit_(nullptr),
       validationLabel_(nullptr),
       saveButton_(nullptr) {
     setupUi();
@@ -78,47 +84,75 @@ WordDialog::WordDialog(Mode mode, const QString& english, const QString& vietnam
 }
 
 void WordDialog::setupUi() {
-    setWindowTitle(mode_ == Mode::Add ? QStringLiteral("Thêm từ")
+    setWindowTitle(mode_ == Mode::Add ? QStringLiteral("Thêm từ mới")
                                       : QStringLiteral("Sửa nghĩa từ"));
     setModal(true);
-    setMinimumWidth(440);
-    resize(500, 350);
+    setMinimumWidth(480);
+    resize(520, 390);
 
     auto* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(24, 22, 24, 22);
+    mainLayout->setContentsMargins(26, 24, 26, 24);
     mainLayout->setSpacing(16);
+
     auto* formLayout = new QFormLayout();
     formLayout->setSpacing(12);
+    formLayout->setLabelAlignment(Qt::AlignLeft);
 
     englishEdit_ = new QLineEdit(this);
     vietnameseEdit_ = new QLineEdit(this);
+
     partOfSpeechEdit_ = new QComboBox(this);
-    partOfSpeechEdit_->addItems({QStringLiteral(""), QStringLiteral("Noun"),
-        QStringLiteral("Verb"), QStringLiteral("Adjective"), QStringLiteral("Adverb"),
-        QStringLiteral("Noun phrase"), QStringLiteral("Verb phrase"),
-        QStringLiteral("Abbreviation"), QStringLiteral("Other / Technical term")});
+    partOfSpeechEdit_->addItems({
+        QStringLiteral(""),
+        QStringLiteral("Noun"),
+        QStringLiteral("Verb"),
+        QStringLiteral("Adjective"),
+        QStringLiteral("Adverb"),
+        QStringLiteral("Noun phrase"),
+        QStringLiteral("Verb phrase"),
+        QStringLiteral("Abbreviation"),
+        QStringLiteral("Other / Technical term")
+    });
+
     exampleEdit_ = new QTextEdit(this);
     exampleEdit_->setObjectName(QStringLiteral("exampleInput"));
-    exampleEdit_->setMaximumHeight(76);
+    exampleEdit_->setMaximumHeight(78);
+
     categoryEdit_ = new QComboBox(this);
-    categoryEdit_->addItems({QStringLiteral(""), QStringLiteral("Basic Computing"),
-        QStringLiteral("Programming"), QStringLiteral("Object-Oriented Programming"),
-        QStringLiteral("Data Structures"), QStringLiteral("Algorithms"),
-        QStringLiteral("Database"), QStringLiteral("Networking"),
-        QStringLiteral("Operating Systems"), QStringLiteral("Cybersecurity"),
-        QStringLiteral("Artificial Intelligence"), QStringLiteral("Machine Learning"),
-        QStringLiteral("Data Science"), QStringLiteral("Software Engineering"),
-        QStringLiteral("Cloud Computing"), QStringLiteral("Web Development")});
+    categoryEdit_->addItems({
+        QStringLiteral(""),
+        QStringLiteral("Basic Computing"),
+        QStringLiteral("Programming"),
+        QStringLiteral("Object-Oriented Programming"),
+        QStringLiteral("Data Structures"),
+        QStringLiteral("Algorithms"),
+        QStringLiteral("Database"),
+        QStringLiteral("Networking"),
+        QStringLiteral("Operating Systems"),
+        QStringLiteral("Cybersecurity"),
+        QStringLiteral("Artificial Intelligence"),
+        QStringLiteral("Machine Learning"),
+        QStringLiteral("Data Science"),
+        QStringLiteral("Software Engineering"),
+        QStringLiteral("Cloud Computing"),
+        QStringLiteral("Web Development")
+    });
+
     validationLabel_ = new QLabel(this);
     saveButton_ = new QPushButton(QStringLiteral("Lưu"), this);
     auto* cancelButton = new QPushButton(QStringLiteral("Hủy"), this);
+
     saveButton_->setObjectName(QStringLiteral("primaryButton"));
     cancelButton->setObjectName(QStringLiteral("secondaryButton"));
+    saveButton_->setCursor(Qt::PointingHandCursor);
+    cancelButton->setCursor(Qt::PointingHandCursor);
 
-    englishEdit_->setPlaceholderText(QStringLiteral("Nhập từ tiếng Anh"));
-    vietnameseEdit_->setPlaceholderText(QStringLiteral("Nhập nghĩa tiếng Việt"));
+    englishEdit_->setPlaceholderText(QStringLiteral("Ví dụ: Algorithm, Compiler, Cloud..."));
+    vietnameseEdit_->setPlaceholderText(QStringLiteral("Ví dụ: Thuật toán, Trình biên dịch..."));
+    exampleEdit_->setPlaceholderText(QStringLiteral("Ví dụ câu tiếng Anh minh họa cách sử dụng..."));
+
     validationLabel_->setWordWrap(true);
-    validationLabel_->setStyleSheet(QStringLiteral("color:#B42318; font-size:12px;"));
+    validationLabel_->setStyleSheet(QStringLiteral("color: #DC2626; font-size: 12px; font-weight: 500;"));
 
     formLayout->addRow(QStringLiteral("Từ tiếng Anh:"), englishEdit_);
     formLayout->addRow(QStringLiteral("Nghĩa tiếng Việt:"), vietnameseEdit_);
@@ -127,6 +161,8 @@ void WordDialog::setupUi() {
     formLayout->addRow(QStringLiteral("Chủ đề:"), categoryEdit_);
 
     auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->setContentsMargins(0, 0, 0, 0);
+    buttonLayout->setSpacing(10);
     buttonLayout->addStretch();
     buttonLayout->addWidget(saveButton_);
     buttonLayout->addWidget(cancelButton);
