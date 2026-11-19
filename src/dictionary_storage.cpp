@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <array>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -88,6 +89,42 @@ bool validField(const std::string& field) {
         if (value < 0x20 || value == 0x7F) return false;
     }
     return true;
+}
+
+bool validRichField(const std::string& field) {
+    if (!isValidUtf8(field)) return false;
+    for (unsigned char c : field)
+        if ((c < 0x20 && c != '\t' && c != '\n' && c != '\r') || c == 0x7F) return false;
+    return true;
+}
+
+std::string escapeField(const std::string& field) {
+    if (field.empty()) return "\\e";
+    std::string result;
+    for (char c : field) {
+        if (c == '\\') result += "\\\\";
+        else if (c == '\t') result += "\\t";
+        else if (c == '\n') result += "\\n";
+        else if (c == '\r') result += "\\r";
+        else result += c;
+    }
+    return result;
+}
+
+bool unescapeField(const std::string& field, std::string& result) {
+    if (field == "\\e") return true;
+    for (std::size_t i = 0; i < field.size(); ++i) {
+        if (field[i] != '\\') { result += field[i]; continue; }
+        if (++i == field.size()) return false;
+        switch (field[i]) {
+        case '\\': result += '\\'; break;
+        case 't': result += '\t'; break;
+        case 'n': result += '\n'; break;
+        case 'r': result += '\r'; break;
+        default: return false;
+        }
+    }
+    return validRichField(result);
 }
 
 bool hasOuterSpaces(const std::string& field) {
@@ -203,10 +240,12 @@ bool loadDictionary(Dictionary& dictionary, const std::string& path) {
     std::ifstream input(std::filesystem::u8path(path), std::ios::binary);
     if (!input) return false;
 
-    std::vector<std::pair<std::string, std::string>> entries;
+    struct Entry { std::string english, vietnamese, partOfSpeech, example, category; };
+    std::vector<Entry> entries;
     std::unordered_set<std::string> seenEnglish;
     std::string line;
     bool firstLine = true;
+    bool version2 = false;
 
     while (std::getline(input, line)) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
@@ -221,7 +260,33 @@ bool loadDictionary(Dictionary& dictionary, const std::string& path) {
             }
         }
 
+        if (firstLine == false && line == "#TECHDICTIONARY\t2" && entries.empty() && !version2) {
+            version2 = true;
+            continue;
+        }
         if (line.empty()) return false; // Empty physical rows are malformed.
+
+        if (version2) {
+            std::array<std::string, 5> fields;
+            std::size_t start = 0;
+            for (std::size_t i = 0; i < fields.size(); ++i) {
+                const std::size_t tab = line.find('\t', start);
+                if ((i < 4 && tab == std::string::npos) ||
+                    (i == 4 && tab != std::string::npos)) return false;
+                if (!unescapeField(line.substr(start, tab == std::string::npos
+                                                ? tab : tab - start), fields[i])) return false;
+                start = tab + 1;
+            }
+            if (!validField(fields[0]) || !validRichField(fields[1]) ||
+                fields[1].empty() ||
+                hashWord(fields[0]) >= 26 || hasOuterSpaces(fields[0]) ||
+                hasOuterSpaces(fields[1]) ||
+                !seenEnglish.insert(normalizeEnglishKey(fields[0])).second) return false;
+            entries.push_back({std::move(fields[0]), std::move(fields[1]),
+                               std::move(fields[2]), std::move(fields[3]),
+                               std::move(fields[4])});
+            continue;
+        }
 
         const std::size_t tab = line.find('\t');
         if (tab == std::string::npos || tab == 0 || tab + 1 >= line.size() ||
@@ -236,7 +301,7 @@ bool loadDictionary(Dictionary& dictionary, const std::string& path) {
             return false;
         }
         if (!seenEnglish.insert(normalizeEnglishKey(english)).second) return false;
-        entries.emplace_back(std::move(english), std::move(vietnamese));
+        entries.push_back({std::move(english), std::move(vietnamese), {}, {}, {}});
     }
     if (input.bad()) return false;
 
@@ -245,7 +310,8 @@ bool loadDictionary(Dictionary& dictionary, const std::string& path) {
     // nodes are untouched until every row has been accepted by addWord().
     DictionaryOwner temporary;
     for (const auto& entry : entries) {
-        if (!addWord(temporary.get(), entry.first, entry.second)) return false;
+        if (!addEntry(temporary.get(), entry.english, entry.vietnamese,
+                      entry.partOfSpeech, entry.example, entry.category)) return false;
     }
 
     temporary.replace(dictionary);
@@ -256,20 +322,30 @@ bool saveDictionary(const Dictionary& dictionary, const std::string& path) {
     if (path.empty()) return false;
     std::unordered_set<std::string> seenEnglish;
     std::string contents;
+    if (!listAllWords(dictionary).empty()) contents = "#TECHDICTIONARY\t2\n";
 
     // Validate and serialize in memory before creating any temporary file.
     for (std::size_t bucket = 0; bucket < 26; ++bucket) {
         for (const WordNode* node = dictionary.buckets[bucket];
              node != nullptr; node = node->next) {
-            if (!validField(node->english) || !validField(node->vietnamese) ||
+            if (!validField(node->english) || !validRichField(node->vietnamese) ||
+                node->vietnamese.empty() ||
                 hasOuterSpaces(node->english) || hasOuterSpaces(node->vietnamese) ||
-                hashWord(node->english) != bucket) {
+                hashWord(node->english) != bucket ||
+                !validRichField(node->partOfSpeech) ||
+                !validRichField(node->example) || !validRichField(node->category)) {
                 return false;
             }
             if (!seenEnglish.insert(normalizeEnglishKey(node->english)).second) return false;
-            contents += node->english;
+            contents += escapeField(node->english);
             contents.push_back('\t');
-            contents += node->vietnamese;
+            contents += escapeField(node->vietnamese);
+            contents.push_back('\t');
+            contents += escapeField(node->partOfSpeech);
+            contents.push_back('\t');
+            contents += escapeField(node->example);
+            contents.push_back('\t');
+            contents += escapeField(node->category);
             contents.push_back('\n');
         }
     }

@@ -1,96 +1,38 @@
 # Tech Dictionary
 
-Tech Dictionary is a planned Windows desktop English–Vietnamese IT dictionary for a
-university Data Structures & Algorithms project. Version 0.1.0 is the project
-foundation: it opens a styled Qt window, while dictionary features remain unimplemented.
+Tech Dictionary is a C++17 / Qt 6 Widgets desktop dictionary for English–Vietnamese IT terms. Terms live in 26 A–Z hash buckets, each backed by a singly linked list. The application supports search, browsing, A–Z filters, add/edit/delete, Undo/Redo, and UTF-8 TSV open/save.
 
-## Academic objectives
+## Build on Windows
 
-The final project will group English words into 26 hash buckets by their first letter.
-Each bucket will hold a custom singly linked list of words and Vietnamese meanings.
-The team will implement and explain hashing, traversal, insertion, deletion, memory
-management, searching, and file persistence rather than using a library container
-for the core dictionary.
-
-## Technology stack
-
-- C++17
-- Qt 6 Widgets
-- CMake 3.16 or newer
-- Custom hash table and singly linked lists (planned)
-
-## Project structure
-
-| Path | Purpose |
-| --- | --- |
-| `include/` | Shared dictionary API and application controller |
-| `src/` | Entry point, controller, and future dictionary operations |
-| `ui/` | Main window and future search and word dialog components |
-| `resources/` | QSS theme and Qt resource manifest |
-| `data/` | Reserved UTF-8 dictionary file |
-| `tests/` | Test guidance; feature tests arrive with implementations |
-| `docs/` | Architecture and coding standards |
-
-`resources/resources.qrc` embeds `styles.qss` into the executable, so the theme
-is available without relying on the process working directory.
-
-## Build requirements
-
-Install a C++17 compiler, CMake 3.16+, and a Qt 6 installation with the Widgets
-component and its matching compiler kit. On Windows, use a Qt kit compatible with
-your compiler (for example, MSVC Qt with MSVC or MinGW Qt with MinGW).
-
-## Build and run
-
-From the repository root:
+Install Qt 6 Widgets, CMake 3.16+, and a compiler matching the Qt kit. For a Qt MinGW kit, add its `bin` directory and the matching MinGW `bin` directory to `PATH`, then run from the repository root:
 
 ```powershell
-cmake -S . -B build -DCMAKE_PREFIX_PATH="C:/path/to/Qt/6.x.x/your-kit"
-cmake --build build --config Debug
+cmake -S . -B build-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="C:/Qt/6.12.0/mingw_64"
+cmake --build build-debug -j 4
+ctest --test-dir build-debug --output-on-failure
+./build-debug/TechDictionary.exe
 ```
 
-If Qt 6 is already discoverable through your environment, omit
-`-DCMAKE_PREFIX_PATH`. With a single-configuration generator, run
-`build/TechDictionary.exe`; with Visual Studio or another multi-configuration
-generator, run `build/Debug/TechDictionary.exe`. The Qt runtime libraries must
-also be available to the executable (for example, through a Qt-enabled shell or
-deployment with Qt's `windeployqt`).
+For Release, use `build-release` and `-DCMAKE_BUILD_TYPE=Release`. Adjust the Qt path to your installed version. Qt 6 Widgets is required; configuration stops if it is missing. A direct executable launch needs the matching Qt and MinGW `bin` directories on `PATH`. For a standalone test copy, place `TechDictionary.exe` and `data/dictionary.txt` together in a new directory, then run the matching kit's `windeployqt --release --compiler-runtime --dir <directory> <directory>/TechDictionary.exe`. This copies Qt DLLs, the Windows platform plugin and the compiler runtime beside the test executable; it does not change system directories.
 
-## Current UI and planned features
+For a complete local Release ZIP, run `./scripts/package_windows.ps1 -BuildDir build-release -QtRoot C:/Qt/6.12.0/mingw_64` from a PowerShell session with the matching MinGW and Qt `bin` folders on `PATH`. The script writes an ignored `dist/TechDictionary-v0.2.0-win64.zip` and verifies the executable, seed, Qt DLLs, platform plugin, and MinGW runtime files. The Windows GitHub Actions workflow builds Debug and Release, runs all CTest targets and the seed validator regressions, validates the seed, packages Release, runs the packaged app's isolated `--ci-smoke` check, and uploads the ZIP plus a smoke screenshot. The smoke mode uses a temporary personal dictionary path and does not write user data. For a normal manual check, extract the ZIP and launch `TechDictionary.exe` without the smoke flag.
 
-The current window shows a welcome message, Vietnamese UTF-8 text, and disabled
-navigation and search controls marked as coming soon. Its content area expands
-with the window. Planned features are word lookup and browsing, add/update/delete,
-advanced search, settings, and text-file persistence. No dictionary algorithm is
-linked into the v0.1.0 executable.
+## Using the application
 
-## Team responsibilities
+The bundled `data/dictionary.txt` is loaded when no editable dictionary exists. The app keeps this seed read-only and saves changes to `QStandardPaths::AppDataLocation/dictionary.txt` for the current user. **File → Open** loads a legacy two-column UTF-8 TSV or a version 2 dictionary; **Save** writes the active editable file; **Save As** chooses a new path. The app confirms unsaved changes before Open or Exit. A corrupt load leaves the current dictionary intact.
 
-| Member | Owned area |
-| --- | --- |
-| TV1 (leader) | App controller, CMake, integration, code review |
-| TV2 | Hash buckets, linked lists, memory management |
-| TV3 | Add, search, advanced search, search widget |
-| TV4 | Update, delete, optional undo/redo, word dialog |
-| TV5 | Main window, Qt layout, QSS design |
-| TV6 | Dictionary display, file storage, sample data |
+The version 2 bundled seed contains 588 unique terms. All 288 original English keys remain in `data/dictionary_legacy.txt`; two legacy Vietnamese meanings were corrected during editorial review. Every entry has a part of speech, English example, and category. The sole metadata source for legacy terms is `data/legacy_enrichment.tsv`, with four tab-separated columns: English key, part of speech, original English example sentence, and category. Keys must exactly match the legacy file. The 300 added terms are in `data/v2_additions.tsv`, with five columns: category, English key, Vietnamese meaning, part of speech, and example. Run `python scripts/validate_seed.py --build` to deterministically regenerate only the bundled `data/dictionary.txt`, then run `python scripts/validate_seed.py` and `python -m unittest discover -s tests -p test_seed_validation.py` to audit it. These scripts never write personal dictionaries. See [dictionary QA](docs/DICTIONARY_QA.md) for corrections, category counts, and editorial review notes.
 
-Each member should contribute C++ code. TV3 and TV4 own their Qt components in
-addition to dictionary operations. The initial window is a minimal scaffold for
-TV5 to refine.
+Version 2 files begin with `#TECHDICTIONARY<TAB>2`. Each following physical row has five tab-separated fields: English term, Vietnamese meaning, part of speech, English example, and category. Empty optional fields use `\e`. Backslash, tab, newline, and carriage return within version 2 fields use `\\`, `\t`, `\n`, and `\r` escapes. Invalid escapes, duplicate keys, bad UTF-8, or malformed rows reject the entire load. Saving a nonempty dictionary writes version 2 atomically, including after a legacy load. Opening a legacy file does not rewrite it, and startup migration never overwrites a personal dictionary.
 
-## Development workflow
+If the user dictionary cannot be read at startup, a one-time recovery dialog offers another file, the bundled seed, or an empty dictionary. The unreadable file is preserved. After seed or empty recovery, Save asks for a path; choosing to replace the unreadable original requires an additional explicit confirmation. If both files are missing, the app starts empty and remains usable.
 
-Keep the default branch buildable. After this skeleton is reviewed, create work
-branches as needed: `feature/core`, `feature/search`, `feature/edit`, `feature/ui`,
-and `feature/storage`. These branches do not exist yet. Open focused pull requests,
-request a teammate's review, and merge only after the Qt build and relevant tests
-pass. Add each feature's source files to `CMakeLists.txt` only when they contain
-real implementations and their dependencies are ready. Follow
-[`docs/CODING_STANDARDS.md`](docs/CODING_STANDARDS.md).
+Type an English prefix to see up to eight live suggestions. Select a suggestion with the arrow keys and Enter or with the mouse; Escape closes the popup. Select a list item to see its meaning, part of speech, English example, and category when available, or choose an A–Z range in the sidebar. Add, edit, and delete use the buttons in the main window. Edit → Undo/Redo use Ctrl+Z and Ctrl+Y. Changes made since the last save are marked in the window state.
 
-Before implementing the dictionary, the leader and module owners should settle
-the invalid-word behavior for `hashWord`, case matching, duplicate handling, and
-the text-file format. The declarations in [`include/dictionary.h`](include/dictionary.h)
-provide ownership and result conventions without inventing algorithms for this
-milestone.
+## Project ownership
+
+TV2–TV6 implemented the original modules. TV1 owns the version 2 feature extension: metadata in the shared WordNode contract and history snapshots, versioned storage, autocomplete integration, seed expansion, validation, tests, and documentation. The 26-bucket hash table and singly linked lists remain the primary dictionary store. See [architecture](docs/ARCHITECTURE.md) for details.
+
+## Limits
+
+English keys must begin with ASCII A–Z and are matched without ASCII case sensitivity. Suggestions use prefix matching, while exact lookup and editing still use whole terms. There is no fuzzy search. Undo/Redo history is in memory and resets when a dictionary file is opened or the application exits. A user-provided two-column legacy file remains metadata-free on load; bundled legacy terms have separate curated metadata in the generated seed.

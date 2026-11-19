@@ -13,9 +13,14 @@ public:
     struct Entry {
         std::string english;
         std::string vietnamese;
+        std::string partOfSpeech;
+        std::string example;
+        std::string category;
 
         bool operator==(const Entry& other) const {
-            return english == other.english && vietnamese == other.vietnamese;
+            return english == other.english && vietnamese == other.vietnamese &&
+                   partOfSpeech == other.partOfSpeech && example == other.example &&
+                   category == other.category;
         }
     };
 

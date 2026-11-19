@@ -4,9 +4,9 @@
 
 #include <string>
 
-// Read UTF-8 TSV rows in the form English<TAB>Vietnamese.
+// Read legacy two-column UTF-8 TSV or #TECHDICTIONARY<TAB>2 five-column TSV.
 // On failure, leave the existing dictionary unchanged.
 bool loadDictionary(Dictionary& dictionary, const std::string& path);
 
-// Save UTF-8 TSV rows through a validated temporary file before replacement.
+// Save version 2 UTF-8 TSV through a validated temporary file before replacement.
 bool saveDictionary(const Dictionary& dictionary, const std::string& path);

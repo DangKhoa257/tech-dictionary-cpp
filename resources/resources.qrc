@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="styles.qss">styles.qss</file>
+        <file alias="icons/tech-dictionary.png">icons/tech-dictionary.png</file>
     </qresource>
 </RCC>

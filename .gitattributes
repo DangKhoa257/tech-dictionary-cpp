@@ -1,0 +1,2 @@
+# Keep the generated V2 seed byte-for-byte reproducible on Windows checkouts.
+data/dictionary.txt text eol=lf

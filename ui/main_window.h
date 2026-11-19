@@ -10,32 +10,31 @@
 #include <QFrame>
 #include <QStringList>
 
+class QGraphicsOpacityEffect;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
-    // Các hàm cho TV1 kết nối danh sách từ và hiển thị chi tiết
     void setWordList(const QStringList &words);
-    void setWordDetail(const QString &title, const QString &definition);
-    // Empty when no word is selected. Controller enables requests after wiring.
+    void setTotalWordCount(int count);
+    void setWordDetail(const QString &title, const QString &definition,
+                       const QString &partOfSpeech = {}, const QString &example = {},
+                       const QString &category = {}, const QStringList &relatedWords = {});
     QString selectedWord() const;
     void setInteractionEnabled(bool enabled);
+    void setActiveFilter(const QString& filter);
 
-    // Hàm lấy layout để TV1 nhúng SearchWidget của TV3
     QVBoxLayout* getSearchContainerLayout() const;
 
 signals:
-    // Values: "All Words", "A - E", "F - J", "K - O", "P - T", "U - Z".
     void filterRequested(const QString &range);
-
-    // Tín hiệu Thêm / Sửa / Xóa cho TV1 nối với TV4
     void addWordRequested();
     void editWordRequested();
     void deleteWordRequested();
-
     void wordSelected(const QString &word);
 
 private slots:
@@ -47,24 +46,35 @@ private slots:
 
 private:
     void setupUi();
+    void setupSidebar(QHBoxLayout* mainLayout);
+    void setupHeader(QVBoxLayout* contentLayout);
+    void setupSearchArea(QVBoxLayout* contentLayout);
+    void setupStatsCards(QVBoxLayout* contentLayout);
+    void setupContentSplitter(QVBoxLayout* contentLayout);
+    void animateDetailTransition();
 
-    QWidget *centralWidget;
-    QFrame *sidebarFrame;
-    QWidget *contentWidget;
-    QVBoxLayout *searchContainerLayout;
+    QWidget *centralWidget = nullptr;
+    QFrame *sidebarFrame = nullptr;
+    QWidget *contentWidget = nullptr;
+    QVBoxLayout *searchContainerLayout = nullptr;
 
-    QLabel *brandLabel;
-    QLabel *eyebrowLabel;
-    QLabel *headingLabel;
-    QLabel *descriptionLabel;
-    QLabel *sidebarFooterLabel;
+    QLabel *brandLabel = nullptr;
+    QLabel *eyebrowLabel = nullptr;
+    QLabel *headingLabel = nullptr;
+    QLabel *descriptionLabel = nullptr;
+    QLabel *sidebarFooterLabel = nullptr;
+    QLabel *totalWordCountLabel_ = nullptr;
+    QLabel *visibleCountLabel_ = nullptr;
+    QLabel *emptyStateLabel_ = nullptr;
+    QLabel *statsTermsCountLabel_ = nullptr;
 
-    QListWidget *wordListWidget;
-    QTextEdit *wordDetailTextEdit;
+    QListWidget *wordListWidget = nullptr;
+    QTextEdit *wordDetailTextEdit = nullptr;
+    QGraphicsOpacityEffect *detailOpacityEffect_ = nullptr;
 
-    QPushButton *btnAdd;
-    QPushButton *btnEdit;
-    QPushButton *btnDelete;
+    QPushButton *btnAdd = nullptr;
+    QPushButton *btnEdit = nullptr;
+    QPushButton *btnDelete = nullptr;
     QList<QPushButton*> filterButtons_;
     bool interactionEnabled_ = false;
 };

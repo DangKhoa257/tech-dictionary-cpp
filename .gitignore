@@ -3,6 +3,7 @@
 /build-*/
 /cmake-build-*/
 /out/
+/dist/
 /.vs/
 /.vscode/
 /.idea/
@@ -17,6 +18,8 @@ compile_commands.json
 *.tmp
 *.temp
 *~
+__pycache__/
+*.py[cod]
 
 # Compiler and Qt output
 *.obj
