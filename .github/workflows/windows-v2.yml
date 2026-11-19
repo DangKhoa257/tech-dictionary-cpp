@@ -99,7 +99,14 @@ jobs:
           $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
           $screenshot = Join-Path $env:RUNNER_TEMP 'tech-dictionary-v2-smoke.png'
           $process = Start-Process -FilePath $packageExe -ArgumentList @('--ci-smoke', $screenshot) -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Packaged GUI smoke test failed: $($process.ExitCode)" }
+          if ($process.ExitCode -ne 0) {
+            $diagnostics = Join-Path $env:RUNNER_TEMP 'smoke-diagnostics.txt'
+            if (Test-Path -LiteralPath $diagnostics) { Get-Content -LiteralPath $diagnostics }
+            foreach ($file in (Get-ChildItem -LiteralPath $env:RUNNER_TEMP -Filter 'tech-dictionary-v2-*.png' -File)) {
+              Copy-Item -LiteralPath $file.FullName -Destination (Join-Path 'dist' $file.Name)
+            }
+            throw "Packaged GUI smoke test failed: $($process.ExitCode)"
+          }
           if (-not (Test-Path -LiteralPath $screenshot -PathType Leaf)) {
             throw 'GUI screenshot was not created'
           }

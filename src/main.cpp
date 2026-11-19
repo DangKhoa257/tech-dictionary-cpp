@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QEventLoop>
+#include <QFile>
 #include <QFileInfo>
 #include <QFrame>
 #include <QGraphicsOpacityEffect>
@@ -18,6 +19,7 @@
 #include <QScreen>
 #include <QTemporaryDir>
 #include <QTextEdit>
+#include <QTextStream>
 #include <QTimer>
 
 #include <cstdlib>
@@ -89,6 +91,15 @@ int main(int argc, char* argv[]) {
 
         QTimer::singleShot(250, &application, [&application, &controller, screenshot, dashShot, autoShot,
                                                 detailShot, addPopupShot, editPopupShot, framesDir] {
+            const QString diagnosticPath = QFileInfo(screenshot).dir().filePath(
+                QStringLiteral("smoke-diagnostics.txt"));
+            const auto report = [&diagnosticPath](const QString& stage, bool passed) {
+                QFile output(diagnosticPath);
+                if (output.open(QIODevice::Append | QIODevice::Text)) {
+                    QTextStream stream(&output);
+                    stream << stage << ": " << (passed ? "PASS" : "FAIL") << '\n';
+                }
+            };
             const auto delay = [](int ms) {
                 QEventLoop loop;
                 QTimer::singleShot(ms, &loop, &QEventLoop::quit);
@@ -101,6 +112,7 @@ int main(int argc, char* argv[]) {
             auto* detailCard = controller.window().findChild<QFrame*>(QStringLiteral("detailCard"));
 
             bool okay = list && detail && input && list->count() >= 550;
+            report(QStringLiteral("initial controls and seed"), okay);
             if (okay) {
                 // Step 1: Verify data & select Algorithm
                 const auto items = list->findItems(QStringLiteral("Algorithm"), Qt::MatchExactly);
@@ -110,6 +122,7 @@ int main(int argc, char* argv[]) {
 
                 okay = okay && detail->toPlainText().contains(
                     QStringLiteral("The algorithm sorts the array in ascending order."));
+                report(QStringLiteral("Algorithm detail"), okay);
 
                 // Verify Prompt & Socket
                 const auto prompt = list->findItems(QStringLiteral("Prompt"), Qt::MatchExactly);
@@ -128,6 +141,7 @@ int main(int argc, char* argv[]) {
                         QStringLiteral("Điểm cuối giao tiếp mạng")) &&
                         detail->toPlainText().contains(QStringLiteral("Networking"));
                 }
+                report(QStringLiteral("Prompt and Socket detail"), okay);
 
                 // Return to Algorithm for Dashboard screenshot
                 if (okay) list->setCurrentItem(items.front());
@@ -172,6 +186,8 @@ int main(int argc, char* argv[]) {
                         delay(25);
                     }
                     okay = okay && fade && fadeStart < 0.6 && fade->opacity() > 0.98;
+                    report(QStringLiteral("detail fade"), fade && fadeStart < 0.6 &&
+                           fade->opacity() > 0.98);
                 }
 
                 // Step 3: Type "comp" and capture Autocomplete reveal
@@ -218,6 +234,7 @@ int main(int argc, char* argv[]) {
                 okay = okay && QFileInfo(screenshot).size() > 1000 &&
                        QFileInfo(dashShot).size() > 1000 &&
                        QFileInfo(autoShot).size() > 1000;
+                report(QStringLiteral("autocomplete and dashboard screenshots"), okay);
 
                 // Capture real Windows popup widgets while Add and Edit dialogs are open.
                 auto* addButton = controller.window().findChild<QPushButton*>(QStringLiteral("addButton"));
@@ -235,6 +252,8 @@ int main(int argc, char* argv[]) {
                     delay(70);
                     okay = okay && popupUsable(*part) &&
                            captureDialogState(controller.window(), *addDialog, *part, addPopupShot);
+                    report(QStringLiteral("add part popup"), popupUsable(*part) &&
+                           QFileInfo(addPopupShot).size() > 1000);
                     part->hidePopup();
                     part->setCurrentText(QStringLiteral("Noun"));
                     category->setCurrentText(QStringLiteral("Programming"));
@@ -251,6 +270,7 @@ int main(int argc, char* argv[]) {
                 }
                 okay = okay && controller.searchWord(QStringLiteral("VisualSmokeOnly")).status ==
                        ControllerStatus::NotFound;
+                report(QStringLiteral("add cancel leaves data unchanged"), okay);
 
                 if (okay) list->setCurrentItem(items.front());
                 auto* editButton = controller.window().findChild<QPushButton*>(QStringLiteral("editButton"));
@@ -271,6 +291,8 @@ int main(int argc, char* argv[]) {
                     okay = okay && popupUsable(*editCategory) &&
                            captureDialogState(controller.window(), *editDialog, *editCategory,
                                               editPopupShot);
+                    report(QStringLiteral("edit category popup"), popupUsable(*editCategory) &&
+                           QFileInfo(editPopupShot).size() > 1000);
                     editCategory->hidePopup();
                     editPart->setCurrentText(QStringLiteral("Verb"));
                     editCategory->setCurrentText(QStringLiteral("Programming"));
@@ -288,10 +310,12 @@ int main(int argc, char* argv[]) {
                     okay = okay && controller.redo().status == ControllerStatus::Success &&
                            controller.searchWord(QStringLiteral("Algorithm")).category ==
                                QStringLiteral("Programming");
+                    report(QStringLiteral("edit save undo redo"), okay);
                 }
                 okay = okay && QFileInfo(addPopupShot).size() > 1000 &&
                        QFileInfo(editPopupShot).size() > 1000;
             }
+            report(QStringLiteral("final result"), okay);
             application.exit(okay ? 0 : 3);
         });
     }
