@@ -75,7 +75,8 @@ void MainWindow::setupSidebar(QHBoxLayout* mainLayout) {
     brandLayout->setSpacing(12);
 
     auto* logoLabel = new QLabel(sidebarFrame);
-    logoLabel->setPixmap(IconHelper::brandLogoPixmap(38));
+    logoLabel->setPixmap(QPixmap(QStringLiteral(":/icons/tech-dictionary.png"))
+                             .scaled(38, 38, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     logoLabel->setFixedSize(38, 38);
     brandLayout->addWidget(logoLabel);
 

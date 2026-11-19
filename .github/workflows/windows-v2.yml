@@ -103,6 +103,18 @@ jobs:
         run: |
           ./scripts/package_windows.ps1 -BuildDir build-release -QtRoot $env:QT_ROOT_DIR
 
+      - name: Verify Windows icon and capture title bar and taskbar
+        shell: pwsh
+        run: |
+          $built = (Get-FileHash -Algorithm SHA256 -LiteralPath 'build-release/TechDictionary.exe').Hash
+          $packaged = (Get-FileHash -Algorithm SHA256 -LiteralPath 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe').Hash
+          if ($built -ne $packaged) { throw 'Packaged executable differs from verified Release build' }
+          ./scripts/verify_windows_icon.ps1 `
+            -Executable 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe' `
+            -IconFile 'resources/icons/tech-dictionary.ico' `
+            -SourcePng 'resources/icons/tech-dictionary.png' `
+            -OutputDirectory 'dist'
+
       - name: Smoke test packaged GUI and capture screenshots & animations
         shell: pwsh
         run: |
@@ -181,4 +193,8 @@ jobs:
             dist/15-tech-dictionary-v2-edit-category-popup.png
             dist/tech-dictionary-v2-animation.gif
             dist/tech-dictionary-v2-animation.mp4
+            dist/tech-dictionary-exe-icon.png
+            dist/tech-dictionary-windows-desktop.png
+            dist/tech-dictionary-titlebar.png
+            dist/tech-dictionary-taskbar.png
           if-no-files-found: warn

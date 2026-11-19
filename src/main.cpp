@@ -12,6 +12,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QGuiApplication>
 #include <QKeyEvent>
+#include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -70,6 +71,9 @@ int main(int argc, char* argv[]) {
     QApplication application(argc, argv);
     application.setApplicationName("Tech Dictionary");
     application.setOrganizationName("Tech Dictionary Team");
+    const QIcon brandIcon(QStringLiteral(":/icons/tech-dictionary.png"));
+    if (brandIcon.isNull()) return 4;
+    application.setWindowIcon(brandIcon);
 
     const bool smoke = argc == 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--ci-smoke");
     QTemporaryDir isolatedData;
@@ -121,7 +125,9 @@ int main(int argc, char* argv[]) {
                 return nullptr;
             };
 
-            bool okay = list && detail && input && list->count() >= 550;
+            bool okay = list && detail && input && list->count() >= 550 &&
+                !application.windowIcon().isNull() &&
+                !controller.window().windowIcon().isNull();
             report(QStringLiteral("initial controls and seed"), okay);
             if (okay) {
                 // Step 1: Verify data & select Algorithm
@@ -288,7 +294,8 @@ int main(int argc, char* argv[]) {
                 auto* addExample = addDialog ? addDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
                 const auto addFields = addDialog ? addDialog->findChildren<QLineEdit*>() : QList<QLineEdit*>{};
                 okay = okay && addDialog && part && category && addExample &&
-                       addFields.size() == 2 && addDialog->isVisible();
+                       addFields.size() == 2 && addDialog->isVisible() &&
+                       !addDialog->windowIcon().isNull();
                 if (addDialog && part && category) {
                     part->showPopup();
                     delay(70);
@@ -327,7 +334,7 @@ int main(int argc, char* argv[]) {
                 auto* editPart = editDialog ? editDialog->findChild<QComboBox*>(QStringLiteral("partOfSpeechInput")) : nullptr;
                 auto* editExample = editDialog ? editDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
                 okay = okay && editDialog && editCategory && editPart && editExample &&
-                       editDialog->isVisible() &&
+                       editDialog->isVisible() && !editDialog->windowIcon().isNull() &&
                        editDialog->englishWord() == QStringLiteral("Algorithm") &&
                        editDialog->partOfSpeech() == QStringLiteral("Noun") &&
                        editDialog->category() == QStringLiteral("Algorithms");

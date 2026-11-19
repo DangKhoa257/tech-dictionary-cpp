@@ -12,6 +12,9 @@ endif()
 if(Qt6_FOUND)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
+    if(WIN32)
+        enable_language(RC)
+    endif()
 
     add_executable(TechDictionary WIN32
         src/main.cpp
@@ -33,6 +36,10 @@ if(Qt6_FOUND)
         ui/delete_confirm.h
         resources/resources.qrc
     )
+    if(WIN32)
+        target_sources(TechDictionary PRIVATE resources/app_icon.rc)
+        target_include_directories(TechDictionary PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+    endif()
 
     target_include_directories(TechDictionary PRIVATE include ui)
     target_link_libraries(TechDictionary PRIVATE Qt6::Widgets)
