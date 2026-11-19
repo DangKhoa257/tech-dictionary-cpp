@@ -123,7 +123,7 @@ jobs:
             throw 'GUI screenshot was not created'
           }
           Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
-          foreach ($name in @('tech-dictionary-v2-dashboard.png', 'tech-dictionary-v2-autocomplete.png', 'tech-dictionary-v2-detail.png', 'tech-dictionary-v2-add-part-popup.png', 'tech-dictionary-v2-edit-category-popup.png')) {
+          foreach ($name in @('tech-dictionary-v2-dashboard.png', 'tech-dictionary-v2-autocomplete.png', 'tech-dictionary-v2-autocomplete-popup.png', 'tech-dictionary-v2-detail.png', 'tech-dictionary-v2-add-part-popup.png', 'tech-dictionary-v2-edit-category-popup.png')) {
             $src = Join-Path $env:RUNNER_TEMP $name
             if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "Missing GUI screenshot: $name" }
             Copy-Item -LiteralPath $src -Destination (Join-Path 'dist' $name)
@@ -171,6 +171,7 @@ jobs:
             dist/tech-dictionary-v2-smoke.png
             dist/tech-dictionary-v2-dashboard.png
             dist/tech-dictionary-v2-autocomplete.png
+            dist/tech-dictionary-v2-autocomplete-popup.png
             dist/tech-dictionary-v2-detail.png
             dist/tech-dictionary-v2-add-part-popup.png
             dist/tech-dictionary-v2-edit-category-popup.png

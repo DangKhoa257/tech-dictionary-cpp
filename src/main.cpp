@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
         const QDir shotDir = shotInfo.dir();
         const QString dashShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-dashboard.png"));
         const QString autoShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-autocomplete.png"));
+        const QString autoPopupShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-autocomplete-popup.png"));
         const QString detailShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-detail.png"));
         const QString addPopupShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-add-part-popup.png"));
         const QString editPopupShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-edit-category-popup.png"));
@@ -91,7 +92,8 @@ int main(int argc, char* argv[]) {
         QDir().mkpath(framesDir);
 
         QTimer::singleShot(250, &application, [&application, &controller, screenshot, dashShot, autoShot,
-                                                detailShot, addPopupShot, editPopupShot, framesDir] {
+                                                autoPopupShot, detailShot, addPopupShot,
+                                                editPopupShot, framesDir] {
             const QString diagnosticPath = QFileInfo(screenshot).dir().filePath(
                 QStringLiteral("smoke-diagnostics.txt"));
             const auto report = [&diagnosticPath](const QString& stage, bool passed) {
@@ -169,7 +171,7 @@ int main(int argc, char* argv[]) {
                         QWidget* popup = input->completer()->popup();
                         QPoint relPos = popup->mapToGlobal(QPoint(0, 0)) - controller.window().mapToGlobal(QPoint(0, 0));
                         QPainter painter(&p);
-                        popup->render(&painter, relPos);
+                        painter.drawPixmap(relPos, popup->grab());
                         painter.end();
                     }
                     const QString fname = QStringLiteral("frame_%1.png").arg(frameIndex++, 3, 10, QLatin1Char('0'));
@@ -233,8 +235,13 @@ int main(int argc, char* argv[]) {
                 if (popupStillVisible) {
                     QWidget* popup = input->completer()->popup();
                     QPoint relPos = popup->mapToGlobal(QPoint(0, 0)) - controller.window().mapToGlobal(QPoint(0, 0));
+                    const QPixmap popupPix = popup->grab();
+                    popupPix.save(autoPopupShot, "PNG");
+                    report(QStringLiteral("autocomplete popup geometry %1,%2 %3x%4 opacity %5")
+                        .arg(relPos.x()).arg(relPos.y()).arg(popup->width()).arg(popup->height())
+                        .arg(popup->windowOpacity()), popupPix.width() > 0 && popupPix.height() > 0);
                     QPainter painter(&autoPix);
-                    popup->render(&painter, relPos);
+                    painter.drawPixmap(relPos, popupPix);
                     painter.end();
                 }
                 autoPix.save(autoShot, "PNG");
@@ -242,7 +249,8 @@ int main(int argc, char* argv[]) {
 
                 okay = okay && QFileInfo(screenshot).size() > 1000 &&
                        QFileInfo(dashShot).size() > 1000 &&
-                       QFileInfo(autoShot).size() > 1000;
+                       QFileInfo(autoShot).size() > 1000 &&
+                       QFileInfo(autoPopupShot).size() > 1000;
                 report(QStringLiteral("autocomplete and dashboard screenshots"), okay);
 
                 // Navigate the open suggestion list with the keyboard, then search it.
