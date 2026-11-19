@@ -11,6 +11,7 @@
 #include <QFrame>
 #include <QGraphicsOpacityEffect>
 #include <QGuiApplication>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPainter>
@@ -204,6 +205,10 @@ int main(int argc, char* argv[]) {
 
                 input->completer()->complete();
                 QCoreApplication::processEvents();
+                const bool autocompleteVisible = input->completer()->popup() &&
+                    input->completer()->popup()->isVisible();
+                okay = okay && autocompleteVisible;
+                report(QStringLiteral("autocomplete popup visible"), autocompleteVisible);
 
                 // Capture autocomplete reveal animation frames
                 for (int i = 0; i < 8; ++i) {
@@ -211,11 +216,6 @@ int main(int argc, char* argv[]) {
                     delay(25);
                 }
 
-                // Highlight first suggestion
-                if (input->completer()->popup()) {
-                    input->completer()->popup()->setCurrentIndex(
-                        input->completer()->popup()->model()->index(0, 0));
-                }
                 delay(50);
 
                 // Hold final autocomplete state for GIF
@@ -226,8 +226,11 @@ int main(int argc, char* argv[]) {
 
                 // Save Autocomplete screenshot and primary smoke screenshot
                 QPixmap autoPix = controller.window().grab();
-                if (input->completer() && input->completer()->popup() &&
-                    input->completer()->popup()->isVisible()) {
+                const bool popupStillVisible = input->completer() && input->completer()->popup() &&
+                    input->completer()->popup()->isVisible();
+                okay = okay && popupStillVisible;
+                report(QStringLiteral("autocomplete popup captured while open"), popupStillVisible);
+                if (popupStillVisible) {
                     QWidget* popup = input->completer()->popup();
                     QPoint relPos = popup->mapToGlobal(QPoint(0, 0)) - controller.window().mapToGlobal(QPoint(0, 0));
                     QPainter painter(&autoPix);
@@ -241,6 +244,22 @@ int main(int argc, char* argv[]) {
                        QFileInfo(dashShot).size() > 1000 &&
                        QFileInfo(autoShot).size() > 1000;
                 report(QStringLiteral("autocomplete and dashboard screenshots"), okay);
+
+                // Navigate the open suggestion list with the keyboard, then search it.
+                if (autocompleteVisible) {
+                    auto* popup = input->completer()->popup();
+                    QKeyEvent down(QEvent::KeyPress, Qt::Key_Down, Qt::NoModifier);
+                    QCoreApplication::sendEvent(popup, &down);
+                    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+                    QCoreApplication::sendEvent(popup, &enter);
+                    delay(70);
+                    const QString chosen = input->text();
+                    const bool keyboardSearch = chosen != QStringLiteral("comp") &&
+                        controller.searchWord(chosen).status == ControllerStatus::Success &&
+                        list->currentItem() && list->currentItem()->text() == chosen;
+                    okay = okay && keyboardSearch;
+                    report(QStringLiteral("autocomplete keyboard selection and search"), keyboardSearch);
+                }
 
                 // Capture real Windows popup widgets while Add and Edit dialogs are open.
                 auto* addButton = controller.window().findChild<QPushButton*>(QStringLiteral("addButton"));
@@ -278,7 +297,11 @@ int main(int argc, char* argv[]) {
                        ControllerStatus::NotFound;
                 report(QStringLiteral("add cancel leaves data unchanged"), okay);
 
-                if (okay) list->setCurrentItem(items.front());
+                if (okay) {
+                    const auto algorithmItems = list->findItems(QStringLiteral("Algorithm"), Qt::MatchExactly);
+                    okay = !algorithmItems.isEmpty();
+                    if (okay) list->setCurrentItem(algorithmItems.front());
+                }
                 auto* editButton = controller.window().findChild<QPushButton*>(QStringLiteral("editButton"));
                 if (okay && editButton) editButton->click();
                 delay(70);
