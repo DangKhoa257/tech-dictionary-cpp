@@ -4,13 +4,17 @@
 #include <QApplication>
 #include <QEasingCurve>
 #include <QFile>
+#include <QGuiApplication>
 #include <QGraphicsOpacityEffect>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidgetItem>
 #include <QPropertyAnimation>
+#include <QScreen>
 #include <QSplitter>
 #include <QVBoxLayout>
+
+#include <algorithm>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setupUi();
@@ -21,7 +25,8 @@ MainWindow::~MainWindow() = default;
 void MainWindow::setupUi() {
     setWindowTitle(QStringLiteral("Tech Dictionary"));
     setMinimumSize(800, 560);
-    resize(1120, 730);
+    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
+    resize(std::min(1120, screen.width()), std::min(730, screen.height()));
 
     QFile styleFile(QStringLiteral(":/styles.qss"));
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -434,7 +439,7 @@ void MainWindow::onItemSelectionChanged() {
 void MainWindow::animateDetailTransition() {
     if (!detailOpacityEffect_) return;
 
-    if (qEnvironmentVariableIsSet("QT_QPA_PLATFORM") ||
+    if (QGuiApplication::platformName() == QLatin1String("offscreen") ||
         qEnvironmentVariableIsSet("TECH_DICTIONARY_NO_ANIMATION")) {
         detailOpacityEffect_->setOpacity(1.0);
         return;
@@ -483,66 +488,47 @@ void MainWindow::setWordDetail(const QString& title, const QString& definition,
     }
 
     QString html;
-    html.reserve(1500);
-
+    html.reserve(1100);
     html += QStringLiteral(
-        "<div style='font-family:\"Segoe UI\", sans-serif; color:#102440; padding:2px 0px;'>"
-        "<div style='font-size:27px; font-weight:700; color:#0F172A; margin-bottom:10px;'>%1</div>"
-        "<div style='margin-bottom:14px;'>")
+        "<div style='font-family:Segoe UI; color:#102440;'>"
+        "<p style='font-size:21pt; font-weight:700; margin:2px 0 6px 0;'>%1</p>")
         .arg(title.toHtmlEscaped());
 
-    if (!partOfSpeech.isEmpty()) {
+    QStringList metadata;
+    if (!partOfSpeech.isEmpty()) metadata.append(partOfSpeech.toHtmlEscaped());
+    if (!category.isEmpty()) metadata.append(category.toHtmlEscaped());
+    if (!metadata.isEmpty()) {
         html += QStringLiteral(
-            "<span style='background-color:#DBEAFE; color:#1D4ED8; font-size:12px; font-weight:600; "
-            "padding:4px 11px; border-radius:6px; margin-right:8px;'>%1</span>")
-            .arg(partOfSpeech.toHtmlEscaped());
+            "<p style='color:#1D4ED8; font-size:10pt; font-weight:600; margin:0 0 16px 0;'>%1</p>")
+            .arg(metadata.join(QStringLiteral(" &nbsp; · &nbsp; ")));
     }
 
-    if (!category.isEmpty()) {
-        html += QStringLiteral(
-            "<span style='background-color:#EDE9FE; color:#6D28D9; font-size:12px; font-weight:600; "
-            "padding:4px 11px; border-radius:6px; margin-right:8px;'>%1</span>")
-            .arg(category.toHtmlEscaped());
-    }
-
-    html += QStringLiteral("</div>");
-
-    // Vietnamese Meaning
     html += QStringLiteral(
-        "<div style='margin-top:16px;'>"
-        "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:6px;'>"
-        "<span style='color:#059669; font-weight:700;'>文A</span> &nbsp;Nghĩa tiếng Việt</div>"
-        "<div style='background-color:#EAF7EE; border:1px solid #D1F2E0; border-radius:8px; "
-        "padding:12px 16px; color:#14532D; font-size:16px; font-weight:700;'>%1</div>"
-        "</div>")
+        "<p style='color:#475569; font-size:9pt; font-weight:600; margin:10px 0 5px 0;'>"
+        "NGHĨA TIẾNG VIỆT</p>"
+        "<table width='100%' cellspacing='0' cellpadding='10'><tr>"
+        "<td bgcolor='#EAF7EE'><span style='color:#14532D; font-size:13pt; font-weight:700;'>"
+        "%1</span></td></tr></table>")
         .arg(definition.toHtmlEscaped());
 
-    // English Example
     if (!example.isEmpty()) {
         html += QStringLiteral(
-            "<div style='margin-top:16px;'>"
-            "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:6px;'>"
-            "<span style='color:#2563EB; font-weight:700;'>“</span> &nbsp;Ví dụ</div>"
-            "<div style='background-color:#F1F5F9; border:1px solid #E2E8F0; border-radius:8px; "
-            "padding:12px 16px; color:#334155; font-size:14px; font-style:italic;'>%1</div>"
-            "</div>")
+            "<p style='color:#475569; font-size:9pt; font-weight:600; margin:16px 0 5px 0;'>"
+            "VÍ DỤ TIẾNG ANH</p>"
+            "<table width='100%' cellspacing='0' cellpadding='10'><tr>"
+            "<td bgcolor='#F1F5F9'><span style='color:#334155; font-size:11pt; font-style:italic;'>"
+            "%1</span></td></tr></table>")
             .arg(example.toHtmlEscaped());
     }
 
-    // Related Terms
     if (!relatedWords.isEmpty()) {
+        QStringList safeRelated;
+        for (const auto& word : relatedWords) safeRelated.append(word.toHtmlEscaped());
         html += QStringLiteral(
-            "<div style='margin-top:16px;'>"
-            "<div style='font-size:12px; font-weight:600; color:#475569; margin-bottom:8px;'>"
-            "<span style='color:#2563EB; font-weight:700;'>🔗</span> &nbsp;Thuật ngữ liên quan</div>"
-            "<div>");
-        for (const auto& rel : relatedWords) {
-            html += QStringLiteral(
-                "<span style='background-color:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; "
-                "font-size:12px; font-weight:500; padding:4px 10px; border-radius:6px; margin-right:6px;'>%1</span>")
-                .arg(rel.toHtmlEscaped());
-        }
-        html += QStringLiteral("</div></div>");
+            "<p style='color:#475569; font-size:9pt; font-weight:600; margin:16px 0 5px 0;'>"
+            "THUẬT NGỮ LIÊN QUAN</p>"
+            "<p style='color:#1D4ED8; font-size:10pt; margin:0;'>%1</p>")
+            .arg(safeRelated.join(QStringLiteral(" &nbsp; · &nbsp; ")));
     }
 
     html += QStringLiteral("</div>");

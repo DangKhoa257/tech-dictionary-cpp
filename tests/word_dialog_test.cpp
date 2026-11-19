@@ -3,8 +3,14 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QComboBox>
+#include <QAbstractItemView>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QScrollBar>
 #include <QTextEdit>
+#include <QTest>
 
+#include <cstdlib>
 #include <iostream>
 
 #include "word_dialog.h"
@@ -49,8 +55,39 @@ int main(int argc, char* argv[]) {
     });
     check(example && categories.size() == 2, "enriched fields exist");
     if (example && categories.size() == 2) {
-        categories[0]->setCurrentText(QStringLiteral("Noun"));
-        categories[1]->setCurrentText(QStringLiteral("Algorithms"));
+        auto* part = add.findChild<QComboBox*>(QStringLiteral("partOfSpeechInput"));
+        auto* category = add.findChild<QComboBox*>(QStringLiteral("categoryInput"));
+        check(part && category, "named metadata controls exist");
+        if (!part || !category) return 1;
+        part->showPopup();
+        QCoreApplication::processEvents();
+        auto* partView = part->view();
+        auto* partPopup = partView->window();
+        const QColor partText = partView->palette().color(QPalette::Text);
+        const QColor partBase = partView->palette().color(QPalette::Base);
+        check(partPopup->isVisible() && partPopup->height() < 300 &&
+                  QGuiApplication::primaryScreen()->availableGeometry().contains(partPopup->geometry()) &&
+                  std::abs(partText.lightness() - partBase.lightness()) >= 100,
+              "part popup is visible, bounded and readable");
+        const QModelIndex noun = partView->model()->index(part->findText(QStringLiteral("Noun")), 0);
+        QTest::mouseClick(partView->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          partView->visualRect(noun).center());
+        check(part->currentText() == QStringLiteral("Noun"), "mouse selects part of speech");
+
+        category->showPopup();
+        QCoreApplication::processEvents();
+        auto* categoryView = category->view();
+        auto* categoryPopup = categoryView->window();
+        check(categoryPopup->isVisible() && categoryPopup->height() < 300 &&
+                  QGuiApplication::primaryScreen()->availableGeometry().contains(categoryPopup->geometry()) &&
+                  categoryView->verticalScrollBar() &&
+                  categoryView->verticalScrollBar()->maximum() > 0,
+              "category popup is bounded and scrollable");
+        categoryView->setCurrentIndex(categoryView->model()->index(
+            category->findText(QStringLiteral("Algorithms")), 0));
+        QTest::keyClick(categoryView, Qt::Key_Return);
+        check(category->currentText() == QStringLiteral("Algorithms"),
+              "keyboard selects category");
         example->setPlainText(QStringLiteral("The algorithm sorts the array."));
         buttons[0]->click();
         check(richRequests == 1, "enriched save signal includes metadata");

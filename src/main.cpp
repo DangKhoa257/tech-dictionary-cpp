@@ -1,20 +1,66 @@
 #include <QApplication>
 #include <QAbstractItemModel>
+#include <QAbstractItemView>
+#include <QComboBox>
 #include <QCompleter>
 #include <QCoreApplication>
 #include <QDir>
 #include <QEventLoop>
 #include <QFileInfo>
 #include <QFrame>
+#include <QGraphicsOpacityEffect>
+#include <QGuiApplication>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPainter>
 #include <QPixmap>
+#include <QPushButton>
+#include <QScreen>
 #include <QTemporaryDir>
 #include <QTextEdit>
 #include <QTimer>
 
+#include <cstdlib>
+
 #include "app_controller.h"
+#include "word_dialog.h"
+
+namespace {
+bool captureDialogState(QWidget& mainWindow, WordDialog& dialog, QComboBox& combo,
+                        const QString& path) {
+    QWidget* popup = combo.view()->window();
+    if (!popup || !popup->isVisible()) return false;
+    const QRect mainRect(mainWindow.mapToGlobal(QPoint(0, 0)), mainWindow.size());
+    const QRect dialogRect(dialog.mapToGlobal(QPoint(0, 0)), dialog.size());
+    const QRect popupRect(popup->mapToGlobal(QPoint(0, 0)), popup->size());
+    const QRect canvasRect = mainRect.united(dialogRect).united(popupRect);
+    const qreal scale = mainWindow.devicePixelRatioF();
+    QPixmap canvas(QSize(qRound(canvasRect.width() * scale),
+                         qRound(canvasRect.height() * scale)));
+    canvas.setDevicePixelRatio(scale);
+    canvas.fill(Qt::white);
+    QPainter painter(&canvas);
+    painter.drawPixmap(mainRect.topLeft() - canvasRect.topLeft(), mainWindow.grab());
+    painter.drawPixmap(dialogRect.topLeft() - canvasRect.topLeft(), dialog.grab());
+    painter.drawPixmap(popupRect.topLeft() - canvasRect.topLeft(), popup->grab());
+    painter.end();
+    return canvas.save(path, "PNG") && QFileInfo(path).size() > 1000;
+}
+
+bool popupUsable(QComboBox& combo) {
+    auto* view = combo.view();
+    QWidget* popup = view ? view->window() : nullptr;
+    const QScreen* screen = popup ? QGuiApplication::screenAt(popup->geometry().center()) : nullptr;
+    if (!view || !popup || !popup->isVisible() || !screen) return false;
+    const QColor text = view->palette().color(QPalette::Text);
+    const QColor background = view->palette().color(QPalette::Base);
+    const int lightnessGap = std::abs(text.lightness() - background.lightness());
+    return view->model() && view->model()->rowCount() == combo.count() &&
+           popup->height() <= 7 * 38 + 18 &&
+           screen->availableGeometry().contains(popup->geometry()) &&
+           lightnessGap >= 100;
+}
+}  // namespace
 
 int main(int argc, char* argv[]) {
     QApplication application(argc, argv);
@@ -36,10 +82,13 @@ int main(int argc, char* argv[]) {
         const QString dashShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-dashboard.png"));
         const QString autoShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-autocomplete.png"));
         const QString detailShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-detail.png"));
+        const QString addPopupShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-add-part-popup.png"));
+        const QString editPopupShot = shotDir.filePath(QStringLiteral("tech-dictionary-v2-edit-category-popup.png"));
         const QString framesDir = shotDir.filePath(QStringLiteral("anim_frames"));
         QDir().mkpath(framesDir);
 
-        QTimer::singleShot(250, &application, [&application, &controller, screenshot, dashShot, autoShot, detailShot, framesDir] {
+        QTimer::singleShot(250, &application, [&application, &controller, screenshot, dashShot, autoShot,
+                                                detailShot, addPopupShot, editPopupShot, framesDir] {
             const auto delay = [](int ms) {
                 QEventLoop loop;
                 QTimer::singleShot(ms, &loop, &QEventLoop::quit);
@@ -116,10 +165,13 @@ int main(int argc, char* argv[]) {
                 const auto compItems = list->findItems(QStringLiteral("Computer"), Qt::MatchExactly);
                 if (!compItems.isEmpty()) {
                     list->setCurrentItem(compItems.front());
+                    auto* fade = qobject_cast<QGraphicsOpacityEffect*>(detail->graphicsEffect());
+                    const qreal fadeStart = fade ? fade->opacity() : 1.0;
                     for (int i = 0; i < 8; ++i) {
                         captureFrame();
                         delay(25);
                     }
+                    okay = okay && fade && fadeStart < 0.6 && fade->opacity() > 0.98;
                 }
 
                 // Step 3: Type "comp" and capture Autocomplete reveal
@@ -166,6 +218,79 @@ int main(int argc, char* argv[]) {
                 okay = okay && QFileInfo(screenshot).size() > 1000 &&
                        QFileInfo(dashShot).size() > 1000 &&
                        QFileInfo(autoShot).size() > 1000;
+
+                // Capture real Windows popup widgets while Add and Edit dialogs are open.
+                auto* addButton = controller.window().findChild<QPushButton*>(QStringLiteral("addButton"));
+                if (okay && addButton) addButton->click();
+                delay(70);
+                auto* addDialog = controller.window().findChild<WordDialog*>();
+                auto* part = addDialog ? addDialog->findChild<QComboBox*>(QStringLiteral("partOfSpeechInput")) : nullptr;
+                auto* category = addDialog ? addDialog->findChild<QComboBox*>(QStringLiteral("categoryInput")) : nullptr;
+                auto* addExample = addDialog ? addDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
+                const auto addFields = addDialog ? addDialog->findChildren<QLineEdit*>() : QList<QLineEdit*>{};
+                okay = okay && addDialog && part && category && addExample &&
+                       addFields.size() == 2 && addDialog->isVisible();
+                if (addDialog && part && category) {
+                    part->showPopup();
+                    delay(70);
+                    okay = okay && popupUsable(*part) &&
+                           captureDialogState(controller.window(), *addDialog, *part, addPopupShot);
+                    part->hidePopup();
+                    part->setCurrentText(QStringLiteral("Noun"));
+                    category->setCurrentText(QStringLiteral("Programming"));
+                    if (addFields.size() == 2) {
+                        addFields[0]->setText(QStringLiteral("VisualSmokeOnly"));
+                        addFields[1]->setText(QStringLiteral("Chỉ dùng để thử giao diện"));
+                    }
+                    if (addExample) addExample->setPlainText(
+                        QStringLiteral("The visual smoke check uses temporary data."));
+                    okay = okay && addDialog->partOfSpeech() == QStringLiteral("Noun") &&
+                           addDialog->category() == QStringLiteral("Programming") &&
+                           addDialog->example().contains(QStringLiteral("temporary data"));
+                    addDialog->reject();
+                }
+                okay = okay && controller.searchWord(QStringLiteral("VisualSmokeOnly")).status ==
+                       ControllerStatus::NotFound;
+
+                if (okay) list->setCurrentItem(items.front());
+                auto* editButton = controller.window().findChild<QPushButton*>(QStringLiteral("editButton"));
+                if (okay && editButton) editButton->click();
+                delay(70);
+                auto* editDialog = controller.window().findChild<WordDialog*>();
+                auto* editCategory = editDialog ? editDialog->findChild<QComboBox*>(QStringLiteral("categoryInput")) : nullptr;
+                auto* editPart = editDialog ? editDialog->findChild<QComboBox*>(QStringLiteral("partOfSpeechInput")) : nullptr;
+                auto* editExample = editDialog ? editDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
+                okay = okay && editDialog && editCategory && editPart && editExample &&
+                       editDialog->isVisible() &&
+                       editDialog->englishWord() == QStringLiteral("Algorithm") &&
+                       editDialog->partOfSpeech() == QStringLiteral("Noun") &&
+                       editDialog->category() == QStringLiteral("Algorithms");
+                if (editDialog && editCategory && editPart && editExample) {
+                    editCategory->showPopup();
+                    delay(70);
+                    okay = okay && popupUsable(*editCategory) &&
+                           captureDialogState(controller.window(), *editDialog, *editCategory,
+                                              editPopupShot);
+                    editCategory->hidePopup();
+                    editPart->setCurrentText(QStringLiteral("Verb"));
+                    editCategory->setCurrentText(QStringLiteral("Programming"));
+                    editExample->setPlainText(QStringLiteral("The algorithm processes each record."));
+                    const auto save = editDialog->findChild<QPushButton*>(QStringLiteral("primaryButton"));
+                    if (save) save->click();
+                    const auto edited = controller.searchWord(QStringLiteral("Algorithm"));
+                    okay = okay && save && edited.status == ControllerStatus::Success &&
+                           edited.partOfSpeech == QStringLiteral("Verb") &&
+                           edited.category == QStringLiteral("Programming") &&
+                           edited.example == QStringLiteral("The algorithm processes each record.");
+                    okay = okay && controller.undo().status == ControllerStatus::Success &&
+                           controller.searchWord(QStringLiteral("Algorithm")).category ==
+                               QStringLiteral("Algorithms");
+                    okay = okay && controller.redo().status == ControllerStatus::Success &&
+                           controller.searchWord(QStringLiteral("Algorithm")).category ==
+                               QStringLiteral("Programming");
+                }
+                okay = okay && QFileInfo(addPopupShot).size() > 1000 &&
+                       QFileInfo(editPopupShot).size() > 1000;
             }
             application.exit(okay ? 0 : 3);
         });

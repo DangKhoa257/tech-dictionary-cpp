@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import glob
+import hashlib
 import os
 import shutil
 import subprocess
@@ -19,7 +20,14 @@ def main():
     print(f"Found {len(frame_files)} animation frames in {frames_dir}")
     if not frame_files:
         print("No animation frames found.")
-        return 0
+        return 1
+    frame_hashes = set()
+    for frame in frame_files:
+        with open(frame, "rb") as source:
+            frame_hashes.add(hashlib.sha256(source.read()).digest())
+    if len(frame_hashes) < 3:
+        print("Animation frames do not contain enough visible changes.")
+        return 1
 
     ffmpeg_bin = shutil.which("ffmpeg")
     ffmpeg_success = False
@@ -65,6 +73,9 @@ def main():
         except Exception as e:
             print(f"Pillow generation failed: {e}")
 
+    if not os.path.isfile(gif_path) or os.path.getsize(gif_path) < 1000:
+        print("Animation GIF is missing or empty.")
+        return 1
     return 0
 
 if __name__ == "__main__":

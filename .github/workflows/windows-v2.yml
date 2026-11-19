@@ -104,14 +104,39 @@ jobs:
             throw 'GUI screenshot was not created'
           }
           Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
-          foreach ($name in @('tech-dictionary-v2-dashboard.png', 'tech-dictionary-v2-autocomplete.png', 'tech-dictionary-v2-detail.png')) {
+          foreach ($name in @('tech-dictionary-v2-dashboard.png', 'tech-dictionary-v2-autocomplete.png', 'tech-dictionary-v2-detail.png', 'tech-dictionary-v2-add-part-popup.png', 'tech-dictionary-v2-edit-category-popup.png')) {
             $src = Join-Path $env:RUNNER_TEMP $name
-            if (Test-Path -LiteralPath $src) {
-              Copy-Item -LiteralPath $src -Destination (Join-Path 'dist' $name)
-            }
+            if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "Missing GUI screenshot: $name" }
+            Copy-Item -LiteralPath $src -Destination (Join-Path 'dist' $name)
           }
           $framesDir = Join-Path $env:RUNNER_TEMP 'anim_frames'
+          python -m pip install Pillow==11.3.0
+          if ($LASTEXITCODE -ne 0) { throw 'Pillow installation failed' }
           python scripts/generate_animation.py $framesDir dist
+          if ($LASTEXITCODE -ne 0) { throw 'Animation generation failed' }
+          if (-not (Test-Path -LiteralPath 'dist/tech-dictionary-v2-animation.gif' -PathType Leaf)) {
+            throw 'Animation GIF was not created'
+          }
+
+      - name: Verify packaged dialogs at 125 and 150 percent scaling
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'windows'
+          $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
+          foreach ($scale in @('1.25', '1.5')) {
+            $env:QT_SCALE_FACTOR = $scale
+            $tag = $scale.Replace('.', '')
+            $outputDir = Join-Path $env:RUNNER_TEMP "ui-scale-$tag"
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+            $screenshot = Join-Path $outputDir 'smoke.png'
+            $process = Start-Process -FilePath $packageExe -ArgumentList @('--ci-smoke', $screenshot) -Wait -PassThru -NoNewWindow
+            if ($process.ExitCode -ne 0) { throw "Packaged GUI failed at scale $scale`: $($process.ExitCode)" }
+            foreach ($name in @('tech-dictionary-v2-add-part-popup.png', 'tech-dictionary-v2-edit-category-popup.png')) {
+              $src = Join-Path $outputDir $name
+              if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "Missing $name at scale $scale" }
+              Copy-Item -LiteralPath $src -Destination (Join-Path 'dist' "$tag-$name")
+            }
+          }
 
       - name: Upload Release package, screenshots and animation recording
         if: always()
@@ -124,6 +149,12 @@ jobs:
             dist/tech-dictionary-v2-dashboard.png
             dist/tech-dictionary-v2-autocomplete.png
             dist/tech-dictionary-v2-detail.png
+            dist/tech-dictionary-v2-add-part-popup.png
+            dist/tech-dictionary-v2-edit-category-popup.png
+            dist/125-tech-dictionary-v2-add-part-popup.png
+            dist/125-tech-dictionary-v2-edit-category-popup.png
+            dist/15-tech-dictionary-v2-add-part-popup.png
+            dist/15-tech-dictionary-v2-edit-category-popup.png
             dist/tech-dictionary-v2-animation.gif
             dist/tech-dictionary-v2-animation.mp4
           if-no-files-found: warn

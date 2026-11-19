@@ -8,6 +8,7 @@
 #include <QFont>
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsOpacityEffect>
+#include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -121,7 +122,7 @@ protected:
 
     void showEvent(QShowEvent* event) override {
         QListView::showEvent(event);
-        if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM") &&
+        if (QGuiApplication::platformName() != QLatin1String("offscreen") &&
             !qEnvironmentVariableIsSet("TECH_DICTIONARY_NO_ANIMATION")) {
             auto* anim = new QPropertyAnimation(this, "windowOpacity", this);
             anim->setDuration(160);
