@@ -110,6 +110,12 @@ int main(int argc, char* argv[]) {
             auto* detail = controller.window().findChild<QTextEdit*>(QStringLiteral("wordDetail"));
             auto* input = controller.window().findChild<QLineEdit*>(QStringLiteral("searchInput"));
             auto* detailCard = controller.window().findChild<QFrame*>(QStringLiteral("detailCard"));
+            const auto visibleWordDialog = [&controller]() -> WordDialog* {
+                for (auto* dialog : controller.window().findChildren<WordDialog*>()) {
+                    if (dialog->isVisible()) return dialog;
+                }
+                return nullptr;
+            };
 
             bool okay = list && detail && input && list->count() >= 550;
             report(QStringLiteral("initial controls and seed"), okay);
@@ -240,7 +246,7 @@ int main(int argc, char* argv[]) {
                 auto* addButton = controller.window().findChild<QPushButton*>(QStringLiteral("addButton"));
                 if (okay && addButton) addButton->click();
                 delay(70);
-                auto* addDialog = controller.window().findChild<WordDialog*>();
+                auto* addDialog = visibleWordDialog();
                 auto* part = addDialog ? addDialog->findChild<QComboBox*>(QStringLiteral("partOfSpeechInput")) : nullptr;
                 auto* category = addDialog ? addDialog->findChild<QComboBox*>(QStringLiteral("categoryInput")) : nullptr;
                 auto* addExample = addDialog ? addDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
@@ -276,7 +282,7 @@ int main(int argc, char* argv[]) {
                 auto* editButton = controller.window().findChild<QPushButton*>(QStringLiteral("editButton"));
                 if (okay && editButton) editButton->click();
                 delay(70);
-                auto* editDialog = controller.window().findChild<WordDialog*>();
+                auto* editDialog = visibleWordDialog();
                 auto* editCategory = editDialog ? editDialog->findChild<QComboBox*>(QStringLiteral("categoryInput")) : nullptr;
                 auto* editPart = editDialog ? editDialog->findChild<QComboBox*>(QStringLiteral("partOfSpeechInput")) : nullptr;
                 auto* editExample = editDialog ? editDialog->findChild<QTextEdit*>(QStringLiteral("exampleInput")) : nullptr;
@@ -285,6 +291,11 @@ int main(int argc, char* argv[]) {
                        editDialog->englishWord() == QStringLiteral("Algorithm") &&
                        editDialog->partOfSpeech() == QStringLiteral("Noun") &&
                        editDialog->category() == QStringLiteral("Algorithms");
+                report(QStringLiteral("edit dialog existing fields"), editDialog && editCategory &&
+                       editPart && editExample && editDialog->isVisible() &&
+                       editDialog->englishWord() == QStringLiteral("Algorithm") &&
+                       editDialog->partOfSpeech() == QStringLiteral("Noun") &&
+                       editDialog->category() == QStringLiteral("Algorithms"));
                 if (editDialog && editCategory && editPart && editExample) {
                     editCategory->showPopup();
                     delay(70);
