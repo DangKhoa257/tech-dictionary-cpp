@@ -209,8 +209,12 @@ int main(int argc, char* argv[]) {
                 QCoreApplication::processEvents();
                 const bool autocompleteVisible = input->completer()->popup() &&
                     input->completer()->popup()->isVisible();
-                okay = okay && autocompleteVisible;
-                report(QStringLiteral("autocomplete popup visible"), autocompleteVisible);
+                const bool styledRows = autocompleteVisible &&
+                    input->completer()->popup()->itemDelegate()->objectName() ==
+                        QStringLiteral("suggestionItemDelegate") &&
+                    input->completer()->popup()->sizeHintForRow(0) >= 32;
+                okay = okay && styledRows;
+                report(QStringLiteral("autocomplete popup and styled rows visible"), styledRows);
 
                 // Capture autocomplete reveal animation frames
                 for (int i = 0; i < 8; ++i) {

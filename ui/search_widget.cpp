@@ -104,7 +104,8 @@ public:
 
 protected:
     void paintEvent(QPaintEvent* event) override {
-        // Draw header text in the reserved viewport top margin
+        QListView::paintEvent(event);
+        // Draw the header after the viewport so its background cannot cover it.
         QPainter p(this);
         p.setPen(QColor(QStringLiteral("#64748B")));
         QFont font = p.font();
@@ -115,9 +116,6 @@ protected:
         const int count = model() ? model()->rowCount() : 0;
         const QString header = QStringLiteral("%1 gợi ý phù hợp").arg(count);
         p.drawText(QRect(14, 6, width() - 28, 18), Qt::AlignLeft | Qt::AlignVCenter, header);
-        p.end();
-
-        QListView::paintEvent(event);
     }
 
     void showEvent(QShowEvent* event) override {
@@ -184,7 +182,6 @@ SearchWidget::SearchWidget(QWidget* parent)
 
 void SearchWidget::setupCompleterPopup() {
     auto* popup = new SuggestionPopupView(this);
-    popup->setItemDelegate(new SuggestionItemDelegate(popup));
     completer_->setPopup(popup);
     completer_->setModel(suggestionModel_);
     completer_->setCaseSensitivity(Qt::CaseInsensitive);
@@ -192,6 +189,9 @@ void SearchWidget::setupCompleterPopup() {
     completer_->setMaxVisibleItems(8);
 
     searchInput_->setCompleter(completer_);
+    auto* suggestionDelegate = new SuggestionItemDelegate(popup);
+    suggestionDelegate->setObjectName(QStringLiteral("suggestionItemDelegate"));
+    popup->setItemDelegate(suggestionDelegate);
 
     connect(searchInput_, &QLineEdit::textChanged, this, [this](const QString& text) {
         if (text.trimmed().isEmpty()) {
