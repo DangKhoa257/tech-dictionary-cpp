@@ -92,7 +92,7 @@ jobs:
         run: |
           ./scripts/package_windows.ps1 -BuildDir build-release -QtRoot $env:QT_ROOT_DIR
 
-      - name: Smoke test packaged GUI and capture screenshot
+      - name: Smoke test packaged GUI and capture screenshots & animations
         shell: pwsh
         run: |
           $env:QT_QPA_PLATFORM = 'windows'
@@ -104,8 +104,16 @@ jobs:
             throw 'GUI screenshot was not created'
           }
           Copy-Item -LiteralPath $screenshot -Destination 'dist/tech-dictionary-v2-smoke.png'
+          foreach ($name in @('tech-dictionary-v2-dashboard.png', 'tech-dictionary-v2-autocomplete.png', 'tech-dictionary-v2-detail.png')) {
+            $src = Join-Path $env:RUNNER_TEMP $name
+            if (Test-Path -LiteralPath $src) {
+              Copy-Item -LiteralPath $src -Destination (Join-Path 'dist' $name)
+            }
+          }
+          $framesDir = Join-Path $env:RUNNER_TEMP 'anim_frames'
+          python scripts/generate_animation.py $framesDir dist
 
-      - name: Upload Release package and GUI screenshot
+      - name: Upload Release package, screenshots and animation recording
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -113,4 +121,9 @@ jobs:
           path: |
             dist/TechDictionary-v0.2.0-win64.zip
             dist/tech-dictionary-v2-smoke.png
+            dist/tech-dictionary-v2-dashboard.png
+            dist/tech-dictionary-v2-autocomplete.png
+            dist/tech-dictionary-v2-detail.png
+            dist/tech-dictionary-v2-animation.gif
+            dist/tech-dictionary-v2-animation.mp4
           if-no-files-found: warn
