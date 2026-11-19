@@ -19,6 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Use Python 3.12 for seed checks and animation assembly
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install Qt 6.12.0 and matching MinGW 13.1.0
         uses: jurplel/install-qt-action@v4.5.0
         with:
@@ -107,6 +112,7 @@ jobs:
             }
             throw "Packaged GUI smoke test failed: $($process.ExitCode)"
           }
+          Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP 'smoke-diagnostics.txt')
           if (-not (Test-Path -LiteralPath $screenshot -PathType Leaf)) {
             throw 'GUI screenshot was not created'
           }
@@ -137,7 +143,11 @@ jobs:
             New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
             $screenshot = Join-Path $outputDir 'smoke.png'
             $process = Start-Process -FilePath $packageExe -ArgumentList @('--ci-smoke', $screenshot) -Wait -PassThru -NoNewWindow
-            if ($process.ExitCode -ne 0) { throw "Packaged GUI failed at scale $scale`: $($process.ExitCode)" }
+            if ($process.ExitCode -ne 0) {
+              $diagnostics = Join-Path $outputDir 'smoke-diagnostics.txt'
+              if (Test-Path -LiteralPath $diagnostics) { Get-Content -LiteralPath $diagnostics }
+              throw "Packaged GUI failed at scale $scale`: $($process.ExitCode)"
+            }
             foreach ($name in @('tech-dictionary-v2-add-part-popup.png', 'tech-dictionary-v2-edit-category-popup.png')) {
               $src = Join-Path $outputDir $name
               if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "Missing $name at scale $scale" }
