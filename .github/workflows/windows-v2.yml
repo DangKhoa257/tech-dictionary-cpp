@@ -91,7 +91,7 @@ jobs:
       - name: Smoke test packaged GUI and capture screenshot
         shell: pwsh
         run: |
-          $env:QT_QPA_PLATFORM = 'offscreen'
+          $env:QT_QPA_PLATFORM = 'windows'
           $packageExe = Join-Path $PWD 'dist/TechDictionary-v0.2.0-win64/TechDictionary.exe'
           $screenshot = Join-Path $env:RUNNER_TEMP 'tech-dictionary-v2-smoke.png'
           $process = Start-Process -FilePath $packageExe -ArgumentList @('--ci-smoke', $screenshot) -Wait -PassThru -NoNewWindow
