@@ -19,11 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Python 3.12 for seed checks and animation assembly
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install Qt 6.12.0 and matching MinGW 13.1.0
         uses: jurplel/install-qt-action@v4.5.0
         with:
@@ -35,6 +30,17 @@ jobs:
           # aqtinstall 3.3.0 cannot read Qt 6.11+ Windows split repositories.
           aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@8c3695d4a4e1ceabf6a74dc6c79681656dc6b74b'
           cache: true
+
+      - name: Use Python 3.12 for seed checks and animation assembly
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify Python version
+        shell: pwsh
+        run: |
+          python -c "import sys; print(sys.version); assert sys.version_info[:2] == (3, 12)"
+          if ($LASTEXITCODE -ne 0) { throw 'Python 3.12 is not active' }
 
       - name: Verify toolchain
         shell: pwsh
