@@ -259,7 +259,7 @@ Depth-First Search	Tìm kiếm theo chiều sâu
 Dynamic Programming	Quy hoạch động
 Greedy Algorithm	Thuật toán tham lam
 Artificial Neural Network	Mạng nơ-ron nhân tạo
-Prompt	Câu lệnh đầu vào cho AI
+Prompt	Lời nhắc đầu vào cho mô hình AI
 Large Language Model	Mô hình ngôn ngữ lớn
 Generative AI	Trí tuệ nhân tạo tạo sinh
 Computer Architecture	Kiến trúc máy tính
@@ -271,7 +271,7 @@ Central Processing Unit	Bộ xử lý trung tâm
 Motherboard	Bo mạch chủ
 Power Supply	Bộ nguồn
 Localhost	Máy chủ cục bộ
-Socket	Ổ cắm/kết nối socket
+Socket	Điểm cuối giao tiếp mạng
 Client	Máy khách
 Peer-to-Peer	Mạng ngang hàng
 Data Packet	Gói dữ liệu

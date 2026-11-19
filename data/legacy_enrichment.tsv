@@ -1,0 +1,288 @@
+Algorithm	Noun	The algorithm sorts the array in ascending order.	Algorithms
+Application	Noun	The application saves a draft before closing.	Basic Computing
+Array	Noun	The array stores the sensor readings in order.	Data Structures
+Artificial Intelligence	Noun phrase	Artificial intelligence helps classify images of damaged roads.	Artificial Intelligence
+Assembly Language	Noun phrase	Assembly language exposes instructions specific to the processor.	Programming
+Attribute	Noun	The attribute stores each user's display name.	Object-Oriented Programming
+Authentication	Noun	Authentication checks a user's identity before granting access.	Cybersecurity
+Automation	Noun	Automation runs the nightly backup without manual input.	Software Engineering
+Backup	Noun	The backup restored files after the disk failed.	Basic Computing
+Bandwidth	Noun	The video stream uses less bandwidth at lower resolution.	Networking
+Binary	Adjective	The binary format stores each value as a sequence of bits.	Basic Computing
+Binary Search	Noun phrase	Binary search halves the sorted search range at each step.	Algorithms
+Binary Tree	Noun phrase	The binary tree gives each node at most two children.	Data Structures
+Bit	Noun	A bit represents one of two possible values.	Basic Computing
+Boolean	Noun	A Boolean stores either true or false.	Programming
+Bug	Noun	The bug caused the login form to reject valid passwords.	Software Engineering
+Byte	Noun	A byte contains eight bits on this system.	Basic Computing
+Cache	Noun	The cache keeps frequently accessed data close to the processor.	Basic Computing
+Class	Noun	The class defines the fields and methods of each object.	Object-Oriented Programming
+Cloud Computing	Noun phrase	Cloud computing provides servers on demand.	Cloud Computing
+Code	Noun	The team reviewed the code before merging the change.	Programming
+Compiler	Noun	The compiler translates source code into machine instructions.	Programming
+Computer	Noun	The computer processes the measurements from the sensor.	Basic Computing
+Computer Network	Noun phrase	The computer network connects the laboratory workstations.	Networking
+Constant	Noun	The constant stores the maximum number of retries.	Programming
+CPU	Abbreviation	The CPU executes the program's instructions.	Basic Computing
+Cybersecurity	Noun	Cybersecurity protects the service from unauthorized access.	Cybersecurity
+Data	Noun	The data includes timestamps and temperature readings.	Data Science
+Data Analysis	Noun phrase	Data analysis revealed a seasonal increase in traffic.	Data Science
+Data Mining	Noun phrase	Data mining found recurring patterns in purchase records.	Data Science
+Data Science	Noun phrase	Data science combines statistics and computing to study the records.	Data Science
+Data Structure	Noun phrase	A data structure organizes values for efficient access.	Data Structures
+Database	Noun	The application stores customer records in a database.	Database
+Database Management System	Noun phrase	The database management system enforces access rules for each table.	Database
+Debugging	Noun	Debugging identified the null pointer behind the crash.	Software Engineering
+Default	Adjective	The default setting keeps automatic updates enabled.	Basic Computing
+Delete	Verb	Delete the temporary file after the import succeeds.	Basic Computing
+Deployment	Noun	The deployment moved the tested release to production.	Software Engineering
+Digital	Adjective	The digital signal encodes each sample as a number.	Basic Computing
+DNS	Abbreviation	DNS resolves the domain name to an IP address.	Networking
+Download	Verb	Download the signed package from the project server.	Web Development
+Encryption	Noun	Encryption protects the file while it travels over the network.	Cybersecurity
+Exception	Noun	The exception reports an invalid file format to the caller.	Programming
+Execution	Noun	Execution stops when the process encounters a fatal error.	Programming
+Expression	Noun	The expression adds the two input values.	Programming
+Extension	Noun	The browser extension adds a password manager to the toolbar.	Web Development
+File	Noun	The file contains one dictionary entry per row.	Basic Computing
+Firewall	Noun	The firewall blocks traffic from an untrusted address.	Cybersecurity
+Framework	Noun	The framework supplies reusable components for the web application.	Software Engineering
+Function	Noun	The function returns the index of the first match.	Programming
+Gateway	Noun	The gateway forwards traffic from the local network to the internet.	Networking
+Git	Other / Technical term	Git records the changes made to each source file.	Software Engineering
+GPU	Abbreviation	The GPU renders the scene and accelerates matrix operations.	Basic Computing
+Graph	Noun	The graph represents stations as vertices and routes as edges.	Data Structures
+GUI	Abbreviation	The GUI lets users search without typing commands.	Basic Computing
+Hardware	Noun	The diagnostic tool checks the hardware for memory faults.	Basic Computing
+Hash Table	Noun phrase	The hash table locates an entry using its key.	Data Structures
+Heap	Noun	The heap keeps the highest-priority task near the root.	Data Structures
+Host	Noun	The host runs the database service on the local network.	Networking
+HTML	Abbreviation	HTML marks the headings and links on the page.	Web Development
+HTTP	Abbreviation	HTTP carries the browser's request to the server.	Web Development
+IDE	Abbreviation	The IDE highlights syntax errors while the developer edits code.	Programming
+Index	Noun	The database index reduces the rows scanned by this query.	Database
+Inheritance	Noun	Inheritance lets the derived class reuse base-class behavior.	Object-Oriented Programming
+Input	Noun	The parser rejects input that does not match the format.	Programming
+Instance	Noun	Each instance holds its own account balance.	Object-Oriented Programming
+Integer	Noun	The integer stores the number of completed requests.	Programming
+Interface	Noun	The interface declares the operations implemented by each driver.	Object-Oriented Programming
+Internet	Noun	The device downloads updates over the internet.	Networking
+IP Address	Noun phrase	The server uses a fixed IP address on the internal network.	Networking
+Iteration	Noun	Each iteration updates the estimate of the solution.	Algorithms
+Java	Other / Technical term	Java runs the service on a virtual machine.	Programming
+JavaScript	Other / Technical term	JavaScript updates the page after the user submits the form.	Web Development
+Kernel	Noun	The kernel manages memory and hardware access.	Operating Systems
+Key	Noun	The primary key identifies one record in the table.	Database
+Keyword	Noun	The keyword changes how the compiler parses the statement.	Programming
+LAN	Abbreviation	The LAN connects the office printers and computers.	Networking
+Library	Noun	The library provides functions for reading JSON files.	Programming
+Linked List	Noun phrase	The linked list connects each entry to the next node.	Data Structures
+Linux	Other / Technical term	Linux runs the container host in the test environment.	Operating Systems
+Load	Verb	Load the configuration before starting the service.	Programming
+Loop	Noun	The loop processes each record in the input file.	Programming
+Machine Learning	Noun phrase	Machine learning detects patterns in historical sales data.	Machine Learning
+Mainboard	Noun	The mainboard connects the processor, memory, and peripherals.	Basic Computing
+Memory	Noun	The process allocates memory for the image buffer.	Basic Computing
+Method	Noun	The method validates the object's state before saving.	Object-Oriented Programming
+Model	Noun	The model predicts a label for each new image.	Machine Learning
+Module	Noun	The module groups the parser and its helper functions.	Programming
+Multithreading	Noun	Multithreading lets the server handle several requests concurrently.	Operating Systems
+Network	Noun	The network carries packets between the client and server.	Networking
+Node	Noun	Each node in the tree stores a value and child links.	Data Structures
+Normalization	Noun	Normalization separates repeated customer details into related tables.	Database
+Null	Other / Technical term	The function returns null when no matching object exists.	Programming
+Number	Noun	The number represents the total bytes received.	Basic Computing
+Object	Noun	The object combines data with methods that operate on it.	Object-Oriented Programming
+Object-Oriented Programming	Noun phrase	Object-oriented programming models the system with interacting objects.	Object-Oriented Programming
+Operating System	Noun phrase	The operating system schedules processes and manages devices.	Operating Systems
+Optimization	Noun	The optimization reduced memory allocations in the parser.	Algorithms
+Output	Noun	The program writes its output to a UTF-8 file.	Programming
+Packet	Noun	The packet contains a header and part of the message.	Networking
+Parameter	Noun	The parameter sets the maximum number of search results.	Programming
+Password	Noun	The password must be stored as a salted hash.	Cybersecurity
+Pointer	Noun	The pointer refers to an element in the array.	Programming
+Polymorphism	Noun	Polymorphism lets different objects respond to the same method call.	Object-Oriented Programming
+Port	Noun	The server listens for connections on port 443.	Networking
+Processor	Noun	The processor executes instructions from the running program.	Basic Computing
+Program	Noun	The program reads a file and displays its records.	Programming
+Programming Language	Noun phrase	The programming language defines syntax for variables and functions.	Programming
+Protocol	Noun	The protocol specifies how the two services exchange messages.	Networking
+Python	Other / Technical term	Python reads the CSV file and computes summary statistics.	Programming
+Query	Noun	The query retrieves all orders placed this week.	Database
+Queue	Noun	The queue processes jobs in the order they arrive.	Data Structures
+RAM	Abbreviation	RAM holds data needed by active processes.	Basic Computing
+Recursion	Noun	Recursion solves the tree problem by visiting each subtree.	Algorithms
+Repository	Noun	The repository stores source code and its revision history.	Software Engineering
+Resolution	Noun	The monitor's resolution determines the number of displayed pixels.	Basic Computing
+Router	Noun	The router forwards packets between the two networks.	Networking
+Runtime	Noun	The runtime of the algorithm doubled for the larger input.	Algorithms
+Scalar	Noun	The scalar represents one numeric value rather than a vector.	Data Science
+Schema	Noun	The schema describes the columns and constraints of each table.	Database
+search	Verb	Search the dictionary for the exact English term.	Algorithms
+Server	Noun	The server responds to requests from connected clients.	Networking
+Software	Noun	The team installs the software after checking its signature.	Basic Computing
+Sorting	Noun	Sorting arranges the records by timestamp.	Algorithms
+Source Code	Noun phrase	The source code defines the application's behavior.	Programming
+SQL	Abbreviation	SQL selects and updates data in relational databases.	Database
+Stack	Noun	The stack removes the most recently added item first.	Data Structures
+Statement	Noun	The statement assigns the result to a variable.	Programming
+String	Noun	The string stores the user's display name as text.	Programming
+Structure	Noun	The structure groups related fields into one value.	Programming
+Syntax	Noun	The parser checks the syntax before evaluating the expression.	Programming
+System	Noun	The system records errors in a central log.	Basic Computing
+TCP	Abbreviation	TCP retransmits lost segments to provide reliable delivery.	Networking
+Thread	Noun	The thread processes one task from the work queue.	Operating Systems
+Token	Noun	The server rejects the expired token during authentication.	Cybersecurity
+Topology	Noun	The network topology shows how the switches are connected.	Networking
+Tree	Noun	The tree stores values in parent and child nodes.	Data Structures
+Type	Noun	The type determines which operations are valid for a value.	Programming
+UML	Abbreviation	UML diagrams show the relationships between classes.	Software Engineering
+Unicode	Other / Technical term	Unicode assigns code points to characters used across languages.	Basic Computing
+Unit Test	Noun phrase	The unit test checks the parser with an empty input.	Software Engineering
+Update	Verb	Update the package before applying the security patch.	Software Engineering
+Upload	Verb	Upload the report to the team's shared server.	Web Development
+URL	Abbreviation	The URL identifies the page requested by the browser.	Web Development
+Variable	Noun	The variable stores the current item count.	Programming
+Vector	Noun	The vector stores numeric features for the model.	Data Science
+Version	Noun	The version number identifies the released build.	Software Engineering
+Virtual Machine	Noun phrase	The virtual machine runs an isolated guest operating system.	Cloud Computing
+VPN	Abbreviation	The VPN encrypts traffic between the laptop and office network.	Networking
+WAN	Abbreviation	The WAN connects offices in different cities.	Networking
+Web Browser	Noun phrase	The web browser renders the page's HTML and CSS.	Web Development
+Website	Noun	The website publishes documentation for the API.	Web Development
+Wi-Fi	Other / Technical term	Wi-Fi connects the tablet to the local wireless network.	Networking
+Windows	Other / Technical term	Windows runs the desktop version of the application.	Operating Systems
+XML	Abbreviation	XML stores the configuration in tagged elements.	Web Development
+XOR	Abbreviation	XOR returns true when its two Boolean inputs differ.	Basic Computing
+YAML	Abbreviation	YAML expresses the deployment settings as readable text.	Software Engineering
+Zero-Day	Noun	A zero-day may be exploited before a security patch exists.	Cybersecurity
+Access Control	Noun phrase	Access control restricts who can read the customer records.	Cybersecurity
+Agile	Other / Technical term	Agile organizes the team's work into short feedback cycles.	Software Engineering
+API	Abbreviation	The API returns account data as JSON.	Programming
+Asynchronous	Adjective	The asynchronous request lets the interface remain responsive.	Programming
+Big Data	Noun phrase	Big data processing distributes large log files across several machines.	Data Science
+Blockchain	Noun	The blockchain records transactions in linked blocks.	Basic Computing
+Cloud Storage	Noun phrase	Cloud storage keeps a copy of the photos outside the device.	Cloud Computing
+Concurrency	Noun	Concurrency lets the service make progress on several tasks.	Operating Systems
+Container	Noun	The container packages the service with its dependencies.	Cloud Computing
+Data Warehouse	Noun phrase	The data warehouse combines sales records from several systems.	Database
+Deep Learning	Noun phrase	Deep learning trains layered neural networks on image data.	Machine Learning
+Encryption Key	Noun phrase	The encryption key must remain separate from the encrypted backup.	Cybersecurity
+Front-end	Noun	The front-end displays validation errors beside the form.	Web Development
+Back-end	Noun	The back-end checks permissions before returning account data.	Web Development
+Full Stack	Adjective	A full stack developer works on both the browser and server code.	Software Engineering
+Neural Network	Noun phrase	The neural network classifies images from the camera.	Machine Learning
+Natural Language Processing	Noun phrase	Natural language processing extracts names from support messages.	Artificial Intelligence
+Computer Vision	Noun phrase	Computer vision detects vehicles in traffic footage.	Artificial Intelligence
+Open Source	Noun phrase	Open source makes the library's implementation available for review.	Software Engineering
+Overfitting	Noun	Overfitting made the model accurate on training data but weak on new images.	Machine Learning
+Underfitting	Noun	Underfitting left the model unable to capture the training pattern.	Machine Learning
+Regression	Noun	Regression predicts a numeric house price from its features.	Machine Learning
+Classification	Noun	Classification assigns each message to a spam or normal category.	Machine Learning
+Training Data	Noun phrase	The training data contains labeled examples of each defect.	Machine Learning
+Testing Data	Noun phrase	The testing data is kept separate until model evaluation.	Machine Learning
+Feature	Noun	The feature represents the customer's account age.	Machine Learning
+Label	Noun	The label identifies the correct class for each image.	Machine Learning
+Accuracy	Noun	Accuracy measures the share of predictions that are correct.	Machine Learning
+Precision	Noun	Precision measures how many predicted positives are truly positive.	Machine Learning
+Recall	Noun	Recall measures how many actual positives the model finds.	Machine Learning
+Data Pipeline	Noun phrase	The data pipeline cleans events before loading them into the warehouse.	Data Science
+ETL	Abbreviation	ETL extracts source data, transforms it, and loads it into the warehouse.	Data Science
+NoSQL	Other / Technical term	NoSQL databases can store documents without a fixed table schema.	Database
+Relational Database	Noun phrase	The relational database links orders to customers through keys.	Database
+Primary Key	Noun phrase	The primary key uniquely identifies each customer row.	Database
+Foreign Key	Noun phrase	The foreign key refers to an existing customer record.	Database
+Transaction	Noun	The transaction updates both account balances atomically.	Database
+Stored Procedure	Noun phrase	The stored procedure validates the order before insertion.	Database
+View	Noun	The database view exposes selected columns to reporting users.	Database
+Indexing	Noun	Indexing speeds up lookups on the customer identifier.	Database
+Deadlock	Noun	The deadlock left two transactions waiting for each other's locks.	Database
+Memory Leak	Noun phrase	The memory leak increased the process's memory use over time.	Programming
+Garbage Collection	Noun phrase	Garbage collection reclaims objects that are no longer reachable.	Programming
+API Endpoint	Noun phrase	The API endpoint accepts requests for a single account.	Web Development
+REST	Abbreviation	REST describes a style for designing networked APIs.	Web Development
+JSON	Abbreviation	JSON encodes the response as objects and arrays.	Web Development
+Authentication Token	Noun phrase	The authentication token expires after a short session.	Cybersecurity
+Two-Factor Authentication	Noun phrase	Two-factor authentication requires a password and a second factor.	Cybersecurity
+Malware	Noun	The malware attempted to read files from the user's account.	Cybersecurity
+Phishing	Noun	Phishing messages tried to steal employees' passwords.	Cybersecurity
+Latency	Noun	The request latency rose when the database became overloaded.	Networking
+Throughput	Noun	The network throughput dropped during peak traffic.	Networking
+Virtualization	Noun	Virtualization lets several guest systems share one host.	Cloud Computing
+DevOps	Other / Technical term	DevOps practices connect development and operations work.	Software Engineering
+Continuous Integration	Noun phrase	Continuous integration builds and tests every submitted change.	Software Engineering
+Continuous Deployment	Noun phrase	Continuous deployment releases changes after automated checks pass.	Software Engineering
+Version Control	Noun phrase	Version control tracks changes to the source files.	Software Engineering
+Merge	Verb	Merge the tested feature branch after its review is complete.	Software Engineering
+Branch	Noun	The branch isolates work on the new search interface.	Software Engineering
+Pull Request	Noun phrase	The pull request asks reviewers to inspect the proposed change.	Software Engineering
+Test Case	Noun phrase	The test case checks how the parser handles an empty file.	Software Engineering
+Software Testing	Noun phrase	Software testing found a regression in the save flow.	Software Engineering
+User Interface	Noun phrase	The user interface displays search results beside their meanings.	Web Development
+User Experience	Noun phrase	The user experience improved when the search field gained suggestions.	Web Development
+Responsive Design	Noun phrase	Responsive design rearranges the layout on a narrow screen.	Web Development
+Accessibility	Noun	Accessibility improvements let keyboard users reach every control.	Web Development
+Cloud	Noun	The service stores encrypted backups in the cloud.	Cloud Computing
+Data Visualization	Noun phrase	Data visualization reveals trends in the monthly traffic figures.	Data Science
+Dashboard	Noun	The dashboard displays request volume and error rates.	Data Science
+Spreadsheet	Noun	The spreadsheet calculates totals from the exported sales data.	Data Science
+Compiler Optimization	Noun phrase	Compiler optimization removed an unnecessary copy from the loop.	Programming
+Source File	Noun phrase	The source file defines the dictionary search function.	Programming
+Header File	Noun phrase	The header file declares the public class interface.	Programming
+Build	Noun	The build produces an executable from the source files.	Software Engineering
+Debug	Verb	Debug the crash by checking the failing stack trace.	Software Engineering
+Command Line	Noun phrase	The command line accepts a path to the input file.	Basic Computing
+Terminal	Noun	The terminal displays the output from the build command.	Basic Computing
+Operating System Kernel	Noun phrase	The operating system kernel schedules threads and manages memory.	Operating Systems
+Firmware	Noun	The firmware initializes the device before the application starts.	Basic Computing
+Embedded System	Noun phrase	The embedded system reads temperature sensors every second.	Basic Computing
+Sensor	Noun	The sensor sends a new temperature reading to the controller.	Basic Computing
+Robotics	Noun	Robotics combines sensing, control, and mechanical movement.	Artificial Intelligence
+Internet of Things	Noun phrase	The internet of things connects devices that report measurements.	Networking
+IoT	Abbreviation	IoT devices send measurements to the monitoring service.	Networking
+Simulation	Noun	The simulation tests the robot's path before a physical run.	Artificial Intelligence
+Algorithm Complexity	Noun phrase	Algorithm complexity describes how resource use grows with input size.	Algorithms
+Time Complexity	Noun phrase	Time complexity estimates how running work grows with input size.	Algorithms
+Space Complexity	Noun phrase	Space complexity measures how extra memory grows with input size.	Algorithms
+Big O Notation	Noun phrase	Big O notation expresses an upper bound on asymptotic growth.	Algorithms
+Linear Search	Noun phrase	Linear search checks each entry until it finds the target.	Algorithms
+Binary Search Tree	Noun phrase	A binary search tree orders keys across its subtrees.	Data Structures
+Sorting Algorithm	Noun phrase	The sorting algorithm orders records by their timestamps.	Algorithms
+Bubble Sort	Noun phrase	Bubble sort repeatedly swaps adjacent out-of-order elements.	Algorithms
+Insertion Sort	Noun phrase	Insertion sort places each item into an already sorted prefix.	Algorithms
+Selection Sort	Noun phrase	Selection sort selects the smallest remaining value at each step.	Algorithms
+Quick Sort	Noun phrase	Quick sort partitions the array around a pivot.	Algorithms
+Merge Sort	Noun phrase	Merge sort combines sorted halves into a complete result.	Algorithms
+Graph Traversal	Noun phrase	Graph traversal visits every reachable vertex from the start.	Algorithms
+Breadth-First Search	Noun phrase	Breadth-first search explores neighboring vertices level by level.	Algorithms
+Depth-First Search	Noun phrase	Depth-first search follows one path before backtracking.	Algorithms
+Dynamic Programming	Noun phrase	Dynamic programming reuses solutions to overlapping subproblems.	Algorithms
+Greedy Algorithm	Noun phrase	A greedy algorithm chooses a locally best option at each step.	Algorithms
+Artificial Neural Network	Noun phrase	The artificial neural network learns patterns from labeled images.	Machine Learning
+Prompt	Noun	The prompt asks the model to summarize the incident report.	Artificial Intelligence
+Large Language Model	Noun phrase	The large language model generates a draft from the instructions.	Artificial Intelligence
+Generative AI	Noun phrase	Generative AI creates a first draft of the help article.	Artificial Intelligence
+Computer Architecture	Noun phrase	Computer architecture defines how the processor and memory interact.	Basic Computing
+Cache Memory	Noun phrase	Cache memory keeps recently used instructions near the processor.	Basic Computing
+Hard Disk Drive	Noun phrase	The hard disk drive stores data on rotating magnetic platters.	Basic Computing
+Solid State Drive	Noun phrase	The solid state drive stores data in flash memory.	Basic Computing
+Graphics Processing Unit	Noun phrase	The graphics processing unit accelerates image rendering.	Basic Computing
+Central Processing Unit	Noun phrase	The central processing unit executes program instructions.	Basic Computing
+Motherboard	Noun	The motherboard connects the processor to memory and expansion slots.	Basic Computing
+Power Supply	Noun phrase	The power supply converts wall power for the computer's components.	Basic Computing
+Localhost	Other / Technical term	Localhost points a client to a service on the same device.	Networking
+Socket	Noun	The socket represents one endpoint of the network connection.	Networking
+Client	Noun	The client sends a request to the server for the latest data.	Networking
+Peer-to-Peer	Adjective	A peer-to-peer network lets devices exchange data directly.	Networking
+Data Packet	Noun phrase	The data packet travels through several routers to reach the server.	Networking
+Subnet	Noun	The subnet separates the office devices from guest devices.	Networking
+Subnet Mask	Noun phrase	The subnet mask identifies the network portion of an IPv4 address.	Networking
+MAC Address	Noun phrase	The MAC address identifies the network interface on the local link.	Networking
+Domain Name	Noun phrase	The domain name resolves to the server's IP address.	Networking
+Cloud Computing Service	Noun phrase	The cloud computing service supplies virtual machines on demand.	Cloud Computing
+Data Integrity	Noun phrase	The checksum helps verify data integrity after the transfer.	Cybersecurity
+Data Backup	Noun phrase	The data backup preserved records before the migration.	Basic Computing
+Data Recovery	Noun phrase	Data recovery restored the database after the disk failure.	Basic Computing
+Encryption Algorithm	Noun phrase	The encryption algorithm transforms plaintext using a secret key.	Cybersecurity
+Digital Signature	Noun phrase	The digital signature lets recipients verify the file's origin.	Cybersecurity
+OpenAI	Other / Technical term	OpenAI develops models and tools used in AI applications.	Artificial Intelligence

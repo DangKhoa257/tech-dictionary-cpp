@@ -163,7 +163,8 @@ if(BUILD_TESTING)
     )
     target_include_directories(DictionaryV2Tests PRIVATE include)
     target_compile_definitions(DictionaryV2Tests PRIVATE
-        TECH_DICTIONARY_SEED_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary.txt")
+        TECH_DICTIONARY_SEED_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary.txt"
+        TECH_DICTIONARY_LEGACY_PATH="${CMAKE_CURRENT_SOURCE_DIR}/data/dictionary_legacy.txt")
     if(MSVC)
         target_compile_options(DictionaryV2Tests PRIVATE /utf-8)
     endif()

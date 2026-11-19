@@ -85,7 +85,7 @@ Algorithms	Lower bound	vị trí đầu tiên không nhỏ hơn giá trị cần
 Algorithms	Dijkstra's algorithm	thuật toán Dijkstra	Noun phrase	Dijkstra's algorithm finds shortest paths with nonnegative weights.
 Algorithms	Divide and conquer	chia để trị	Noun phrase	Divide and conquer splits the problem into smaller pieces.
 Algorithms	Floyd-Warshall algorithm	thuật toán Floyd-Warshall	Noun phrase	The Floyd-Warshall algorithm computes shortest paths between all pairs.
-Algorithms	Heuristic	hàm đánh giá gần đúng	Noun	A heuristic estimates the remaining distance to the goal.
+Algorithms	Heuristic	quy tắc kinh nghiệm	Noun	A heuristic estimates the remaining distance to the goal.
 Algorithms	Kruskal's algorithm	thuật toán Kruskal	Noun phrase	Kruskal's algorithm builds a minimum spanning tree from sorted edges.
 Algorithms	Memoization	ghi nhớ kết quả trung gian	Noun	Memoization avoids repeating the same recursive calculation.
 Algorithms	Minimum spanning tree	cây khung nhỏ nhất	Noun phrase	A minimum spanning tree connects all vertices at minimum total cost.
@@ -111,7 +111,7 @@ Database	Isolation level	mức cô lập giao dịch	Noun phrase	The isolation l
 Database	Join	phép nối bảng	Noun	The join combines orders with their customer records.
 Database	Query planner	bộ lập kế hoạch truy vấn	Noun phrase	The query planner chooses an index for the filter.
 Database	Replication	nhân bản dữ liệu	Noun	Replication copies changes to a second database server.
-Database	Rollback	hoàn tác giao dịch	Verb	Rollback the transaction if validation fails.
+Database	Rollback	thao tác hoàn tác giao dịch	Noun	A rollback restored the database to its previous state after validation failed.
 Database	Row lock	khóa hàng	Noun phrase	A row lock prevents conflicting updates to one account.
 Database	SQL injection	tiêm lệnh SQL	Noun phrase	Parameterized queries prevent SQL injection.
 Database	Table scan	quét bảng	Noun phrase	A table scan reads every record in the table.
@@ -128,7 +128,7 @@ Networking	Handshake	quá trình bắt tay kết nối	Noun	The handshake establ
 Networking	Hop count	số chặng mạng	Noun phrase	The hop count increases at each router on the path.
 Networking	IPv6	giao thức Internet phiên bản sáu	Abbreviation	IPv6 provides a much larger address space.
 Networking	Load balancer	bộ cân bằng tải	Noun phrase	The load balancer distributes requests across servers.
-Networking	NAT	biên dịch địa chỉ mạng	Abbreviation	NAT maps private addresses to a public address.
+Networking	NAT	chuyển đổi địa chỉ mạng	Abbreviation	NAT maps private addresses to a public address.
 Networking	Network interface card	card giao tiếp mạng	Noun phrase	The network interface card connects the desktop to Ethernet.
 Networking	Packet loss	mất gói tin	Noun phrase	Packet loss caused the video call to freeze.
 Networking	Ping	lệnh kiểm tra kết nối	Noun	Ping confirmed that the server was reachable.
@@ -171,7 +171,7 @@ Cybersecurity	Man-in-the-middle attack	tấn công xen giữa	Noun phrase	Certif
 Cybersecurity	Multi-factor authentication	xác thực đa yếu tố	Noun phrase	Multi-factor authentication requires a second proof of identity.
 Cybersecurity	Penetration test	kiểm thử xâm nhập	Noun phrase	The penetration test found an exposed admin panel.
 Cybersecurity	Ransomware	mã độc tống tiền	Noun	Ransomware encrypted files on the compromised workstation.
-Cybersecurity	Salt	giá trị ngẫu nhiên thêm vào mật khẩu	Noun	A unique salt makes precomputed password attacks harder.
+Cybersecurity	Salt	giá trị ngẫu nhiên bổ sung khi băm mật khẩu	Noun	A unique salt makes precomputed password attacks harder.
 Cybersecurity	Security patch	bản vá bảo mật	Noun phrase	Install the security patch before exposing the server.
 Cybersecurity	Session hijacking	chiếm đoạt phiên	Noun phrase	Secure cookies help prevent session hijacking.
 Cybersecurity	Threat model	mô hình mối đe dọa	Noun phrase	The threat model identifies likely attacks on the login flow.
@@ -190,7 +190,7 @@ Artificial Intelligence	Knowledge graph	đồ thị tri thức	Noun phrase	The k
 Artificial Intelligence	Language model	mô hình ngôn ngữ	Noun phrase	The language model predicts the next token in a sequence.
 Artificial Intelligence	Multimodal model	mô hình đa phương thức	Noun phrase	A multimodal model can analyze text and images together.
 Artificial Intelligence	Prompt injection	tấn công chèn chỉ dẫn vào đầu vào	Noun phrase	Prompt injection can hide malicious instructions in a web page.
-Artificial Intelligence	Reasoning model	mô hình suy luận	Noun phrase	The reasoning model checks intermediate steps before answering.
+Artificial Intelligence	Reasoning model	mô hình suy luận	Noun phrase	The reasoning model handled the multi-step planning task.
 Artificial Intelligence	Retrieval augmented generation	sinh nội dung tăng cường truy xuất	Noun phrase	Retrieval augmented generation grounds answers in retrieved documents.
 Artificial Intelligence	Semantic search	tìm kiếm ngữ nghĩa	Noun phrase	Semantic search finds related documents without exact keywords.
 Artificial Intelligence	Speech recognition	nhận dạng tiếng nói	Noun phrase	Speech recognition converts the recording into text.
@@ -233,7 +233,7 @@ Data Science	P-value	giá trị p	Noun	The p-value was computed under the null h
 Data Science	Percentile	phân vị	Noun	The 95th percentile summarizes slow request times.
 Data Science	Sampling bias	thiên lệch lấy mẫu	Noun phrase	Sampling bias appeared because only active users replied.
 Data Science	Standard deviation	độ lệch chuẩn	Noun phrase	The standard deviation measures spread around the mean.
-Data Science	Statistical power	lực thống kê	Noun phrase	Statistical power improves with a larger sample.
+Data Science	Statistical power	công suất kiểm định	Noun phrase	Statistical power improves with a larger sample.
 Data Science	Time series	chuỗi thời gian	Noun phrase	The time series shows daily traffic over six months.
 Data Science	Variance	phương sai	Noun	The variance increased after the system change.
 Data Science	Z-score	điểm chuẩn hóa z	Noun	A z-score expresses distance from the mean in standard deviations.

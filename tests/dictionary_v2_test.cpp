@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 namespace {
 int failures = 0;
@@ -84,7 +85,28 @@ int main() {
 
     Dictionary seed{};
     check(loadDictionary(seed, TECH_DICTIONARY_SEED_PATH), "real version 2 seed loads");
-    check(listAllWords(seed).size() >= 550, "seed has at least 550 terms");
+    const auto bundled = listAllWords(seed);
+    check(bundled.size() == 588, "seed has exactly 588 terms");
+    std::unordered_set<std::string> legacyKeys;
+    std::ifstream legacySource(TECH_DICTIONARY_LEGACY_PATH, std::ios::binary);
+    std::string legacyLine;
+    while (std::getline(legacySource, legacyLine)) {
+        const auto separator = legacyLine.find('\t');
+        check(separator != std::string::npos, "legacy source has two columns");
+        if (separator == std::string::npos) continue;
+        const std::string english = legacyLine.substr(0, separator);
+        legacyKeys.insert(english);
+        const auto* entry = findWord(seed, english);
+        check(entry && entry->english == english, "exact legacy key retained");
+        check(entry && !entry->partOfSpeech.empty() && !entry->example.empty() &&
+              !entry->category.empty(), "legacy entry has complete metadata");
+    }
+    check(legacySource.eof() && legacyKeys.size() == 288, "all 288 legacy keys checked");
+    for (const auto* entry : bundled) {
+        check(!entry->vietnamese.empty() && !entry->partOfSpeech.empty() &&
+              !entry->example.empty() && !entry->category.empty(),
+              "every bundled entry has complete metadata");
+    }
     for (const char* sample : {"ALU", "Constexpr", "Constructor", "Trie", "Dijkstra's algorithm",
                                "ACID", "BGP", "Context switch", "Ransomware", "Embedding",
                                "Gradient descent", "Confidence interval", "Code review",
@@ -93,6 +115,24 @@ int main() {
     }
     const auto* algorithm = findWord(seed, "Algorithm");
     check(algorithm && !algorithm->example.empty(), "legacy term enriched in actual seed");
+    const auto* prompt = findWord(seed, "Prompt");
+    check(prompt && prompt->vietnamese == u8"Lời nhắc đầu vào cho mô hình AI",
+          "corrected Vietnamese UTF-8 meaning loads");
+    check(suggestWords(seed, "comp").size() == 8,
+          "autocomplete finds enriched bundled records");
+    check(saveDictionary(seed, rich.u8string()), "save all 588 enriched records");
+    Dictionary seedRoundTrip{};
+    check(loadDictionary(seedRoundTrip, rich.u8string()), "reload all 588 enriched records");
+    check(listAllWords(seedRoundTrip).size() == bundled.size(), "round-trip preserves term count");
+    for (const auto* original : bundled) {
+        const auto* restored = findWord(seedRoundTrip, original->english);
+        check(restored && restored->vietnamese == original->vietnamese &&
+              restored->partOfSpeech == original->partOfSpeech &&
+              restored->example == original->example &&
+              restored->category == original->category,
+              "round-trip preserves all bundled entry fields");
+    }
+    clearDictionary(seedRoundTrip);
     clearDictionary(seed);
     clearDictionary(dictionary);
     std::error_code ignored;

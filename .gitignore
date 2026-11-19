@@ -18,6 +18,8 @@ compile_commands.json
 *.tmp
 *.temp
 *~
+__pycache__/
+*.py[cod]
 
 # Compiler and Qt output
 *.obj

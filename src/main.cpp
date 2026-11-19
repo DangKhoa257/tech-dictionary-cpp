@@ -38,6 +38,17 @@ int main(int argc, char* argv[]) {
                 if (okay) list->setCurrentItem(items.front());
                 okay = okay && detail->toPlainText().contains(
                     QStringLiteral("The algorithm sorts the array in ascending order."));
+                const auto prompt = list->findItems(QStringLiteral("Prompt"), Qt::MatchExactly);
+                if (okay && !prompt.isEmpty()) list->setCurrentItem(prompt.front());
+                okay = okay && !prompt.isEmpty() && detail->toPlainText().contains(
+                    QStringLiteral("Lời nhắc đầu vào cho mô hình AI")) &&
+                    detail->toPlainText().contains(QStringLiteral("Artificial Intelligence"));
+                const auto socket = list->findItems(QStringLiteral("Socket"), Qt::MatchExactly);
+                if (okay && !socket.isEmpty()) list->setCurrentItem(socket.front());
+                okay = okay && !socket.isEmpty() && detail->toPlainText().contains(
+                    QStringLiteral("Điểm cuối giao tiếp mạng")) &&
+                    detail->toPlainText().contains(QStringLiteral("Networking"));
+                if (okay) list->setCurrentItem(items.front());
                 input->setText(QStringLiteral("comp"));
                 okay = okay && input->completer() &&
                        input->completer()->model()->rowCount() > 0;
