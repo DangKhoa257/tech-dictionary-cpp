@@ -12,6 +12,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QGuiApplication>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPainter>
@@ -212,7 +213,11 @@ int main(int argc, char* argv[]) {
                 const bool styledRows = autocompleteVisible &&
                     input->completer()->popup()->itemDelegate()->objectName() ==
                         QStringLiteral("suggestionItemDelegate") &&
-                    input->completer()->popup()->sizeHintForRow(0) >= 32;
+                    input->completer()->popup()->sizeHintForRow(0) >= 32 &&
+                    input->completer()->popup()->findChild<QLabel*>(
+                        QStringLiteral("suggestionHeader")) &&
+                    input->completer()->popup()->findChild<QLabel*>(
+                        QStringLiteral("suggestionHeader"))->isVisible();
                 okay = okay && styledRows;
                 report(QStringLiteral("autocomplete popup and styled rows visible"), styledRows);
 

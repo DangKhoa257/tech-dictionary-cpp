@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QShowEvent>
 #include <QStringListModel>
 #include <QStyledItemDelegate>
@@ -77,9 +78,16 @@ public:
 
 class SuggestionPopupView : public QListView {
 public:
-    explicit SuggestionPopupView(QWidget* parent = nullptr) : QListView(parent) {
+    explicit SuggestionPopupView(QWidget* parent = nullptr)
+        : QListView(parent), header_(new QLabel(this)) {
         setObjectName(QStringLiteral("autocompletePopup"));
         setViewportMargins(0, 26, 0, 0);
+        header_->setObjectName(QStringLiteral("suggestionHeader"));
+        header_->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        header_->setAttribute(Qt::WA_TransparentForMouseEvents);
+        header_->setStyleSheet(QStringLiteral(
+            "color: #64748B; background: #FFFFFF; font-size: 9pt; padding-left: 14px;"));
+        header_->setGeometry(1, 1, width() - 2, 25);
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         setSelectionMode(QAbstractItemView::SingleSelection);
@@ -102,24 +110,19 @@ public:
         setGraphicsEffect(shadow);
     }
 
-protected:
-    void paintEvent(QPaintEvent* event) override {
-        QListView::paintEvent(event);
-        // Draw the header after the viewport so its background cannot cover it.
-        QPainter p(this);
-        p.setPen(QColor(QStringLiteral("#64748B")));
-        QFont font = p.font();
-        font.setPointSize(9);
-        font.setWeight(QFont::Medium);
-        p.setFont(font);
+    void setSuggestionCount(int count) {
+        header_->setText(QStringLiteral("%1 gợi ý phù hợp").arg(count));
+    }
 
-        const int count = model() ? model()->rowCount() : 0;
-        const QString header = QStringLiteral("%1 gợi ý phù hợp").arg(count);
-        p.drawText(QRect(14, 6, width() - 28, 18), Qt::AlignLeft | Qt::AlignVCenter, header);
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QListView::resizeEvent(event);
+        header_->setGeometry(1, 1, width() - 2, 25);
     }
 
     void showEvent(QShowEvent* event) override {
         QListView::showEvent(event);
+        header_->raise();
         if (QGuiApplication::platformName() != QLatin1String("offscreen") &&
             !qEnvironmentVariableIsSet("TECH_DICTIONARY_NO_ANIMATION")) {
             auto* anim = new QPropertyAnimation(this, "windowOpacity", this);
@@ -130,6 +133,9 @@ protected:
             anim->start(QAbstractAnimation::DeleteWhenStopped);
         }
     }
+
+private:
+    QLabel* header_;
 };
 
 }  // namespace
@@ -251,6 +257,8 @@ void SearchWidget::clearResult() {
 
 void SearchWidget::setSuggestions(const QStringList& suggestions) {
     suggestionModel_->setStringList(suggestions);
+    if (auto* popup = dynamic_cast<SuggestionPopupView*>(completer_->popup()))
+        popup->setSuggestionCount(suggestions.size());
     if (suggestions.isEmpty()) {
         completer_->popup()->hide();
         statusLabel_->setText(QStringLiteral("Không có gợi ý phù hợp. Nhấn Enter để tìm chính xác."));
